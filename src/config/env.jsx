@@ -20,11 +20,11 @@ const refreshThreshold = Number.parseInt(
 
 export const AUTH_CONFIG = {
   // 7일
-  REFRESH_TOKEN_MAX_AGE_MS: Number.isFinite(
-    refreshMaxAge ? refreshMaxAge : 604800000,
-  ),
+  REFRESH_TOKEN_MAX_AGE_MS: Number.isFinite(refreshMaxAge)
+    ? refreshMaxAge
+    : 604800000,
   // 45분
-  TOKEN_REFRESH_THRESHOLD_MS: Number.isFinite(
-    refreshThreshold ? refreshThreshold : 2700000,
-  ),
+  TOKEN_REFRESH_THRESHOLD_MS: Number.isFinite(refreshThreshold)
+    ? refreshThreshold
+    : 2700000,
 };
