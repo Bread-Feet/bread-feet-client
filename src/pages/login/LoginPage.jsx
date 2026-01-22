@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getApiUrl, AUTH_CONFIG } from "../../config/env";
+import { getApiUrl } from "../../config/env";
 import { isPWAStandalone, openOAuthPopup } from "../../lib/oauth-popup";
 import { apiClient, markLoginSuccess } from "../../lib/api-client";
 import { useUserStore } from "../../store/userStore";
@@ -34,26 +34,30 @@ function LoginContent() {
         const result = await openOAuthPopup(provider);
 
         if (result.success) {
-          const userData = await apiClient.get("/api/v1/members/me"); // 사용자 정보 가져오기
+          try {
+            const userData = await apiClient.get("/api/v1/members/me"); // 사용자 정보 가져오기
 
-          setUser({
-            id: userData.id,
-            nickname: userData.nickname,
-            age: userData.age,
-            email: userData.email,
-          });
+            setUser({
+              id: userData.id,
+              nickname: userData.nickname,
+              age: userData.age,
+              email: userData.email,
+            });
 
-          // token refresh time 초기화
-          markLoginSuccess();
+            // token refresh time 초기화
+            markLoginSuccess();
 
-          // indexedDB에 토큰 저장 X (http only 쿠키로 따로 추출 불가)
+            // indexedDB에 토큰 저장 X (http only 쿠키로 따로 추출 불가)
 
-          const returnUrl = sessionStorage.getItem("returnUrl");
-          if (returnUrl) {
-            sessionStorage.removeItem("returnUrl");
-            navigate(returnUrl);
-          } else {
-            navigate("/");
+            const returnUrl = sessionStorage.getItem("returnUrl");
+            if (returnUrl) {
+              sessionStorage.removeItem("returnUrl");
+              navigate(returnUrl);
+            } else {
+              navigate("/");
+            }
+          } catch (apiError) {
+            console.error("[Login] Failed to fetch user data:", apiError);
           }
         } else {
           console.warn("[Login] OAuth completed but not successful:", result); // popup에서 성공 신호는 왔지만, success가 false인 케이스
@@ -162,10 +166,9 @@ const Logo = styled.img`
 
 const Title = styled.h1`
   font-family: "Fredoka";
-  font-size: 43px !important;
 
   margin: 0;
-  font-size: clamp(40px, 10vw, 52px);
+  font-size: clamp(43px, 10vw, 52px);
   line-height: 1.05;
   letter-spacing: -0.5px;
 

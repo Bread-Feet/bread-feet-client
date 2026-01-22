@@ -1,7 +1,7 @@
 import { getApiUrl } from "../config/env";
 
 export const OAUTH_STORAGE_KEY = "bread_feet_oauth_result";
-const OAUTH_CHANNEL_NAME = "bread_feet_oauth";
+export const OAUTH_CHANNEL_NAME = "bread_feet_oauth";
 
 // pwa가 standalone 모드로 실행되는지 판별
 export function isPWAStandalone() {
@@ -62,7 +62,7 @@ export function openOAuthPopup(provider) {
       // onmessage : 메시지가 도착하면 실행되는 함수
       // postMessage : 메시지 전송 함수
       channel.onmessage = (event) => {
-        if (event.data && event.data.type == "OAUTH_COMPLETE") {
+        if (event.data && event.data.type === "OAUTH_COMPLETE") {
           console.log("[OAuth] Received result via BroadcastChannel");
           cleanup();
           resolve(event.data.payload);
@@ -81,7 +81,7 @@ export function openOAuthPopup(provider) {
       if (event.origin !== window.location.origin) return; // 다른 도메인에서 보낸 메시지는 차단
       if (event.source !== popup) return; // 현재 popup에서 온 메시지만 받기
 
-      if (event.data && event.data.type == "OAUTH_COMPLETE") {
+      if (event.data && event.data.type === "OAUTH_COMPLETE") {
         console.log("[OAuth] Received result via postMessage");
         cleanup();
         resolve(event.data.payload);

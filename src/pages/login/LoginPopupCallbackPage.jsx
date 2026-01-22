@@ -2,10 +2,7 @@ import styled, { keyframes } from "styled-components";
 
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { OAUTH_STORAGE_KEY } from "../../lib/oauth-popup";
-
-// BroadcastChannel 이름(oauth-popup.jsx에서와 동일)
-const OAUTH_CHANNEL_NAME = "bread_feet_oauth";
+import { OAUTH_STORAGE_KEY, OAUTH_CHANNEL_NAME } from "../../lib/oauth-popup";
 
 export default function LoginPopupCallbackPage() {
   const [searchParams] = useSearchParams();

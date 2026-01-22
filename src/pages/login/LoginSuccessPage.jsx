@@ -18,7 +18,6 @@ export default function LoginSuccessPage() {
 
         console.log("Fetching user info from:", getApiUrl());
         const userData = await apiClient.get("/api/v1/members/me");
-        console.log("User data received:", userData);
 
         setUser({
           id: userData.id,
@@ -29,10 +28,16 @@ export default function LoginSuccessPage() {
 
         markLoginSuccess();
 
+        const isSafeReturnUrl = (url) =>
+          typeof url === "string" &&
+          url.startsWith("/") &&
+          !url.startsWith("//");
+
         const returnUrl = sessionStorage.getItem("returnUrl");
-        if (returnUrl) {
+        const safeReturnUrl = isSafeReturnUrl(returnUrl);
+        if (safeReturnUrl) {
           sessionStorage.removeItem("returnUrl");
-          navigate(returnUrl, { replace: true }); // 로그인 페이지 오기 이전 페이지로 이동
+          navigate(safeReturnUrl, { replace: true }); // 로그인 페이지 오기 이전 페이지로 이동
         } else {
           navigate("/", { replace: true }); // returnUrl 없을시, 메인 페이지로 이동
         }

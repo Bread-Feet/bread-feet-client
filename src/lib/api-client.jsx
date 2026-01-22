@@ -178,6 +178,7 @@ class ApiClient {
         ) {
           const returnUrl = window.location.pathname + window.location.search;
           window.location.href = `/login?returnUrl=${encodeURIComponent(returnUrl)}`; // login 페이지로 이동
+          return;
         }
       }
 

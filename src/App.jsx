@@ -1,5 +1,5 @@
 import "./App.css";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
 import LoginSuccessPage from "./pages/login/LoginSuccessPage";
 import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
