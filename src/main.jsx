@@ -6,13 +6,13 @@ import App from "./App.jsx";
 
 import { registerSW } from "virtual:pwa-register";
 
-registerSW({
+const updateSW = registerSW({
   onNeedRefresh() {
     if (confirm("새 버전이 있어요. 새로고침할까요?")) {
-      window.location.reload();
+      updateSW(true);
     }
   },
-  onofflineReady() {
+  onOfflineReady() {
     console.log("offline ready");
   },
 });
