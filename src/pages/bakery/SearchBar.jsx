@@ -42,6 +42,10 @@ const ClearButton = styled.button`
   height: 40px;
   border-radius: 999px;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border: 0;
   background: var(--main-color2);
   color: #fff;
@@ -51,6 +55,5 @@ const ClearButton = styled.button`
 `;
 
 const Image = styled.img`
-  width: 40px;
-  transform: translatex(-15%);
+  width: 50px;
 `;

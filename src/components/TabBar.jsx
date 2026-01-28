@@ -44,8 +44,6 @@ export default function TabBar() {
     activeKey = "home";
   }
 
-  console.log(activeKey);
-
   return (
     <TabBarWrapper>
       {tabs.map((t) => {

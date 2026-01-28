@@ -37,7 +37,7 @@ export default function LoginSuccessPage() {
         const safeReturnUrl = isSafeReturnUrl(returnUrl);
         if (safeReturnUrl) {
           sessionStorage.removeItem("returnUrl");
-          navigate(safeReturnUrl, { replace: true }); // 로그인 페이지 오기 이전 페이지로 이동
+          navigate(returnUrl, { replace: true }); // 로그인 페이지 오기 이전 페이지로 이동
         } else {
           navigate("/", { replace: true }); // returnUrl 없을시, 메인 페이지로 이동
         }

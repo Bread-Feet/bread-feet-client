@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { useEffect } from "react";
 import SearchBar from "./SearchBar";
 import BakeryCard from "./BakeryCard";
-import TabBar from "../../components/TabBar";
 
 export default function BakeryAdminPage() {
   useEffect(() => {
