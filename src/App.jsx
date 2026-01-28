@@ -1,16 +1,21 @@
 import "./App.css";
+import { GlobalStyle } from "../GlobalStyle";
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
-import LoginSuccessPage from "./pages/login/LoginSuccessPage";
-import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
+import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
+import AppLayout from "./pages/layouts/AppLayout";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/logins" element={<LoginSuccessPage />} />
-      <Route path="/logine" element={<LoginPopupCallbackPage />} />
-    </Routes>
+    <>
+      <GlobalStyle />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/mybakery" element={<BakeryAdminPage />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 

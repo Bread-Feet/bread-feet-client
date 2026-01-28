@@ -64,7 +64,7 @@ export default function LoginSuccessPage() {
 
 // styled components
 const Page = styled.div`
-  min-height: 100vh;
+  min-height: var(--app-100vh);
   display: flex;
   align-items: center;
   justify-content: center;
