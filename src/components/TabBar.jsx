@@ -36,7 +36,9 @@ export default function TabBar() {
   const nav = useNavigate();
   const { pathname } = useLocation();
 
-  const matchedTab = tabs.find((t) => pathname.startsWith(t.to));
+  const matchedTab = tabs.find((t) =>
+    t.to === "/" ? pathname === "/" : pathname.startsWith(t.to),
+  );
   let activeKey;
   if (matchedTab !== undefined && matchedTab !== null) {
     activeKey = matchedTab.key;
@@ -51,7 +53,7 @@ export default function TabBar() {
         return (
           <TabButton key={t.key} type="button" onClick={() => nav(t.to)}>
             <TabIcon src={isActive ? t.on : t.off} alt="" />
-            <TabLabel data-active={isActive}>{t.label}</TabLabel>
+            <TabLabel>{t.label}</TabLabel>
           </TabButton>
         );
       })}
