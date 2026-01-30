@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
 import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
 import AppLayout from "./pages/layouts/AppLayout";
+import BakeryRegisterPage from "./pages/bakery/BakeryRegisterationPage";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <GlobalStyle />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/myBakery/register" element={<BakeryRegisterPage />} />
         <Route element={<AppLayout />}>
           <Route path="/mybakery" element={<BakeryAdminPage />} />
         </Route>
