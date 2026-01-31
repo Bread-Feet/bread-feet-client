@@ -114,7 +114,7 @@ export default function LoginPage() {
 
 // styled components
 const Page = styled.main`
-  min-height: 100vh;
+  min-height: var(--app-100vh);
   background: var(--main-color4);
 
   display: flex;
@@ -130,9 +130,9 @@ const Page = styled.main`
 
 const PhoneFrame = styled.section`
   width: min(430px, 100vw);
-  height: 100vh;
+  height: var(--app-100vh);
 
-  max-height: 100vh;
+  max-height: var(--app-100vh);
 
   background: var(--main-color3);
 
@@ -193,7 +193,7 @@ const Button = styled.button`
 `;
 
 const BottomSpacer = styled.div`
-  height: 10vh;
+  height: var(--app-10vh);
   max-height: 80px;
   min-height: 24px;
 `;
