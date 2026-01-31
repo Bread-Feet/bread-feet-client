@@ -1,4 +1,5 @@
 import { useState } from "react";
+import HashtagInput from "./fields/HashtagInput";
 import * as S from "./DiaryEditorForm.styled";
 
 export default function DiaryEditorForm({ fontFamily }) {
@@ -85,45 +86,10 @@ export default function DiaryEditorForm({ fontFamily }) {
       </S.Field>
 
       <S.Field>
-        <S.Label>해시태그</S.Label>
-
-        <S.Input
-          placeholder="#달달 #크루아상"
-          onKeyDown={(e) => {
-            if (e.key !== "Enter") return;
-            e.preventDefault();
-
-            const raw = e.currentTarget.value.trim();
-            if (!raw) return;
-
-            const tag = raw.startsWith("#") ? raw.slice(1) : raw;
-            if (!tag) return;
-
-            setForm((prev) => {
-              if (prev.hashtag.includes(tag)) return prev;
-              return { ...prev, hashtag: [...prev.hashtag, tag] };
-            });
-
-            e.currentTarget.value = "";
-          }}
-        />
-
-        <S.ChipWrap>
-          {form.hashtag.map((tag) => (
-            <S.Chip
-              key={tag}
-              type="button"
-              onClick={() =>
-                setForm((prev) => ({
-                  ...prev,
-                  hashtag: prev.hashtag.filter((t) => t !== tag),
-                }))
-              }
-            >
-              #{tag} ✕
-            </S.Chip>
-          ))}
-        </S.ChipWrap>
+        <HashtagInput
+          value={form.hashtag}
+          onChange={(next) => updateField("hashtag", next)}
+        ></HashtagInput>
       </S.Field>
 
       <S.SubmitButton type="submit">등록</S.SubmitButton>

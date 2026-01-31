@@ -1,79 +1,115 @@
 import styled from "styled-components";
 
+const COLORS = {
+  border: "#E8EBF1",
+  bg: "#FFFFFF",
+  surface: "#F8F9FA",
+  text: "#000000",
+  gray: "#a5a5a5",
+  brown: "#7C4628",
+};
+
 export const Form = styled.form`
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+  background: transparent;
 `;
 
 export const Field = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 `;
 
 export const Label = styled.label`
+  margin-left: 8px;
   font-size: 14px;
-  color: #555;
-`;
-
-export const SubmitButton = styled.button`
-  margin-top: 24px;
-  padding: 14px 0;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
   font-weight: 600;
-  background-color: #222;
-  color: #fff;
-  cursor: pointer;
+  color: ${COLORS.text};
 `;
 
 export const Row = styled.div`
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 10px;
 `;
 
 export const Input = styled.input`
-  width: 80%;
-  padding: 12px 12px;
-  border-radius: 12px;
-  border: 1px solid #e5e5e5;
+  width: 100%;
+  height: 56px;
+  padding: 0 12px;
+  border-radius: 20px;
+  border: 1px solid ${COLORS.border};
+  background: ${COLORS.surface};
+  color: ${COLORS.text};
+  outline: none;
+
+  &:focus {
+    border-color: ${COLORS.brown};
+  }
+
+  &::placeholder {
+    color: ${COLORS.gray};
+  }
 `;
 
 export const Textarea = styled.textarea`
   width: 100%;
-  padding: 12px 12px;
-  border-radius: 12px;
-  border: 1px solid #e5e5e5;
+  min-height: 120px;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid ${COLORS.border};
+  background: ${COLORS.surface};
+  color: ${COLORS.text};
+  outline: none;
   resize: vertical;
+
+  &:focus {
+    border-color: ${COLORS.brown};
+  }
+
+  &::placeholder {
+    color: ${COLORS.gray};
+  }
 `;
 
 export const GhostButton = styled.button`
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid #e5e5e5;
-  background: white;
+  width: 86px;
+  height: 56px;
+  padding: 0 12px;
+  border-radius: 20px;
+  border: 1px solid ${COLORS.brown};
+  background: ${COLORS.brown};
+  color: ${COLORS.bg};
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${COLORS.surface};
+    color: ${COLORS.brown};
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
 `;
 
-export const PreviewImage = styled.img`
+export const SubmitButton = styled.button`
   width: 100%;
-  max-width: 360px;
-  border-radius: 12px;
-  margin-top: 8px;
-`;
+  height: 46px;
+  border-radius: 20px;
+  border: none;
+  background: ${COLORS.brown};
+  color: ${COLORS.bg};
+  cursor: pointer;
+  font-weight: 700;
 
-export const ChipWrap = styled.div`
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-`;
-
-export const Chip = styled.button`
-  border: 1px solid #e5e5e5;
-  background: white;
-  border-radius: 999px;
-  padding: 6px 10px;
+  &:hover {
+    opacity: 0.9;
+  }
 `;
