@@ -45,9 +45,6 @@ function LoginContent() {
             //   email: userData.email,
             // });
 
-            // token refresh time 초기화
-            markLoginSuccess();
-
             // indexedDB에 토큰 저장 (access token만 refresh token 부분은 주석 처리)
             // if (result.tokens?.accessToken && result.tokens?.refreshToken) {
             if (result.tokens?.accessToken) {
@@ -57,6 +54,8 @@ function LoginContent() {
                   result.tokens.accessToken,
                   // result.tokens.refreshToken,
                 );
+                // token refresh time 초기화
+                markLoginSuccess();
                 console.log(
                   "[Login] PWA tokens saved to IndexedDB from postMessage",
                 );
