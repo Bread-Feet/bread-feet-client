@@ -1,4 +1,5 @@
 import { getApiUrl, AUTH_CONFIG } from "../config/env";
+import { getAccessToken } from "./token-storage.jsx";
 
 const STORAGE_KEY_LAST_REFRESH = "bread_feet_last_token_refresh"; // 마지막 refresh 시각
 const STORAGE_KEY_REFRESH_LOCK = "bread_feet_refresh_lock";
@@ -146,30 +147,52 @@ class ApiClient {
     // FormData 형식일 경우에는 Content-type을 직접 세팅하면 안되므로 확인 필요
     const isFormData = options.body instanceof FormData;
 
+    // api 호출에 토큰을 자동으로 포함
+    const providedHeaders = options.headers ? { ...options.headers } : {};
+
+    if (!providedHeaders.Authorization && !providedHeaders.authorization) {
+      const accessToken = await getAccessToken();
+      if (accessToken) {
+        providedHeaders.Authorization = `Bearer ${accessToken}`;
+      }
+    }
+
     // 공통 options
     const defaultOptions = {
       credentials: "include",
       headers: isFormData
-        ? { ...options.headers } // true
+        ? { ...providedHeaders } // true
         : {
             // false
             "Content-Type": "application/json",
-            ...options.headers, // 사용자가 추가로 준 options
+            ...providedHeaders, // 사용자가 추가로 준 options
           },
     };
 
-    const response = await fetch(url, { ...defaultOptions, ...options });
+    const mergedHeaders = {
+      ...defaultOptions.headers,
+      ...(options.headers ? options.headers : {}),
+    };
+
+    const response = await fetch(url, {
+      ...defaultOptions,
+      ...options,
+      headers: mergedHeaders,
+    });
 
     if (!response.ok) {
       // response code가 401인 경우(유저 정보 가져오지 못함)
       // retryOnUnauthorized는 재시도를 1번만 하기 위함
       if (response.status === 401 && retryOnUnauthorized) {
+        // Access-token only라서 refresh token 부분은 삭제
+        /*
         const refreshed = await authService.refreshTokens(); // token refresh
 
         // token refresh 성공
         if (refreshed) {
           return this.request(endpoint, options, false); // 재시도(retryOnUnauthorized를 false로 변경)
         }
+        */
 
         // token refresh 실패
         if (
