@@ -1,5 +1,5 @@
 export function getClientApiUrl() {
-  return import.meta.env.VITE_API_URL || "http://localhost:8080";
+  return import.meta.env.VITE_API_URL || "https://api.breadfeet.co.kr";
 }
 
 export function getApiUrl() {
