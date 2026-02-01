@@ -161,15 +161,24 @@ class ApiClient {
     const defaultOptions = {
       credentials: "include",
       headers: isFormData
-        ? { ...options.headers } // true
+        ? { ...providedHeaders } // true
         : {
             // false
             "Content-Type": "application/json",
-            ...options.headers, // 사용자가 추가로 준 options
+            ...providedHeaders, // 사용자가 추가로 준 options
           },
     };
 
-    const response = await fetch(url, { ...defaultOptions, ...options });
+    const mergedHeaders = {
+      ...defaultOptions.headers,
+      ...(options.headers ? options.headers : {}),
+    };
+
+    const response = await fetch(url, {
+      ...defaultOptions,
+      ...options,
+      headers: mergedHeaders,
+    });
 
     if (!response.ok) {
       // response code가 401인 경우(유저 정보 가져오지 못함)

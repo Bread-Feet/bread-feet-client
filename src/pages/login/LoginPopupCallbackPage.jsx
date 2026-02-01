@@ -79,8 +79,8 @@ export default function LoginPopupCallbackPage() {
 
       if (!isPopupWindow && success && tokens?.accessToken) {
         try {
-          markLoginSuccess();
           await saveTokens(tokens.accessToken);
+          markLoginSuccess();
           console.log("[PopupCallback] Tokens saved to IndexedDB");
         } catch (tokenError) {
           console.warn("[PopupCallback] Token save failed:", tokenError);

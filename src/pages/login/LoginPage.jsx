@@ -171,7 +171,7 @@ const Content = styled.div`
 `;
 
 const Logo = styled.img`
-  width: min(220px);
+  width: min(220px, 80vw);
   height: auto;
   display: block;
   margin: 0 auto 18px;
