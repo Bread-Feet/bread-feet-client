@@ -19,7 +19,7 @@ function App() {
           element={<LoginPopupCallbackPage />}
         />
         <Route path="/oauth/callback" element={<LoginPopupCallbackPage />} />
-        <Route path="/myBakery/register" element={<BakeryRegisterPage />} />
+        <Route path="/mybakery/register" element={<BakeryRegisterPage />} />
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />
