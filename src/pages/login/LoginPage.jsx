@@ -7,12 +7,13 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getApiUrl } from "../../config/env";
 import { isPWAStandalone, openOAuthPopup } from "../../lib/oauth-popup";
-import { apiClient, markLoginSuccess } from "../../lib/api-client";
-import { useUserStore } from "../../store/userStore";
+import { markLoginSuccess } from "../../lib/api-client";
+// import { useUserStore } from "../../store/userStore";
+import { saveTokens } from "../../lib/token-storage.jsx";
 
 function LoginContent() {
   const [searchParams] = useSearchParams();
-  const setUser = useUserStore((state) => state.setUser);
+  // const setUser = useUserStore((state) => state.setUser);
   const navigate = useNavigate();
   const [isAuthChecking, setIsAuthChecking] = useState(false);
 
@@ -35,19 +36,33 @@ function LoginContent() {
 
         if (result.success) {
           try {
-            const userData = await apiClient.get("/api/v1/members/me"); // 사용자 정보 가져오기
+            // const userData = await apiClient.get("/api/v1/members/me"); // 사용자 정보 가져오기
 
-            setUser({
-              id: userData.id,
-              nickname: userData.nickname,
-              age: userData.age,
-              email: userData.email,
-            });
+            // setUser({
+            //   id: userData.id,
+            //   nickname: userData.nickname,
+            //   age: userData.age,
+            //   email: userData.email,
+            // });
 
-            // token refresh time 초기화
-            markLoginSuccess();
-
-            // indexedDB에 토큰 저장 X (http only 쿠키로 따로 추출 불가)
+            // indexedDB에 토큰 저장 (access token만 refresh token 부분은 주석 처리)
+            // if (result.tokens?.accessToken && result.tokens?.refreshToken) {
+            if (result.tokens?.accessToken) {
+              // refresh token 생길시 윗줄로 대체
+              try {
+                await saveTokens(
+                  result.tokens.accessToken,
+                  // result.tokens.refreshToken,
+                );
+                // token refresh time 초기화
+                markLoginSuccess();
+                console.log(
+                  "[Login] PWA tokens saved to IndexedDB from postMessage",
+                );
+              } catch (tokenError) {
+                console.warn("[Login] PWA token save failed:", tokenError);
+              }
+            }
 
             const returnUrl = sessionStorage.getItem("returnUrl");
             if (returnUrl) {
@@ -115,6 +130,7 @@ export default function LoginPage() {
 // styled components
 const Page = styled.main`
   min-height: var(--app-100vh);
+  height: var(--app-100vh);
   background: var(--main-color4);
 
   display: flex;
@@ -129,7 +145,7 @@ const Page = styled.main`
 `;
 
 const PhoneFrame = styled.section`
-  width: min(430px, 100vw);
+  width: min(402px, 100vw);
   height: var(--app-100vh);
 
   max-height: var(--app-100vh);
@@ -154,7 +170,7 @@ const Content = styled.div`
 `;
 
 const Logo = styled.img`
-  width: min(220px);
+  width: min(220px, 80vw);
   height: auto;
   display: block;
   margin: 0 auto 18px;
@@ -189,7 +205,12 @@ const Button = styled.button`
   color: inherit;
   background: transparent;
   border: none;
-  line-height: 0;
+
+  text-align: center;
+
+  img {
+    display: block;
+  }
 `;
 
 const BottomSpacer = styled.div`
