@@ -10,6 +10,49 @@ import { useState } from "react";
 export default function BakeryRegisterPage() {
   const nav = useNavigate();
 
+  const [bakeryName, setBakeryName] = useState("");
+  const handleBakeryNameChange = (e) => {
+    setBakeryName(e.target.value);
+  };
+
+  const [address, setAddress] = useState("");
+  const [detailedAddress, setDetailedAddress] = useState("");
+  const handleDetailedAddressChange = (e) => {
+    setDetailedAddress(e.target.value);
+  };
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const handlePhoneNumberChange = (e) => {
+    setPhoneNumber(e.target.value);
+  };
+
+  const [webpage, setWebpage] = useState("");
+  const handleWebpageChange = (e) => {
+    setWebpage(e.target.value);
+  };
+
+  const [mainPhoto, setMainPhoto] = useState(null);
+  const [mainPhotoPreview, setMainPhotoPreview] = useState(null);
+
+  const handleMainPhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 선택할 수 있어요.");
+      e.target.value = "";
+      return;
+    }
+
+    // 이전 미리보기 url 해제
+    setMainPhotoPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+
+    setMainPhoto(file);
+  };
+
   const [hours, setHours] = useState([
     { id: 1, day: "", start: "", end: "" },
     { id: 2, day: "", start: "", end: "" },
@@ -33,7 +76,7 @@ export default function BakeryRegisterPage() {
   };
 
   const TIME_OPTIONS = Array.from(
-    { length: 24 },
+    { length: 25 },
     (_, h) => `${String(h).padStart(2, "0")}:00`,
   );
 
@@ -56,6 +99,68 @@ export default function BakeryRegisterPage() {
     }));
   };
 
+  const [draftMenuPhotoPreview, setDraftMenuPhotoPreview] = useState(null);
+  const [menus, setMenus] = useState([
+    { id: 1, name: "소금빵", price: 2800, isMain: true, photoPreview: null },
+    { id: 2, name: "크림빵", price: 4500, isMain: false, photoPreview: null },
+  ]);
+
+  // 메뉴 추가용 임시 상태
+  const [newMenu, setNewMenu] = useState({
+    name: "",
+    price: "",
+    photoPreview: null,
+  });
+
+  const handleDraftMenuPhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 선택할 수 있어요.");
+      e.target.value = "";
+      return;
+    }
+
+    // 이전 미리보기 url 해제
+    setDraftMenuPhotoPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+
+    setNewMenu((p) => ({ ...p, photoPreview: URL.createObjectURL(file) }));
+  };
+
+  const addMenu = () => {
+    if (!newMenu.name.trim()) return;
+    const priceNum = Number(newMenu.price);
+    setMenus((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        name: newMenu.name.trim(),
+        price: Number.isFinite(priceNum) ? priceNum : 0,
+        isMain: prev.length === 0,
+        photoPreview: newMenu.photoPreview,
+      },
+    ]);
+
+    setDraftMenuPhotoPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+
+    setNewMenu({ name: "", price: "", photoPreview: null });
+  };
+
+  const removeMenu = (id) => {
+    setMenus((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const setMainMenu = (id) => {
+    setMenus((prev) => prev.map((m) => ({ ...m, isMain: m.id === id })));
+  };
+
   return (
     <Page>
       <PhoneFrame>
@@ -70,7 +175,12 @@ export default function BakeryRegisterPage() {
             <SectionName>기본 정보</SectionName>
             <Field>
               <Label>빵집 이름</Label>
-              <Input placeholder="빵집 이름을 입력해주세요" />
+              <Input
+                placeholder="빵집 이름을 입력해주세요"
+                onChange={(e) => {
+                  handleBakeryNameChange(e);
+                }}
+              />
             </Field>
             <Field>
               <Label>주소</Label>
@@ -78,23 +188,43 @@ export default function BakeryRegisterPage() {
                 <Input placeholder="주소를 검색하세요" />
                 <SearchButton type="button">검색</SearchButton>
               </AddressRow>
-              <Input placeholder="상세 주소를 입력하세요" />
+              <Input
+                placeholder="상세 주소를 입력하세요"
+                onChange={(e) => {
+                  handleDetailedAddressChange(e);
+                }}
+              />
             </Field>
           </FormSection>
           <FormSection>
             <SectionName>연락처 및 사진 정보</SectionName>
             <Field>
               <Label>전화번호</Label>
-              <Input placeholder="010-XXXX-XXXX" />
+              <Input
+                placeholder="010-XXXX-XXXX"
+                onChange={(e) => handlePhoneNumberChange(e)}
+              />
             </Field>
             <Field>
               <Label>웹페이지</Label>
-              <Input placeholder="https://www.instagram.com/example" />
+              <Input
+                placeholder="https://www.instagram.com/example"
+                onChange={(e) => handleWebpageChange(e)}
+              />
             </Field>
             <Field>
               <Label>대표사진</Label>
               <PhotoBox>
-                <Plus src={plus} alt="대표사진 추가" />
+                {mainPhotoPreview ? (
+                  <PreviewImg src={mainPhotoPreview} alt="대표사진 미리보기" />
+                ) : (
+                  <Plus src={plus} alt="대표사진 추가" />
+                )}
+                <PhotoInput
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleMainPhotoChange(e)}
+                />
               </PhotoBox>
             </Field>
           </FormSection>
@@ -107,6 +237,7 @@ export default function BakeryRegisterPage() {
                 <span>시간 추가</span>
               </InlineAction>
             </TimeRow>
+            <TimeText>시작 시간을 먼저 선택해주세요</TimeText>
             <HoursList>
               {hours.map((h) => (
                 <HoursRow key={h.id}>
@@ -172,24 +303,19 @@ export default function BakeryRegisterPage() {
                         </option>
                       ))}
                     </TimeSelect>
-                    <HoursDeleteButton
+                    <DeleteButton
                       type="button"
                       onClick={() => removeHourRow(h.id)}
                     >
                       <DeleteImg src={deleteIcon} alt="삭제" />
-                    </HoursDeleteButton>
+                    </DeleteButton>
                   </TimeRange>
-                  <SelectedTimeText>
-                    {h.start && h.end
-                      ? `${h.start}-${h.end}`
-                      : "시간을 선택하세요"}
-                  </SelectedTimeText>
                 </HoursRow>
               ))}
             </HoursList>
           </FormSection>
           <FormSection>
-            <SectionName>매장 관리</SectionName>
+            <Label>매장 관리</Label>
             <StoreTagGrid>
               <StoreTag
                 type="button"
@@ -252,21 +378,84 @@ export default function BakeryRegisterPage() {
           <FormSection>
             <SectionName>메뉴 정보</SectionName>
             <AddWrapper>
-              <InlineAction type="button" onClick={() => {}}>
+              <InlineAction type="button" onClick={addMenu}>
                 <Plus src={plus_brown} alt="메뉴 추가" />
                 <span>메뉴 추가</span>
               </InlineAction>
             </AddWrapper>
             <MenuAddRow>
-              <MenuPhotoBox type="button" aria-label="메뉴 사진 추가">
-                <PlusSmaller src={plus} alt="추가하기" />
+              <MenuPhotoBox
+                type="button"
+                onClick={() => {}}
+                aria-label="메뉴 사진 추가"
+              >
+                {draftMenuPhotoPreview ? (
+                  <PreviewImg
+                    src={draftMenuPhotoPreview}
+                    alt="대표사진 미리보기"
+                  />
+                ) : (
+                  <PlusSmaller src={plus} alt="추가하기" />
+                )}
+                <PhotoInput
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleDraftMenuPhotoChange(e)}
+                />
               </MenuPhotoBox>
               <MenuInputColumn>
-                <SmallInput placeholder="메뉴 이름" />
-                <SmallInput placeholder="가격" />
+                <SmallInput
+                  placeholder="메뉴 이름"
+                  value={newMenu.name}
+                  onChange={(e) =>
+                    setNewMenu((p) => ({ ...p, name: e.target.value }))
+                  }
+                />
+                <SmallInput
+                  placeholder="가격"
+                  inputMode="numeric"
+                  value={newMenu.price}
+                  onChange={(e) =>
+                    setNewMenu((p) => ({ ...p, price: e.target.value }))
+                  }
+                />
               </MenuInputColumn>
             </MenuAddRow>
+            <Label>메뉴 관리</Label>
+            <MenuList>
+              {menus.map((m) => (
+                <MenuCard key={m.id}>
+                  <MenuThumb>
+                    <MenuThumbImg src={m.photoPreview || undefined} />
+                  </MenuThumb>
+                  <MenuInfo>
+                    <MenuNameRow>
+                      <MenuName>{m.name}</MenuName>
+                      {m.isMain ? (
+                        <Badge>대표</Badge>
+                      ) : (
+                        <BadgeButton
+                          type="button"
+                          onClick={() => setMainMenu(m.id)}
+                        >
+                          대표 설정
+                        </BadgeButton>
+                      )}
+                    </MenuNameRow>
+                    <MenuPrice>{m.price.toLocaleString()}원</MenuPrice>
+                  </MenuInfo>
+                  <DeleteButton
+                    type="button"
+                    onClick={() => removeMenu(m.id)}
+                    aria-label="메뉴 삭제"
+                  >
+                    <DeleteImg src={deleteIcon} alt="삭제" />
+                  </DeleteButton>
+                </MenuCard>
+              ))}
+            </MenuList>
           </FormSection>
+          <SubmitButton>완료</SubmitButton>
         </Form>
       </PhoneFrame>
     </Page>
@@ -317,6 +506,7 @@ const Header = styled.header`
 const ActionButton = styled.button`
   border: none;
   background: transparent;
+
   cursor: pointer;
 `;
 
@@ -336,7 +526,6 @@ const Form = styled.div`
   flex-direction: column;
 
   overflow-y: auto;
-  /* padding-bottom: var(--tabbar-height); */
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -353,29 +542,30 @@ const Form = styled.div`
 `;
 
 const FormSection = styled.div`
-  margin: 10px;
+  margin: 12px 16px;
 `;
 
 const SectionName = styled.h2`
   font-size: 12px;
   color: var(--main-color2);
 
-  margin: 3px 0 0 0;
+  margin: 8px 8px 0 8px;
 `;
 
 const Field = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 3px;
 
   padding: 0 8px;
-  margin: 20px 0 0 0;
+  margin: 15px 0 0 0;
 `;
 
 const Label = styled.label`
   font-size: 14px;
   font-weight: 700;
   color: #111;
+
+  margin-bottom: 6px;
 `;
 
 const Input = styled.input`
@@ -389,7 +579,7 @@ const Input = styled.input`
   border-radius: 20px;
 
   padding: 0 20px;
-  margin: 5px 0;
+  margin: 0 0 5px 0;
 
   outline: none;
 
@@ -426,7 +616,7 @@ const SearchButton = styled.button`
   cursor: pointer;
 `;
 
-const PhotoBox = styled.button`
+const PhotoBox = styled.label`
   width: 135px;
   height: 135px;
 
@@ -438,11 +628,24 @@ const PhotoBox = styled.button`
 
   display: grid;
   place-items: center;
+  overflow: hidden;
 
   cursor: pointer;
 `;
 
 const Plus = styled.img``;
+
+const PhotoInput = styled.input`
+  display: none;
+  width: 100%;
+  height: 100%;
+`;
+
+const PreviewImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
 
 const TimeRow = styled.div`
   display: flex;
@@ -515,13 +718,7 @@ const TimeRange = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 24px;
   align-items: center;
-  gap: 8px;
-`;
-
-const SelectedTimeText = styled.div`
-  margin: 6px 8px 0 8px;
-  font-size: 12px;
-  color: #777;
+  gap: 3px;
 `;
 
 const TimeSelect = styled.select`
@@ -531,6 +728,13 @@ const TimeSelect = styled.select`
   &:invalid {
     font-weight: 400;
     color: #a5a5a5;
+  }
+
+  &:disabled {
+    color: #a5a5a5;
+    font-weight: 400;
+    cursor: not-allowed;
+    opacity: 1; /* 브라우저 기본 흐려짐이 싫으면 유지 */
   }
 
   width: 100%;
@@ -556,9 +760,16 @@ const TimeSelect = styled.select`
   background-size: 18px 18px;
 `;
 
+const TimeText = styled.div`
+  font-size: 14px;
+  color: #a5a5a5;
+
+  margin: 5px 10px;
+`;
+
 const Option = styled.option``;
 
-const HoursDeleteButton = styled.button`
+const DeleteButton = styled.button`
   border: none;
   background: transparent;
 
@@ -570,10 +781,11 @@ const HoursDeleteButton = styled.button`
 const DeleteImg = styled.img``;
 
 const StoreTagGrid = styled.div`
-  margin-top: 10px;
+  margin-top: 6px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  row-gap: 8px;
+  column-gap: 12px;
 `;
 
 const StoreTag = styled.button`
@@ -596,19 +808,23 @@ const AddWrapper = styled.div`
 `;
 
 const MenuAddRow = styled.div`
-  margin-top: 10px;
+  margin: 10px 0 20px 0;
 
   display: flex;
   gap: 4px;
 `;
 
-const MenuPhotoBox = styled.button`
+const MenuPhotoBox = styled.label`
   width: 116px;
   height: 116px;
 
   border-radius: 20px;
   border: dashed 0.5px #e8ebf1;
   background: #f8f9fa;
+
+  display: grid;
+  place-items: center;
+  overflow: hidden;
 
   cursor: pointer;
 `;
@@ -648,4 +864,114 @@ const SmallInput = styled.input`
   &::placeholder {
     color: #a5a5a5;
   }
+`;
+
+const MenuList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  margin-top: 6px;
+`;
+
+const MenuCard = styled.div`
+  display: grid;
+  grid-template-columns: 72px 1fr 30px;
+  gap: 12px;
+  align-items: center;
+
+  background: #f8f9fa;
+  border-radius: 20px;
+  border: 1px solid #e8ebf1;
+
+  padding: 14px;
+`;
+
+const MenuThumb = styled.div`
+  width: 72px;
+  height: 72px;
+
+  background: var(--main-color4);
+  border-radius: 20px;
+  border: 1px solid #a5a5a5;
+
+  overflow: hidden;
+`;
+
+const MenuThumbImg = styled.img`
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+`;
+
+const MenuInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const MenuNameRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+`;
+
+const MenuName = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+`;
+
+const MenuPrice = styled.div`
+  font-size: 16px;
+  color: #a5a5a5;
+`;
+
+const Badge = styled.span`
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--main-color4);
+
+  background: var(--main-color2);
+  border-radius: 999px;
+
+  padding: 3px 10px;
+`;
+
+const BadgeButton = styled.button`
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--main-color2);
+
+  background: var(--main-color4);
+  border-radius: 999px;
+  border: 1px solid var(--main-color2);
+
+  padding: 0 5px;
+
+  cursor: pointer;
+`;
+
+const SubmitButton = styled.button`
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--main-color4);
+
+  width: calc(100% - 26px);
+
+  border: none;
+  border-radius: 20px;
+  background: var(--main-color2);
+
+  padding: 18px 0;
+  margin: auto;
+  margin-top: 99px;
+  margin-bottom: 18px;
+
+  cursor: pointer;
 `;
