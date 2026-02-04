@@ -27,20 +27,10 @@ export function openOAuthPopup(provider) {
     const apiUrl = getApiUrl();
 
     // popup 크기 & 위치
-    const padding = 24;
-
-    const availW =
-      Math.min(window.outerWidth || window.innerWidth, screen.availWidth) -
-      padding;
-    const availH =
-      Math.min(window.outerHeight || window.innerHeight, screen.availHeight) -
-      padding;
-
-    const width = Math.max(320, Math.min(500, availW));
-    const height = Math.max(500, Math.min(650, availH));
-
-    const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
-    const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+    const width = 500;
+    const height = 650;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
 
     // 이전 OAuth 결과 제거
     localStorage.removeItem(OAUTH_STORAGE_KEY);

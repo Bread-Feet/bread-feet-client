@@ -6,6 +6,7 @@ import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
 import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
 import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
+import BakeryRegisterPage from "./pages/bakery/BakeryRegisterationPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           element={<LoginPopupCallbackPage />}
         />
         <Route path="/oauth/callback" element={<LoginPopupCallbackPage />} />
+        <Route path="/myBakery/register" element={<BakeryRegisterPage />} />
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />

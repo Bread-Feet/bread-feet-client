@@ -1,15 +1,11 @@
 import styled, { keyframes } from "styled-components";
 
 import { useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { OAUTH_STORAGE_KEY, OAUTH_CHANNEL_NAME } from "../../lib/oauth-popup";
-import { getApiUrl } from "../../config/env";
-import { markLoginSuccess } from "../../lib/api-client";
-import { saveTokens } from "../../lib/token-storage.jsx";
 
 export default function LoginPopupCallbackPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   // React 18 StrictMode(dev)에서 useEffect가 2번 실행될 수 있어 중복 실행 방지
   const ranRef = useRef(false);
@@ -18,74 +14,21 @@ export default function LoginPopupCallbackPage() {
     if (ranRef.current) return;
     ranRef.current = true;
 
-    const handleCallback = async () => {
+    const handleCallback = () => {
       const error = searchParams.get("error");
       const errorDescription = searchParams.get("error_description");
-      const code = searchParams.get("code");
-      const tokenParam = searchParams.get("token");
-      const mode = searchParams.get("mode");
-      let token = null;
-      let tokens = null;
 
-      if (tokenParam) {
-        try {
-          const decoded = decodeURIComponent(tokenParam);
-          const parsed = JSON.parse(decoded);
-          if (parsed && typeof parsed === "object") {
-            tokens = parsed;
-            token = parsed.accessToken || null;
-          } else {
-            token = decoded;
-            tokens = { accessToken: decoded };
-          }
-        } catch {
-          token = tokenParam;
-          tokens = { accessToken: tokenParam };
-        }
-      }
-
-      if (!token && code) {
-        console.log("[PopupCallback] code:", code);
-        console.log("[PopupCallback] exchange start");
-        const apiUrl = getApiUrl();
-        const exchangeUrl = `${apiUrl}/login/oauth2/code/kakao?code=${encodeURIComponent(
-          code,
-        )}`;
-        // backend redirects to frontend with token; avoid fetch to bypass CORS
-        window.location.href = exchangeUrl;
-        return;
-      }
-
-      const success = !error && (code || token || tokens);
+      const success = !error;
       const oauthResult = {
         type: "OAUTH_COMPLETE",
         payload: success
-          ? {
-              success: true,
-              code,
-              token,
-              tokens,
-            }
+          ? { success: true }
           : {
               success: false,
               error: error || "oauth_error",
               errorDescription: errorDescription || null,
             },
       };
-
-      const isPopupWindow =
-        typeof window !== "undefined" &&
-        (window.name === "breadfeetOAuth" || mode === "popup");
-
-      if (!isPopupWindow && success && tokens?.accessToken) {
-        try {
-          await saveTokens(tokens.accessToken);
-          markLoginSuccess();
-          console.log("[PopupCallback] Tokens saved to IndexedDB");
-        } catch (tokenError) {
-          console.warn("[PopupCallback] Token save failed:", tokenError);
-        }
-      }
 
       // oauth-popup.jsx로 전달
       // 1 - BroadcastChannel
@@ -124,36 +67,11 @@ export default function LoginPopupCallbackPage() {
       }
 
       // 팝업 닫기 (팝업이 스크립트로 열린 경우에만 정상 동작)
-      if (!isPopupWindow) {
-        const isSafeReturnUrl = (url) =>
-          typeof url === "string" &&
-          url.startsWith("/") &&
-          !url.startsWith("//");
-
-        const returnUrl = sessionStorage.getItem("returnUrl");
-        const safeReturnUrl = isSafeReturnUrl(returnUrl);
-
-        if (safeReturnUrl) {
-          sessionStorage.removeItem("returnUrl");
-          navigate(returnUrl, { replace: true });
-        } else {
-          navigate("/", { replace: true });
-        }
-        return;
-      }
-
-      try {
-        window.close();
-      } catch (error) {
-        console.warn(
-          "[PopupCallback] Unable to close window programmatically:",
-          error,
-        );
-      }
+      window.close();
     };
 
     handleCallback();
-  }, [navigate, searchParams]);
+  }, [searchParams]);
 
   return (
     <Page>

@@ -1,12 +1,11 @@
 import styled, { keyframes } from "styled-components";
 
 import { useNavigate } from "react-router-dom";
-import { useUserStore } from "../../store/userStore.jsx";
+import { useUserStore } from "../../store/userStore";
 import { useEffect } from "react";
-import { markLoginSuccess } from "../../lib/api-client.jsx";
-import { apiClient } from "../../lib/api-client.jsx";
-import { isPWAStandalone } from "../../lib/oauth-popup.jsx";
-import { saveTokens } from "../../lib/token-storage.jsx";
+import { markLoginSuccess } from "../../lib/api-client";
+import { apiClient } from "../../lib/api-client";
+import { getApiUrl } from "../../config/env";
 
 export default function LoginSuccessPage() {
   const navigate = useNavigate();
@@ -17,39 +16,17 @@ export default function LoginSuccessPage() {
       try {
         setLoading(true);
 
-        // console.log("Fetching user info from:", getApiUrl());
-        // const userData = await apiClient.get("/api/v1/members/me");
+        console.log("Fetching user info from:", getApiUrl());
+        const userData = await apiClient.get("/api/v1/members/me");
 
-        // setUser({
-        //   id: userData.id,
-        //   nickname: userData.nickname,
-        //   age: userData.age,
-        //   email: userData.email,
-        // });
+        setUser({
+          id: userData.id,
+          nickname: userData.nickname,
+          age: userData.age,
+          email: userData.email,
+        });
 
         markLoginSuccess();
-
-        if (isPWAStandalone()) {
-          try {
-            const tokens = await apiClient.post("/api/v1/auth/token-exchange");
-
-            // indexedDB에 토큰 저장 (access token만 refresh token 부분은 주석 처리)
-            // if (tokens && tokens.accessToken && tokens.refreshToken) {
-            if (tokens && tokens.accessToken) {
-              // refresh token 생길시 윗줄로 대체
-              await saveTokens(
-                tokens.accessToken,
-                // tokens.refreshToken,
-              );
-              console.log("[LoginSuccess] PWA tokens saved to IndexedDB");
-            }
-          } catch (tokenError) {
-            console.warn(
-              "[LoginSuccess] Failed to save PWA tokens:",
-              tokenError,
-            );
-          }
-        }
 
         const isSafeReturnUrl = (url) =>
           typeof url === "string" &&
