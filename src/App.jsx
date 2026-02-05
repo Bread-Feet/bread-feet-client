@@ -6,7 +6,7 @@ import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
 import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
 import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
-import BakeryRegisterPage from "./pages/bakery/BakeryRegisterationPage";
+import BakeryRegisterPage from "./pages/bakery/register/BakeryRegisterationPage";
 
 function App() {
   return (
