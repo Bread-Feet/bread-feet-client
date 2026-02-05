@@ -1,4 +1,4 @@
-const logoImg = "/breed-feet-logo-login.png";
+const logoImg = "/bread-feet-logo-login.png";
 const kakaoLoginIcon = "/kakao_login_medium_wide.png";
 
 import styled from "styled-components";

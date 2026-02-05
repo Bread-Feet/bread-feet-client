@@ -1,15 +1,11 @@
 import styled from "styled-components";
-import { useEffect } from "react";
 import SearchBar from "./SearchBar";
 import BakeryCard from "./BakeryCard";
 
+import { useNavigate } from "react-router-dom";
+
 export default function BakeryAdminPage() {
-  useEffect(() => {
-    document.body.classList.add("no-scroll");
-    return () => {
-      document.body.classList.remove("no-scroll");
-    };
-  }, []);
+  const nav = useNavigate();
 
   return (
     <Page>
@@ -19,7 +15,9 @@ export default function BakeryAdminPage() {
           <SearchBar />
         </Header>
         <ButtonWrapper>
-          <RegisterButton>빵집 등록하기</RegisterButton>
+          <RegisterButton onClick={() => nav("/mybakery/register")}>
+            빵집 등록하기
+          </RegisterButton>
         </ButtonWrapper>
         <Scroll>
           <BakeryCard />
