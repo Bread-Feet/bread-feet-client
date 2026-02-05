@@ -12,7 +12,7 @@ import BakeryInfoSection from "./sections/BakeryInfoSection";
 import OperationSection from "./sections/OperationSection";
 import MenuSection from "./sections/MenuSection";
 
-export default function BakeryRegisterPage() {
+export default function BakeryFormPage({ title }) {
   const nav = useNavigate();
 
   const bakeryInfo = useBakeryInfo();
@@ -27,7 +27,7 @@ export default function BakeryRegisterPage() {
           <ActionButton onClick={() => nav("/mybakery")}>
             <Image src={arrow_left} alt="뒤로가기" />
           </ActionButton>
-          <Title>빵집 등록하기</Title>
+          <Title>{title}</Title>
         </Header>
         <Form>
           <BakeryInfoSection {...bakeryInfo} />
