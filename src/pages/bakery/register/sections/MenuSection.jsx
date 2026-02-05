@@ -41,10 +41,7 @@ export default function MenuSection({
           aria-label="메뉴 사진 추가"
         >
           {draftMenuPhotoPreview ? (
-            <PreviewImg
-              src={draftMenuPhotoPreview}
-              alt="대표사진 미리보기"
-            />
+            <PreviewImg src={draftMenuPhotoPreview} alt="대표사진 미리보기" />
           ) : (
             <PlusSmaller src={plus} alt="추가하기" />
           )}
@@ -77,7 +74,7 @@ export default function MenuSection({
         {menus.map((m) => (
           <MenuCard key={m.id}>
             <MenuThumb>
-              <MenuThumbImg src={m.photoPreview || undefined} />
+              <MenuThumbImg src={m.photoPreview || undefined} alt={m.name} />
             </MenuThumb>
             <MenuInfo>
               <MenuNameRow>
@@ -85,10 +82,7 @@ export default function MenuSection({
                 {m.isMain ? (
                   <Badge>대표</Badge>
                 ) : (
-                  <BadgeButton
-                    type="button"
-                    onClick={() => setMainMenu(m.id)}
-                  >
+                  <BadgeButton type="button" onClick={() => setMainMenu(m.id)}>
                     대표 설정
                   </BadgeButton>
                 )}
@@ -132,6 +126,8 @@ const MenuPhotoBox = styled.label`
   display: grid;
   place-items: center;
   overflow: hidden;
+
+  position: relative;
 
   cursor: pointer;
 `;
@@ -200,7 +196,6 @@ const MenuThumb = styled.div`
 
   background: var(--main-color4);
   border-radius: 20px;
-  border: 1px solid #a5a5a5;
 
   overflow: hidden;
 `;

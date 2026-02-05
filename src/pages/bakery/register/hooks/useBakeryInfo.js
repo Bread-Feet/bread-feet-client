@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function useBakeryInfo() {
   const [bakeryName, setBakeryName] = useState("");
@@ -35,14 +35,17 @@ export default function useBakeryInfo() {
       return;
     }
 
-    // 이전 미리보기 url 해제
-    setMainPhotoPreview((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return URL.createObjectURL(file);
-    });
-
     setMainPhoto(file);
+    setMainPhotoPreview(URL.createObjectURL(file));
   };
+
+  useEffect(() => {
+    return () => {
+      if (mainPhotoPreview) {
+        URL.revokeObjectURL(mainPhotoPreview);
+      }
+    };
+  }, [mainPhotoPreview]);
 
   return {
     bakeryName,

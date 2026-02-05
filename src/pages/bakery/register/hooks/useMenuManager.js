@@ -1,10 +1,18 @@
+const logoImg = "/menu_example_img.svg";
+
 import { useState } from "react";
 
 export default function useMenuManager() {
   const [draftMenuPhotoPreview, setDraftMenuPhotoPreview] = useState(null);
   const [menus, setMenus] = useState([
-    { id: 1, name: "소금빵", price: 2800, isMain: true, photoPreview: null },
-    { id: 2, name: "크림빵", price: 4500, isMain: false, photoPreview: null },
+    { id: 1, name: "소금빵", price: 2800, isMain: true, photoPreview: logoImg },
+    {
+      id: 2,
+      name: "크림빵",
+      price: 4500,
+      isMain: false,
+      photoPreview: logoImg,
+    },
   ]);
 
   // 메뉴 추가용 임시 상태
@@ -56,7 +64,11 @@ export default function useMenuManager() {
   };
 
   const removeMenu = (id) => {
-    setMenus((prev) => prev.filter((m) => m.id !== id));
+    setMenus((prev) => {
+      const target = prev.find((m) => m.id === id);
+      if (target?.photoPreview) URL.revokeObjectURL(target.photoPreview);
+      return prev.filter((m) => m.id !== id);
+    });
   };
 
   const setMainMenu = (id) => {

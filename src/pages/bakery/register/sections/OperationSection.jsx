@@ -99,10 +99,7 @@ export default function OperationSection({
                     </option>
                   ))}
                 </TimeSelect>
-                <DeleteButton
-                  type="button"
-                  onClick={() => removeHourRow(h.id)}
-                >
+                <DeleteButton type="button" onClick={() => removeHourRow(h.id)}>
                   <DeleteImg src={deleteIcon} alt="삭제" />
                 </DeleteButton>
               </TimeRange>
@@ -214,7 +211,7 @@ const SelectBox = styled.select`
   background: #f8f9fa;
   outline: none;
 
-  padding: 0 15px;
+  padding: 0 20px;
 
   cursor: pointer;
 
@@ -224,8 +221,8 @@ const SelectBox = styled.select`
 
   background-image: url("/dropboxIcon.svg");
   background-repeat: no-repeat;
-  background-position: right 16px center;
-  background-size: 18px 18px;
+  background-position: right 10px center;
+  background-size: 16px 16px;
 `;
 
 const TimeRange = styled.div`
@@ -270,8 +267,8 @@ const TimeSelect = styled.select`
 
   background-image: url("/dropboxIcon.svg");
   background-repeat: no-repeat;
-  background-position: right 16px center;
-  background-size: 18px 18px;
+  background-position: right 10px center;
+  background-size: 16px 16px;
 `;
 
 const TimeText = styled.div`

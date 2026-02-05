@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export const TIME_OPTIONS = Array.from(
   { length: 25 },
@@ -16,11 +16,13 @@ export default function useOperatingHours() {
     { id: 2, day: "", start: "", end: "" },
   ]);
 
+  const nextIdRef = useRef(3);
+
   const addHourRow = () => {
-    setHours((prev) => [
-      ...prev,
-      { id: Date.now(), day: "", start: "", end: "" },
-    ]);
+    setHours((prev) => {
+      const id = nextIdRef.current++;
+      return [...prev, { id: id, day: "", start: "", end: "" }];
+    });
   };
 
   const updateHour = (id, key, value) => {

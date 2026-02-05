@@ -66,13 +66,22 @@ export const PhotoBox = styled.label`
   place-items: center;
   overflow: hidden;
 
+  position: relative;
+
   cursor: pointer;
 `;
 
 export const PhotoInput = styled.input`
-  display: none;
   width: 100%;
   height: 100%;
+
+  border: 0;
+  inset: 0;
+  opacity: 0;
+
+  position: absolute;
+
+  cursor: pointer;
 `;
 
 export const PreviewImg = styled.img`
