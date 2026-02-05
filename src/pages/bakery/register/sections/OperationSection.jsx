@@ -39,6 +39,7 @@ export default function OperationSection({
             <HoursRow key={h.id}>
               <SelectBox
                 required
+                aria-label="요일"
                 value={h.day || ""}
                 onChange={(e) => updateHour(h.id, "day", e.target.value)}
               >
@@ -62,6 +63,7 @@ export default function OperationSection({
               <TimeRange>
                 <TimeSelect
                   required
+                  aria-label="시작 시간"
                   value={h.start || ""}
                   onChange={(e) => {
                     const start = e.target.value;
@@ -84,6 +86,7 @@ export default function OperationSection({
                 </TimeSelect>
                 <TimeSelect
                   required
+                  aria-label="마감 시간"
                   value={h.end || ""}
                   disabled={!h.start}
                   onChange={(e) => updateHour(h.id, "end", e.target.value)}
@@ -113,6 +116,7 @@ export default function OperationSection({
           <StoreTag
             type="button"
             $active={storeTags.drink === "SELL"}
+            aria-pressed={storeTags.drink === "SELL"}
             onClick={() => setTag("drink", "SELL")}
           >
             음료 판매
@@ -120,6 +124,7 @@ export default function OperationSection({
           <StoreTag
             type="button"
             $active={storeTags.drink === "NO_SELL"}
+            aria-pressed={storeTags.drink === "NO_SELL"}
             onClick={() => setTag("drink", "NO_SELL")}
           >
             음료 미판매
@@ -127,6 +132,7 @@ export default function OperationSection({
           <StoreTag
             type="button"
             $active={storeTags.eatIn === "POSSIBLE"}
+            aria-pressed={storeTags.eatIn === "POSSIBLE"}
             onClick={() => setTag("eatIn", "POSSIBLE")}
           >
             매장 취식 가능
@@ -134,6 +140,7 @@ export default function OperationSection({
           <StoreTag
             type="button"
             $active={storeTags.eatIn === "IMPOSSIBLE"}
+            aria-pressed={storeTags.eatIn === "IMPOSSIBLE"}
             onClick={() => setTag("eatIn", "IMPOSSIBLE")}
           >
             매장 취식 불가능
@@ -141,6 +148,7 @@ export default function OperationSection({
           <StoreTag
             type="button"
             $active={storeTags.waiting === "ONSITE"}
+            aria-pressed={storeTags.waiting === "ONSITE"}
             onClick={() => setTag("waiting", "ONSITE")}
           >
             현장 웨이팅
@@ -148,6 +156,7 @@ export default function OperationSection({
           <StoreTag
             type="button"
             $active={storeTags.waiting === "ONLINE"}
+            aria-pressed={storeTags.waiting === "ONLINE"}
             onClick={() => setTag("waiting", "ONLINE")}
           >
             온라인 웨이팅
@@ -155,6 +164,7 @@ export default function OperationSection({
           <StoreTag
             type="button"
             $active={storeTags.parking === "HAVE"}
+            aria-pressed={storeTags.parking === "HAVE"}
             onClick={() => setTag("parking", "HAVE")}
           >
             전용 주차장 보유
@@ -162,6 +172,7 @@ export default function OperationSection({
           <StoreTag
             type="button"
             $active={storeTags.parking === "NONE"}
+            aria-pressed={storeTags.parking === "NONE"}
             onClick={() => setTag("parking", "NONE")}
           >
             전용 주차장 미보유
