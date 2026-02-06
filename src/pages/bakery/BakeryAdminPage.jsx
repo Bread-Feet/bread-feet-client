@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import SearchBar from "./SearchBar";
 import BakeryCard from "./BakeryCard";
-import DeleteConfirmModal from "./mybakery/components/DeleteConfirmModal";
+import DeleteConfirmModal from "./components/DeleteConfirmModal";
 import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";

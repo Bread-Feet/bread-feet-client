@@ -12,7 +12,7 @@ import BakeryInfoSection from "./sections/BakeryInfoSection";
 import OperationSection from "./sections/OperationSection";
 import MenuSection from "./sections/MenuSection";
 
-export default function BakeryFormPage({ title }) {
+export default function BakeryFormPage({ title = "빵집 등록하기" }) {
   const nav = useNavigate();
 
   const bakeryInfo = useBakeryInfo();
