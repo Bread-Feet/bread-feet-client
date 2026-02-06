@@ -6,7 +6,7 @@ import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
 import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
 import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
-import BakeryRegisterPage from "./pages/bakery/register/BakeryRegisterationPage";
+import BakeryFormPage from "./pages/bakery/form/BakeryFormPage";
 
 function App() {
   return (
@@ -19,7 +19,14 @@ function App() {
           element={<LoginPopupCallbackPage />}
         />
         <Route path="/oauth/callback" element={<LoginPopupCallbackPage />} />
-        <Route path="/mybakery/register" element={<BakeryRegisterPage />} />
+        <Route
+          path="/mybakery/register"
+          element={<BakeryFormPage title="빵집 등록하기" />}
+        />
+        <Route
+          path="/mybakery/modify"
+          element={<BakeryFormPage title="수정하기" />}
+        />
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />

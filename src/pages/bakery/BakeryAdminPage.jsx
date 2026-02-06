@@ -1,11 +1,30 @@
 import styled from "styled-components";
 import SearchBar from "./SearchBar";
 import BakeryCard from "./BakeryCard";
+import DeleteConfirmModal from "./components/DeleteConfirmModal";
+import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
 export default function BakeryAdminPage() {
   const nav = useNavigate();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const openModifyPage = () => {
+    nav("/mybakery/modify");
+  };
+
+  const openDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  const confirmDelete = () => {
+    setIsDeleteModalOpen(false);
+  };
 
   return (
     <Page>
@@ -20,13 +39,36 @@ export default function BakeryAdminPage() {
           </RegisterButton>
         </ButtonWrapper>
         <Scroll>
-          <BakeryCard />
-          <BakeryCard />
-          <BakeryCard />
-          <BakeryCard />
-          <BakeryCard />
-          <BakeryCard />
+          <BakeryCard
+            onModifyClick={openModifyPage}
+            onDeleteClick={openDeleteModal}
+          />
+          <BakeryCard
+            onModifyClick={openModifyPage}
+            onDeleteClick={openDeleteModal}
+          />
+          <BakeryCard
+            onModifyClick={openModifyPage}
+            onDeleteClick={openDeleteModal}
+          />
+          <BakeryCard
+            onModifyClick={openModifyPage}
+            onDeleteClick={openDeleteModal}
+          />
+          <BakeryCard
+            onModifyClick={openModifyPage}
+            onDeleteClick={openDeleteModal}
+          />
+          <BakeryCard
+            onModifyClick={openModifyPage}
+            onDeleteClick={openDeleteModal}
+          />
         </Scroll>
+        <DeleteConfirmModal
+          open={isDeleteModalOpen}
+          onClose={closeDeleteModal}
+          onConfirm={confirmDelete}
+        />
       </PhoneFrame>
     </Page>
   );
