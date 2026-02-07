@@ -6,6 +6,7 @@ export default function useBakeryInfo() {
     setBakeryName(e.target.value);
   };
 
+  const [lotNumber, setLotNumber] = useState("");
   const [address, setAddress] = useState("");
   const [detailedAddress, setDetailedAddress] = useState("");
   const handleDetailedAddressChange = (e) => {
@@ -53,6 +54,8 @@ export default function useBakeryInfo() {
   return {
     bakeryName,
     handleBakeryNameChange,
+    lotNumber,
+    setLotNumber,
     address,
     setAddress,
     detailedAddress,

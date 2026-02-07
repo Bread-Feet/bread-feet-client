@@ -17,6 +17,8 @@ import { openDaumPostcode } from "../../../../lib/daum-postcode";
 
 export default function BakeryInfoSection({
   handleBakeryNameChange,
+  lotNumber,
+  setLotNumber,
   address,
   setAddress,
   handleDetailedAddressChange,
@@ -28,6 +30,7 @@ export default function BakeryInfoSection({
   async function handleSearchAddress() {
     try {
       const data = await openDaumPostcode();
+      setLotNumber(data.zonecode);
       setAddress(data.roadAddress || data.jibunAddress || "");
     } catch (err) {
       const msg = String(err?.message || "");
