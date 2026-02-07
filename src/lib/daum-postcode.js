@@ -25,8 +25,11 @@ function loadDaumPostcodeScript() {
     if (existing) {
       const status = existing.getAttribute("data-status");
       if (status === "loaded") return resolve();
-      if (status === "error")
+      if (status === "error") {
+        existing.remove();
+        loadPromise = null;
         return reject(new Error("Failed to load Daum Postcode script"));
+      }
 
       existing.addEventListener(
         "load",
@@ -41,6 +44,7 @@ function loadDaumPostcodeScript() {
         "error",
         () => {
           existing.setAttribute("data-status", "error");
+          loadPromise = null;
           reject(new Error("Failed to load Daum Postcode script"));
         },
         { once: true },
@@ -61,6 +65,7 @@ function loadDaumPostcodeScript() {
     };
     script.onerror = () => {
       script.setAttribute("data-status", "error");
+      loadPromise = null;
       reject(new Error("Failed to load Daum Postcode script"));
     };
 

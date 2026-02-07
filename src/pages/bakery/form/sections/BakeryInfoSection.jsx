@@ -31,7 +31,7 @@ export default function BakeryInfoSection({
       setAddress(data.roadAddress || data.jibunAddress || "");
     } catch (err) {
       const msg = String(err?.message || "");
-      if (msg.startsWith("Postcode closed:")) return; // 조용히 무시
+      if (msg.startsWith("Postcode closed:")) return;
       console.warn(err);
     }
   }
