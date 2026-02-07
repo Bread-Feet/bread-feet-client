@@ -36,7 +36,10 @@ export default function useBakeryInfo() {
     }
 
     setMainPhoto(file);
-    setMainPhotoPreview(URL.createObjectURL(file));
+    setMainPhotoPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
   };
 
   useEffect(() => {

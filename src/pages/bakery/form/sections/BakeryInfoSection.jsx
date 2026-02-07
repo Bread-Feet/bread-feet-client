@@ -13,14 +13,29 @@ import {
   Plus,
 } from "../styles";
 
+import { openDaumPostcode } from "../../../../lib/daum-postcode";
+
 export default function BakeryInfoSection({
   handleBakeryNameChange,
+  address,
+  setAddress,
   handleDetailedAddressChange,
   handlePhoneNumberChange,
   handleWebpageChange,
   mainPhotoPreview,
   handleMainPhotoChange,
 }) {
+  async function handleSearchAddress() {
+    try {
+      const data = await openDaumPostcode();
+      setAddress(data.roadAddress || data.jibunAddress || "");
+    } catch (err) {
+      const msg = String(err?.message || "");
+      if (msg.startsWith("Postcode closed:")) return; // 조용히 무시
+      console.warn(err);
+    }
+  }
+
   return (
     <>
       <FormSection>
@@ -37,8 +52,17 @@ export default function BakeryInfoSection({
         <Field>
           <Label>주소</Label>
           <AddressRow>
-            <Input placeholder="주소를 검색하세요" />
-            <SearchButton type="button">검색</SearchButton>
+            <Input
+              placeholder="주소를 검색하세요"
+              type="text"
+              value={address}
+              readOnly
+              disabled
+              style={{ cursor: "not-allowed" }}
+            />
+            <SearchButton type="button" onClick={handleSearchAddress}>
+              검색
+            </SearchButton>
           </AddressRow>
           <Input
             placeholder="상세 주소를 입력하세요"
@@ -103,6 +127,8 @@ const SearchButton = styled.button`
   background: var(--main-color2);
   border: none;
   border-radius: 20px;
+
+  margin: 0 0 5px 0;
 
   cursor: pointer;
 `;
