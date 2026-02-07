@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { OAUTH_STORAGE_KEY, OAUTH_CHANNEL_NAME } from "../../lib/oauth-popup";
 import { getApiUrl } from "../../config/env";
 import { markLoginSuccess } from "../../lib/api-client";
-import { saveTokens } from "../../lib/token-storage.jsx";
+import { saveTokens } from "../../lib/token-storage.js";
 
 export default function LoginPopupCallbackPage() {
   const [searchParams] = useSearchParams();
