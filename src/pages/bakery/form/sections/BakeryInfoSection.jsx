@@ -65,7 +65,7 @@ export default function BakeryInfoSection({
           />
         </Field>
         <Field>
-          <Label>대표사진</Label>
+          <Label>대표 사진</Label>
           <PhotoBox>
             {mainPhotoPreview ? (
               <PreviewImg src={mainPhotoPreview} alt="대표사진 미리보기" />

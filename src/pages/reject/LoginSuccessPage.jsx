@@ -3,10 +3,10 @@ import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../../store/userStore.jsx";
 import { useEffect } from "react";
-import { markLoginSuccess } from "../../lib/api-client.jsx";
-import { apiClient } from "../../lib/api-client.jsx";
-import { isPWAStandalone } from "../../lib/oauth-popup.jsx";
-import { saveTokens } from "../../lib/token-storage.jsx";
+import { markLoginSuccess } from "../../lib/api-client.js";
+import { apiClient } from "../../lib/api-client.js";
+import { isPWAStandalone } from "../../lib/oauth-popup.js";
+import { saveTokens } from "../../lib/token-storage.js";
 
 export default function LoginSuccessPage() {
   const navigate = useNavigate();
@@ -33,10 +33,10 @@ export default function LoginSuccessPage() {
           try {
             const tokens = await apiClient.post("/api/v1/auth/token-exchange");
 
-            // indexedDB에 토큰 저장 (access token만 refresh token 부분은 주석 처리)
+            // indexedDB???�큰 ?�??(access token�?refresh token 부분�? 주석 처리)
             // if (tokens && tokens.accessToken && tokens.refreshToken) {
             if (tokens && tokens.accessToken) {
-              // refresh token 생길시 윗줄로 대체
+              // refresh token ?�길???�줄�??��?
               await saveTokens(
                 tokens.accessToken,
                 // tokens.refreshToken,
@@ -60,13 +60,13 @@ export default function LoginSuccessPage() {
         const safeReturnUrl = isSafeReturnUrl(returnUrl);
         if (safeReturnUrl) {
           sessionStorage.removeItem("returnUrl");
-          navigate(returnUrl, { replace: true }); // 로그인 페이지 오기 이전 페이지로 이동
+          navigate(returnUrl, { replace: true }); // 로그???�이지 ?�기 ?�전 ?�이지�??�동
         } else {
-          navigate("/", { replace: true }); // returnUrl 없을시, 메인 페이지로 이동
+          navigate("/", { replace: true }); // returnUrl ?�을?? 메인 ?�이지�??�동
         }
       } catch (error) {
-        console.error("로그인 정보를 가져오는데 실패했습니다:", error);
-        navigate("/login", { replace: true }); // error 발생시 다시 login page로 이동
+        console.error("로그???�보�?가?�오?�데 ?�패?�습?�다:", error);
+        navigate("/login", { replace: true }); // error 발생???�시 login page�??�동
       } finally {
         setLoading(false);
       }
@@ -79,7 +79,7 @@ export default function LoginSuccessPage() {
     <Page>
       <Center>
         <Spinner aria-label="loading" />
-        <Message>로그인중 입니다...</Message>
+        <Message>로그?�중 ?�니??..</Message>
       </Center>
     </Page>
   );
@@ -119,3 +119,5 @@ const Message = styled.p`
   font-size: 18px;
   color: var(--neutral-600, #000000);
 `;
+
+

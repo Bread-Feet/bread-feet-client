@@ -9,7 +9,7 @@ import { getApiUrl } from "../../config/env";
 import { isPWAStandalone, openOAuthPopup } from "../../lib/oauth-popup";
 import { markLoginSuccess } from "../../lib/api-client";
 // import { useUserStore } from "../../store/userStore";
-import { saveTokens } from "../../lib/token-storage.jsx";
+import { saveTokens } from "../../lib/token-storage.js";
 
 function LoginContent() {
   const [searchParams] = useSearchParams();
