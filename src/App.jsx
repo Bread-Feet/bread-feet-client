@@ -8,6 +8,8 @@ import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
 import BakeryFormPage from "./pages/bakery/form/BakeryFormPage";
 
+import BakeryPage from "./pages/bakery-user/BakeryPage";
+
 function App() {
   return (
     <>
@@ -30,6 +32,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />
+          <Route path="/bakery" element={<BakeryPage />} />
         </Route>
       </Routes>
     </>
