@@ -10,6 +10,7 @@ const logoImg = "/menu_example_img.svg";
 
 export default function BakeryPage() {
   const nav = useNavigate();
+  const [sortKey, setSortKey] = useState("RECENT"); // "RECENT" | "KOREAN"
   const [bakeries, setBakeries] = useState([
     {
       id: 1,
@@ -44,7 +45,26 @@ export default function BakeryPage() {
           <Title>나의 빵집</Title>
           <SearchBar />
         </Header>
-        <ButtonWrapper></ButtonWrapper>
+        <ButtonWrapper>
+          <SortButton
+            type="button"
+            role="tab"
+            aria-selected={sortKey === "RECENT"}
+            $active={sortKey === "RECENT"}
+            onClick={() => setSortKey("RECENT")}
+          >
+            최근순
+          </SortButton>
+          <SortButton
+            type="button"
+            role="tab"
+            aria-selected={sortKey === "KOREAN"}
+            $active={sortKey === "KOREAN"}
+            onClick={() => setSortKey("KOREAN")}
+          >
+            가나다순
+          </SortButton>
+        </ButtonWrapper>
         <Scroll>
           {bakeries.map((b) => (
             <BakeryCard
@@ -108,7 +128,26 @@ const Title = styled.h1`
 
 const ButtonWrapper = styled.div`
   width: 100%;
+
+  display: flex;
+  gap: 12px;
+
   padding: 12px 20px;
+`;
+
+const SortButton = styled.button`
+  font-size: 12px;
+  font-weight: 500;
+  color: ${(p) => (p.$active ? "var(--main-color4)" : "#a5a5a5")};
+
+  width: 100px;
+
+  border: ${(p) =>
+    p.$active ? "solid 1px var(--main-color4)" : "solid 1px #a5a5a5"};
+  border-radius: 20px;
+  background: ${(p) => (p.$active ? "var(--main-color2)" : "transparent")};
+
+  padding: 8px 0;
 `;
 
 const Scroll = styled.div`
