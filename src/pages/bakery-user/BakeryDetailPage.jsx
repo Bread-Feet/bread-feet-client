@@ -1,12 +1,12 @@
 import styled from "styled-components";
-import arrow_left from "/arrow_left_white.svg";
-import heart from "/heart_off.svg";
-import star from "/starIcon.svg";
-import location from "/location.svg";
-import tell from "/tell.svg";
-import link from "/link.svg";
-import clock from "/clock.svg";
-import dropboxIcon from "/dropboxIcon.svg";
+const arrow_left = "/arrow_left_white.svg";
+const heart = "/heart_off.svg";
+const star = "/starIcon.svg";
+const location = "/location.svg";
+const tell = "/tell.svg";
+const link = "/link.svg";
+const clock = "/clock.svg";
+const dropboxIcon = "/dropboxIcon.svg";
 
 import PageLayout from "../../components/layout/PageLayout";
 
@@ -15,7 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const TAB_ORDER = ["home", "menu", "review"];
 
-import exampleImg from "/examplePhoto.jpg";
+const exampleImg = "/examplePhoto.jpg";
 export default function BakeryDetailPage() {
   const nav = useNavigate();
   const { id } = useParams();
@@ -211,24 +211,16 @@ function HomeSection({ bakery }) {
 
         <TagGrid>
           <Tag $active={active.beverage}># 음료 판매</Tag>
-          <Tag $active={!active.beverage} $muted>
-            # 음료 미판매
-          </Tag>
+          <Tag $active={!active.beverage}># 음료 미판매</Tag>
 
-          <Tag $active={active.dineIn}># 매장 섭식 가능</Tag>
-          <Tag $active={!active.dineIn} $muted>
-            # 매장 섭식 불가능
-          </Tag>
+          <Tag $active={!active.dineIn}># 매장 섭식 가능</Tag>
+          <Tag $active={active.dineIn}># 매장 섭식 불가능</Tag>
 
           <Tag $active={active.onsiteWaiting}># 현장 웨이팅</Tag>
-          <Tag $active={active.onlineWaiting} $muted={!active.onlineWaiting}>
-            # 온라인 웨이팅
-          </Tag>
+          <Tag $active={active.onlineWaiting}># 온라인 웨이팅</Tag>
 
           <Tag $active={active.parking}># 전용 주차장 보유</Tag>
-          <Tag $active={!active.parking} $muted>
-            # 전용 주차장 미보유
-          </Tag>
+          <Tag $active={!active.parking}># 전용 주차장 미보유</Tag>
         </TagGrid>
       </Section>
     </HomeWrap>
@@ -248,6 +240,7 @@ const Hero = styled.div`
 
 const HeroImg = styled.img`
   width: 100%;
+  height: 100%;
   object-fit: cover;
 `;
 
@@ -460,13 +453,13 @@ const ClockIcon = styled.img``;
 
 const InfoText = styled.div`
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   color: #000000;
 `;
 
 const InfoLink = styled.a`
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   color: #000000;
 
   text-decoration: none;
@@ -574,7 +567,7 @@ const TagGrid = styled.div`
 
 const Tag = styled.div`
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
   color: ${(p) => (p.$active ? "var(--main-color2)" : "#d9d9d9")};
 
   padding: 0 13px;
