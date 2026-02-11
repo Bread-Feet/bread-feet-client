@@ -22,6 +22,28 @@ export default function OperationSection({
   storeTags,
   setTag,
 }) {
+  const DAYS = [
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+    "일요일",
+  ];
+
+  const calcUsedDays = new Map(
+    hours.map((h) => {
+      const used = new Set(
+        hours
+          .filter((x) => x.id !== h.id)
+          .map((x) => x.day)
+          .filter(Boolean),
+      );
+      return [h.id, used];
+    }),
+  );
+
   return (
     <>
       <FormSection>
@@ -35,79 +57,99 @@ export default function OperationSection({
         </TimeRow>
         <TimeText>시작 시간을 먼저 선택해주세요</TimeText>
         <HoursList>
-          {hours.map((h) => (
-            <HoursRow key={h.id}>
-              <SelectBox
-                required
-                aria-label="요일"
-                value={h.day || ""}
-                onChange={(e) => updateHour(h.id, "day", e.target.value)}
-              >
-                <option value="" disabled>
-                  요일 선택
-                </option>
-                {[
-                  "월요일",
-                  "화요일",
-                  "수요일",
-                  "목요일",
-                  "금요일",
-                  "토요일",
-                  "일요일",
-                ].map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </SelectBox>
-              <TimeRange>
-                <TimeSelect
-                  required
-                  aria-label="시작 시간"
-                  value={h.start || ""}
-                  onChange={(e) => {
-                    const start = e.target.value;
-                    updateHour(h.id, "start", start);
+          {hours.map((h) => {
+            const usedDays = calcUsedDays.get(h.id) ?? new Set();
 
-                    // start 바꾸면 end가 start보다 이르면 end 초기화
-                    if (h.end && toMinutes(h.end) <= toMinutes(start)) {
-                      updateHour(h.id, "end", "");
-                    }
+            const availableDays = DAYS.filter(
+              (d) => !usedDays.has(d) || d === h.day,
+            );
+
+            return (
+              <HoursRow key={h.id}>
+                <SelectBox
+                  required
+                  aria-label="요일"
+                  value={h.day || ""}
+                  onInvalid={(e) =>
+                    e.target.setCustomValidity("요일을 선택해주세요.")
+                  }
+                  onChange={(e) => {
+                    e.target.setCustomValidity("");
+                    updateHour(h.id, "day", e.target.value);
                   }}
                 >
                   <option value="" disabled>
-                    시작
+                    요일 선택
                   </option>
-                  {TIME_OPTIONS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {availableDays.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
                     </option>
                   ))}
-                </TimeSelect>
-                <TimeSelect
-                  required
-                  aria-label="마감 시간"
-                  value={h.end || ""}
-                  disabled={!h.start}
-                  onChange={(e) => updateHour(h.id, "end", e.target.value)}
-                >
-                  <option value="" disabled>
-                    마감
-                  </option>
-                  {TIME_OPTIONS.filter(
-                    (t) => !h.start || toMinutes(t) > toMinutes(h.start),
-                  ).map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                </SelectBox>
+                <TimeRange>
+                  <TimeSelect
+                    required
+                    aria-label="시작 시간"
+                    value={h.start || ""}
+                    onInvalid={(e) =>
+                      e.target.setCustomValidity("시작시간을 선택해주세요.")
+                    }
+                    onChange={(e) => {
+                      e.target.setCustomValidity("");
+
+                      const start = e.target.value;
+                      updateHour(h.id, "start", start);
+
+                      // start 바꾸면 end가 start보다 이르면 end 초기화
+                      if (h.end && toMinutes(h.end) <= toMinutes(start)) {
+                        updateHour(h.id, "end", "");
+                      }
+                    }}
+                  >
+                    <option value="" disabled>
+                      시작
                     </option>
-                  ))}
-                </TimeSelect>
-                <DeleteButton type="button" onClick={() => removeHourRow(h.id)}>
-                  <DeleteImg src={deleteIcon} alt="삭제" />
-                </DeleteButton>
-              </TimeRange>
-            </HoursRow>
-          ))}
+                    {TIME_OPTIONS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </TimeSelect>
+                  <TimeSelect
+                    required
+                    aria-label="마감 시간"
+                    value={h.end || ""}
+                    disabled={!h.start}
+                    onInvalid={(e) =>
+                      e.target.setCustomValidity("마감시간을 선택해주세요.")
+                    }
+                    onChange={(e) => {
+                      e.target.setCustomValidity("");
+                      updateHour(h.id, "end", e.target.value);
+                    }}
+                  >
+                    <option value="" disabled>
+                      마감
+                    </option>
+                    {TIME_OPTIONS.filter(
+                      (t) => !h.start || toMinutes(t) > toMinutes(h.start),
+                    ).map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </TimeSelect>
+                  <DeleteButton
+                    type="button"
+                    onClick={() => removeHourRow(h.id)}
+                  >
+                    <DeleteImg src={deleteIcon} alt="삭제" />
+                  </DeleteButton>
+                </TimeRange>
+              </HoursRow>
+            );
+          })}
         </HoursList>
       </FormSection>
       <FormSection>

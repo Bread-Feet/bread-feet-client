@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { openDaumPostcode } from "../../../../lib/daum-postcode";
 
 export default function useBakeryInfo() {
   const [bakeryName, setBakeryName] = useState("");
@@ -11,6 +12,17 @@ export default function useBakeryInfo() {
   const [detailedAddress, setDetailedAddress] = useState("");
   const handleDetailedAddressChange = (e) => {
     setDetailedAddress(e.target.value);
+  };
+  const handleSearchAddress = async () => {
+    try {
+      const data = await openDaumPostcode();
+      setLotNumber(data.zonecode);
+      setAddress(data.roadAddress || data.jibunAddress || "");
+    } catch (err) {
+      const msg = String(err?.message || "");
+      if (msg.startsWith("Postcode closed:")) return;
+      console.warn(err);
+    }
   };
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -60,6 +72,7 @@ export default function useBakeryInfo() {
     setAddress,
     detailedAddress,
     handleDetailedAddressChange,
+    handleSearchAddress,
     phoneNumber,
     handlePhoneNumberChange,
     webpage,

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import arrow_left from "/arrow_left_black.svg";
+const arrow_left = "/arrow_left_black.svg";
 
 import PageLayout from "../../../components/layout/PageLayout";
 
@@ -9,12 +9,14 @@ import useBakeryInfo from "./hooks/useBakeryInfo";
 import useOperatingHours from "./hooks/useOperatingHours";
 import useStoreTags from "./hooks/useStoreTags";
 import useMenuManager from "./hooks/useMenuManager";
+import useBakerySubmit from "./hooks/useBakerySubmit";
+import { serializeBusinessHours } from "./utils/makeBakeryBody";
 
 import BakeryInfoSection from "./sections/BakeryInfoSection";
 import OperationSection from "./sections/OperationSection";
 import MenuSection from "./sections/MenuSection";
 
-export default function BakeryFormPage({ title = "빵집 등록하기" }) {
+export default function BakeryCreatePage() {
   const nav = useNavigate();
 
   const bakeryInfo = useBakeryInfo();
@@ -22,15 +24,47 @@ export default function BakeryFormPage({ title = "빵집 등록하기" }) {
   const storeTags = useStoreTags();
   const menuManager = useMenuManager();
 
+  const { submitCreate, isSubmitting } = useBakerySubmit();
+
+  const mainMenu = menuManager.menus?.find((m) => m.isMain);
+  const bestBread = (mainMenu?.name ?? "").trim();
+
+  const handleSubmit = async (err) => {
+    err.preventDefault();
+
+    const body = {
+      name: (bakeryInfo.bakeryName ?? "").trim(),
+      address: {
+        detail: (bakeryInfo.detailedAddress ?? "").trim(),
+        lotNumber: (bakeryInfo.lotNumber ?? "").trim(),
+        address: (bakeryInfo.address ?? "").trim(),
+      },
+      // imageUrl: (bakeryInfo.mainPhoto ?? "").trim(),
+      imageUrl: "temp",
+      phoneNumber: (bakeryInfo.phoneNumber ?? "").trim(),
+      businessHours: serializeBusinessHours(operatingHours.hours),
+      bestBread: (bestBread ?? "").trim(),
+    };
+
+    try {
+      await submitCreate(body);
+      alert("빵집 등록 완료");
+      nav("/mybakery");
+    } catch (err) {
+      console.error(err);
+      alert(err?.message || "등록에 실패했습니다.");
+    }
+  };
+
   return (
     <PageLayout>
       <Header>
         <ActionButton onClick={() => nav("/mybakery")}>
           <Image src={arrow_left} alt="뒤로가기" />
         </ActionButton>
-        <Title>{title}</Title>
+        <Title>빵집 등록하기</Title>
       </Header>
-      <Form>
+      <Form onSubmit={handleSubmit}>
         <BakeryInfoSection {...bakeryInfo} />
         <OperationSection {...operatingHours} {...storeTags} />
         <MenuSection {...menuManager} />

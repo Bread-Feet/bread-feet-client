@@ -2,10 +2,10 @@ import { useState } from "react";
 
 export default function useStoreTags() {
   const [storeTags, setStoreTags] = useState({
-    drink: null, //SELL, NO_SELL
-    eatIn: null, // POSSIBLE, IMPOSSIBLE
-    waiting: null, // ONSITE, ONLINE
-    parking: null, // HAVE, NONE
+    drink: false, //SELL, NO_SELL
+    eatIn: false, // POSSIBLE, IMPOSSIBLE
+    waiting: false, // ONSITE, ONLINE
+    parking: false, // HAVE, NONE
   });
 
   const setTag = (key, value) => {
