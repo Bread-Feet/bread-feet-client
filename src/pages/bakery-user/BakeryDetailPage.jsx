@@ -213,8 +213,8 @@ function HomeSection({ bakery }) {
           <Tag $active={active.beverage}># 음료 판매</Tag>
           <Tag $active={!active.beverage}># 음료 미판매</Tag>
 
-          <Tag $active={!active.dineIn}># 매장 섭식 가능</Tag>
-          <Tag $active={active.dineIn}># 매장 섭식 불가능</Tag>
+          <Tag $active={active.dineIn}># 매장 섭식 가능</Tag>
+          <Tag $active={!active.dineIn}># 매장 섭식 불가능</Tag>
 
           <Tag $active={active.onsiteWaiting}># 현장 웨이팅</Tag>
           <Tag $active={active.onlineWaiting}># 온라인 웨이팅</Tag>
