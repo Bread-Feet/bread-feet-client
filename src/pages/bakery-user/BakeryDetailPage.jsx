@@ -25,21 +25,17 @@ export default function BakeryDetailPage() {
   const bakery = useMemo(() => {
     return {
       id,
-      name: "성심당",
+      name: "맛있는 빵집",
       rating: 5.0,
       reviewCount: 1689,
-      address: "대전광역시 중구 대종로 480번길 15",
-      phone: "053-123-4567",
-      instagram: "https://www.instagram.com/",
-      isOpen: false, // false면 영업종료
-      features: {
-        beverage: true,
-        dineIn: true,
-        waiting: "onsite", // "onsite" | "online" | "none"
-        parking: true,
+      address: {
+        detail: "101호",
+        lotNumber: "1-45",
+        roadAddress: "서울특별시 강남구 테헤란로 123",
       },
-      heroImage: exampleImg,
-
+      imageUrl: exampleImg,
+      phoneNumber: "010-1234-5678",
+      websiteUrl: "https://www.instagram.com/",
       businessHours: [
         { day: "월요일", time: "09:00 - 18:00" },
         { day: "화요일", time: "09:00 - 18:00" },
@@ -49,6 +45,25 @@ export default function BakeryDetailPage() {
         { day: "토요일", time: "00:00 - 00:00" },
         { day: "일", time: "" },
       ],
+      bestBread: "소금빵",
+      features: {
+        beverage: true,
+        dineIn: true,
+        waiting: "onsite", // "onsite" | "online" | "none"
+        parking: true,
+      },
+      menus: [
+        {
+          name: "소금빵",
+          price: 3000,
+          thumbnailUrl: exampleImg,
+        },
+        {
+          name: "바게트",
+          price: 4500,
+          thumbnailUrl: exampleImg,
+        },
+      ],
     };
   }, [id]);
 
@@ -56,7 +71,7 @@ export default function BakeryDetailPage() {
     <PageLayout>
       <Scroll>
         <Hero>
-          <HeroImg src={bakery.heroImage} alt={bakery.name} />
+          <HeroImg src={bakery.imageUrl} alt={bakery.name} />
           <HeroDim />
 
           <HeroTop>
@@ -123,6 +138,8 @@ export default function BakeryDetailPage() {
 
           {tab === "home" ? (
             <HomeSection bakery={bakery} />
+          ) : tab === "menu" ? (
+            <MenuSection menus={bakery.menus} bestBread={bakery.bestBread} />
           ) : (
             <Placeholder>
               <PlaceholderTitle>TODO</PlaceholderTitle>
@@ -134,8 +151,7 @@ export default function BakeryDetailPage() {
   );
 }
 
-/* -------------------- Home Section -------------------- */
-
+// home section
 function HomeSection({ bakery }) {
   const isClosed = !bakery.isOpen;
   const [hoursOpen, setHoursOpen] = useState(false);
@@ -156,22 +172,22 @@ function HomeSection({ bakery }) {
           <InfoIconWrap>
             <PinIcon src={location} />
           </InfoIconWrap>
-          <InfoText>{bakery.address}</InfoText>
+          <InfoText>{bakery.address.roadAddress}</InfoText>
         </InfoRow>
 
         <InfoRow>
           <InfoIconWrap>
             <PhoneIcon src={tell} />
           </InfoIconWrap>
-          <InfoText>{bakery.phone}</InfoText>
+          <InfoText>{bakery.phoneNumber}</InfoText>
         </InfoRow>
 
         <InfoRow>
           <InfoIconWrap>
             <LinkIcon src={link} />
           </InfoIconWrap>
-          <InfoLink href={bakery.instagram} target="_blank" rel="noreferrer">
-            {bakery.instagram}
+          <InfoLink href={bakery.websiteUrl} target="_blank" rel="noreferrer">
+            {bakery.websiteUrl}
           </InfoLink>
         </InfoRow>
 
@@ -224,6 +240,43 @@ function HomeSection({ bakery }) {
         </TagGrid>
       </Section>
     </HomeWrap>
+  );
+}
+
+// menu section
+function MenuSection({ menus, bestBread }) {
+  return (
+    <MenuWrap>
+      <MenuList>
+        {menus?.map((m, idx) => {
+          const isSignature =
+            (m.name ?? "").trim() === (bestBread ?? "").trim();
+
+          return (
+            <MenuCard key={`${m.name}-${idx}`}>
+              <MenuLeft>
+                <MenuThumb>
+                  {m.thumbnailUrl ? (
+                    <MenuThumbImg src={m.thumbnailUrl} alt="" />
+                  ) : (
+                    <MenuThumbFallback aria-hidden="true">🥐</MenuThumbFallback>
+                  )}
+                </MenuThumb>
+
+                <MenuInfo>
+                  <MenuName>{m.name}</MenuName>
+                  <MenuPrice>
+                    {Number(m.price || 0).toLocaleString()}원
+                  </MenuPrice>
+                </MenuInfo>
+              </MenuLeft>
+
+              {isSignature && <MenuBadge>대표</MenuBadge>}
+            </MenuCard>
+          );
+        })}
+      </MenuList>
+    </MenuWrap>
   );
 }
 
@@ -418,6 +471,8 @@ const IndicatorBar = styled.div`
   background: ${(p) => (p.$active ? "var(--main-color2)" : "#d9d9d9")};
 `;
 
+// home
+
 const HomeWrap = styled.div``;
 
 const InfoList = styled.div`
@@ -584,4 +639,96 @@ const Placeholder = styled.div`
 const PlaceholderTitle = styled.div`
   font-weight: 900;
   margin-bottom: 6px;
+`;
+
+// menu
+
+const MenuWrap = styled.div`
+  padding: 16px;
+`;
+
+const MenuList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const MenuCard = styled.div`
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  background: #f8f9fa;
+  border: 1px solid #e8ebf1;
+  border-radius: 18px;
+
+  padding: 14px 24px 14px 14px;
+`;
+
+const MenuLeft = styled.div`
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 36px;
+`;
+
+const MenuThumb = styled.div`
+  width: 72px;
+  height: 72px;
+
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 20px;
+
+  overflow: hidden;
+`;
+
+const MenuThumbImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const MenuThumbFallback = styled.div`
+  font-size: 22px;
+  line-height: 1;
+`;
+
+const MenuInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+`;
+
+const MenuName = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const MenuPrice = styled.div`
+  font-size: 16px;
+  font-weight: 400;
+  color: #a5a5a5;
+`;
+
+const MenuBadge = styled.div`
+  font-size: 12px;
+  color: var(--main-color4);
+
+  border-radius: 20px;
+  background: var(--main-color2);
+
+  padding: 3px 10px;
 `;
