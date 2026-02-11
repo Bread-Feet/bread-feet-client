@@ -3,14 +3,12 @@ import styled from "styled-components";
 export default function PageLayout({ children, frameStyle }) {
   return (
     <Page>
-      <PhoneFrame $frameStyle={frameStyle}>
-        {children}
-      </PhoneFrame>
+      <PhoneFrame $frameStyle={frameStyle}>{children}</PhoneFrame>
     </Page>
   );
 }
 
-const Page = styled.main`
+const Page = styled.div`
   min-height: var(--app-100vh);
   height: var(--app-100vh);
   background: var(--main-color4);

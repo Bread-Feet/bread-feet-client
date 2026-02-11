@@ -48,8 +48,7 @@ export default function BakeryPage() {
       <ButtonWrapper>
         <SortButton
           type="button"
-          role="tab"
-          aria-selected={sortKey === "RECENT"}
+          aria-pressed={sortKey === "RECENT"}
           $active={sortKey === "RECENT"}
           onClick={() => setSortKey("RECENT")}
         >
@@ -57,8 +56,7 @@ export default function BakeryPage() {
         </SortButton>
         <SortButton
           type="button"
-          role="tab"
-          aria-selected={sortKey === "KOREAN"}
+          aria-pressed={sortKey === "RECENT"}
           $active={sortKey === "KOREAN"}
           onClick={() => setSortKey("KOREAN")}
         >

@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
 const star = "/starIcon.svg";
-const heat_off = "/heart_off.svg";
-const heat_on = "/heart_on.svg";
+const heart_off = "/heart_off.svg";
+const heart_on = "/heart_on.svg";
 
 export default function BakeryCard({
   name,
@@ -15,13 +15,23 @@ export default function BakeryCard({
   onClick,
 }) {
   const handleToggleLike = (e) => {
-    e.preventDefault();
     e.stopPropagation();
     onToggleLike?.(!liked);
   };
 
   return (
-    <Card role="button" tabIndex={0} onClick={onClick}>
+    <Card
+      role="button"
+      tabIndex={0}
+      aria-label={`${name} 상세 보기`}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+    >
       <ThumbWrap>
         {imageUrl ? (
           <Thumb src={imageUrl} alt={`${name} 사진`} />
@@ -35,7 +45,7 @@ export default function BakeryCard({
           aria-pressed={liked}
           onClick={handleToggleLike}
         >
-          <HeartIcon src={liked ? heat_on : heat_off} />
+          <HeartIcon src={liked ? heart_on : heart_off} />
         </LikeButton>
       </ThumbWrap>
 
@@ -43,7 +53,7 @@ export default function BakeryCard({
         <Name title={name}>{name}</Name>
 
         <MetaRow>
-          <StarIcon src={star} />
+          <StarIcon src={star} alt="" aria-hidden="true" />
           <RatingText>{Number(rating).toFixed(1)}</RatingText>
           <ReviewCount>({reviewCount ?? 0})</ReviewCount>
         </MetaRow>

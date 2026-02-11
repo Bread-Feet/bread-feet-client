@@ -65,10 +65,10 @@ export default function BakeryDetailPage() {
               aria-label="뒤로가기"
               onClick={() => nav(-1)}
             >
-              <ArrowLeftIcon src={arrow_left} />
+              <ArrowLeftIcon src={arrow_left} alt="" aria-hidden="true" />
             </CircleBtn>
-            <CircleBtn type="button" aria-label="즐겨찾기" onClick={() => {}}>
-              <HeartIcon src={heart} />
+            <CircleBtn type="button" aria-label="즐겨찾기">
+              <HeartIcon src={heart} alt="" aria-hidden="true" />
             </CircleBtn>
           </HeroTop>
         </Hero>
@@ -575,8 +575,7 @@ const TagGrid = styled.div`
 const Tag = styled.div`
   font-size: 12px;
   font-weight: 500;
-  color: ${(p) =>
-    p.$active ? "var(--main-color2)" : p.$muted ? "#d9d9d9" : "#d9d9d9"};
+  color: ${(p) => (p.$active ? "var(--main-color2)" : "#d9d9d9")};
 
   padding: 0 13px;
 `;
