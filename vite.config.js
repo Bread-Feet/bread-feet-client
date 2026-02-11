@@ -4,7 +4,16 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [
+          [
+            "babel-plugin-styled-components",
+            { displayName: true, fileName: false },
+          ],
+        ],
+      },
+    }),
     VitePWA({
       strategies: "generateSW",
       filename: "sw.js",

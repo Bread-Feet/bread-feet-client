@@ -31,7 +31,7 @@ export default function BakeryCard({
 
         <LikeButton
           type="button"
-          aria-label={liked ? "찜 해제" : "찜하기"}
+          aria-label={liked ? "즐겨찾기 해제" : "즐겨찾기"}
           aria-pressed={liked}
           onClick={handleToggleLike}
         >

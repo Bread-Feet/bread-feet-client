@@ -1,7 +1,9 @@
 const logoImg = "/bread-feet-logo-login.png";
 const kakaoLoginIcon = "/kakao_login_medium_wide.png";
 
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+
+import PageLayout from "../../components/layout/PageLayout";
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -96,25 +98,23 @@ function LoginContent() {
   };
 
   return (
-    <Page>
-      <PhoneFrame>
-        <Content>
-          <Logo src={logoImg} alt="BreadFeet logo" />
-          <Title>
-            <span style={{ color: "var(--main-color2)" }}>Bread</span>
-            <span style={{ color: "var(--main-color1)" }}>Feet</span>
-          </Title>
-          <Subtitle>빵을 위한 발걸음: 빵발자국</Subtitle>
-          <Button
-            onClick={() => handleSocialLogin("kakao")}
-            disabled={isAuthChecking}
-          >
-            <img src={kakaoLoginIcon} alt="카카오로 로그인" />
-          </Button>
-          <BottomSpacer />
-        </Content>
-      </PhoneFrame>
-    </Page>
+    <PageLayout frameStyle={loginFrameStyle}>
+      <Content>
+        <Logo src={logoImg} alt="BreadFeet logo" />
+        <Title>
+          <span style={{ color: "var(--main-color2)" }}>Bread</span>
+          <span style={{ color: "var(--main-color1)" }}>Feet</span>
+        </Title>
+        <Subtitle>빵을 위한 발걸음: 빵발자국</Subtitle>
+        <Button
+          onClick={() => handleSocialLogin("kakao")}
+          disabled={isAuthChecking}
+        >
+          <img src={kakaoLoginIcon} alt="카카오로 로그인" />
+        </Button>
+        <BottomSpacer />
+      </Content>
+    </PageLayout>
   );
 }
 
@@ -128,32 +128,8 @@ export default function LoginPage() {
 }
 
 // styled components
-const Page = styled.main`
-  min-height: var(--app-100vh);
-  height: var(--app-100vh);
-  background: var(--main-color4);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  /* pwa iOS safe area */
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-`;
-
-const PhoneFrame = styled.section`
-  width: min(402px, 100vw);
-  height: var(--app-100vh);
-
-  max-height: var(--app-100vh);
-
+const loginFrameStyle = css`
   background: var(--main-color3);
-
-  display: flex;
-  align-items: center;
   justify-content: center;
 `;
 

@@ -1,4 +1,6 @@
 import styled from "styled-components";
+
+import PageLayout from "../../components/layout/PageLayout";
 import SearchBar from "./SearchBar";
 import BakeryCard from "./BakeryCard";
 import DeleteConfirmModal from "./components/DeleteConfirmModal";
@@ -27,80 +29,50 @@ export default function BakeryAdminPage() {
   };
 
   return (
-    <Page>
-      <PhoneFrame>
-        <Header>
-          <Title>나의 빵집</Title>
-          <SearchBar />
-        </Header>
-        <ButtonWrapper>
-          <RegisterButton onClick={() => nav("/mybakery/register")}>
-            빵집 등록하기
-          </RegisterButton>
-        </ButtonWrapper>
-        <Scroll>
-          <BakeryCard
-            onModifyClick={openModifyPage}
-            onDeleteClick={openDeleteModal}
-          />
-          <BakeryCard
-            onModifyClick={openModifyPage}
-            onDeleteClick={openDeleteModal}
-          />
-          <BakeryCard
-            onModifyClick={openModifyPage}
-            onDeleteClick={openDeleteModal}
-          />
-          <BakeryCard
-            onModifyClick={openModifyPage}
-            onDeleteClick={openDeleteModal}
-          />
-          <BakeryCard
-            onModifyClick={openModifyPage}
-            onDeleteClick={openDeleteModal}
-          />
-          <BakeryCard
-            onModifyClick={openModifyPage}
-            onDeleteClick={openDeleteModal}
-          />
-        </Scroll>
-        <DeleteConfirmModal
-          open={isDeleteModalOpen}
-          onClose={closeDeleteModal}
-          onConfirm={confirmDelete}
+    <PageLayout>
+      <Header>
+        <Title>나의 빵집</Title>
+        <SearchBar />
+      </Header>
+      <ButtonWrapper>
+        <RegisterButton onClick={() => nav("/mybakery/register")}>
+          빵집 등록하기
+        </RegisterButton>
+      </ButtonWrapper>
+      <Scroll>
+        <BakeryCard
+          onModifyClick={openModifyPage}
+          onDeleteClick={openDeleteModal}
         />
-      </PhoneFrame>
-    </Page>
+        <BakeryCard
+          onModifyClick={openModifyPage}
+          onDeleteClick={openDeleteModal}
+        />
+        <BakeryCard
+          onModifyClick={openModifyPage}
+          onDeleteClick={openDeleteModal}
+        />
+        <BakeryCard
+          onModifyClick={openModifyPage}
+          onDeleteClick={openDeleteModal}
+        />
+        <BakeryCard
+          onModifyClick={openModifyPage}
+          onDeleteClick={openDeleteModal}
+        />
+        <BakeryCard
+          onModifyClick={openModifyPage}
+          onDeleteClick={openDeleteModal}
+        />
+      </Scroll>
+      <DeleteConfirmModal
+        open={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+      />
+    </PageLayout>
   );
 }
-
-const Page = styled.main`
-  min-height: var(--app-100vh);
-  height: var(--app-100vh);
-  background: var(--main-color4);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  /* pwa iOS safe area */
-  padding-top: env(safe-area-inset-top);
-  padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-`;
-
-const PhoneFrame = styled.section`
-  width: min(402px, 100vw);
-  height: var(--app-100vh);
-
-  max-height: var(--app-100vh);
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-`;
 
 const Header = styled.header`
   width: 100%;

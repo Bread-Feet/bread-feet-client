@@ -1,5 +1,6 @@
 import styled from "styled-components";
 
+import PageLayout from "../../components/layout/PageLayout";
 import SearchBar from "../bakery/SearchBar";
 import BakeryCard from "./BakeryCard";
 
@@ -39,78 +40,49 @@ export default function BakeryPage() {
   };
 
   return (
-    <Page>
-      <PhoneFrame>
-        <Header>
-          <Title>나의 빵집</Title>
-          <SearchBar />
-        </Header>
-        <ButtonWrapper>
-          <SortButton
-            type="button"
-            role="tab"
-            aria-selected={sortKey === "RECENT"}
-            $active={sortKey === "RECENT"}
-            onClick={() => setSortKey("RECENT")}
-          >
-            최근순
-          </SortButton>
-          <SortButton
-            type="button"
-            role="tab"
-            aria-selected={sortKey === "KOREAN"}
-            $active={sortKey === "KOREAN"}
-            onClick={() => setSortKey("KOREAN")}
-          >
-            가나다순
-          </SortButton>
-        </ButtonWrapper>
-        <Scroll>
-          {bakeries.map((b) => (
-            <BakeryCard
-              key={b.id}
-              name={b.name}
-              rating={b.rating}
-              reviewCount={b.reviewCount}
-              address={b.address}
-              imageUrl={b.imageUrl}
-              liked={b.liked}
-              onToggleLike={() => toggleLike(b.id)}
-            />
-          ))}
-        </Scroll>
-      </PhoneFrame>
-    </Page>
+    <PageLayout>
+      <Header>
+        <Title>나의 빵집</Title>
+        <SearchBar />
+      </Header>
+      <ButtonWrapper>
+        <SortButton
+          type="button"
+          role="tab"
+          aria-selected={sortKey === "RECENT"}
+          $active={sortKey === "RECENT"}
+          onClick={() => setSortKey("RECENT")}
+        >
+          최근순
+        </SortButton>
+        <SortButton
+          type="button"
+          role="tab"
+          aria-selected={sortKey === "KOREAN"}
+          $active={sortKey === "KOREAN"}
+          onClick={() => setSortKey("KOREAN")}
+        >
+          가나다순
+        </SortButton>
+      </ButtonWrapper>
+      <Scroll>
+        {bakeries.map((b) => (
+          <BakeryCard
+            key={b.id}
+            name={b.name}
+            rating={b.rating}
+            reviewCount={b.reviewCount}
+            address={b.address}
+            imageUrl={b.imageUrl}
+            liked={b.liked}
+            onToggleLike={() => toggleLike(b.id)}
+            onClick={() => nav(`/bakery/${b.id}`)}
+          />
+        ))}
+      </Scroll>
+    </PageLayout>
   );
 }
-
-const Page = styled.main`
-  min-height: var(--app-100vh);
-  height: var(--app-100vh);
-  background: var(--main-color4);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  /* pwa iOS safe area */
-  padding-top: env(safe-area-inset-top);
-  padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-`;
-
-const PhoneFrame = styled.section`
-  width: min(402px, 100vw);
-  height: var(--app-100vh);
-
-  max-height: var(--app-100vh);
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-`;
 
 const Header = styled.header`
   width: 100%;
