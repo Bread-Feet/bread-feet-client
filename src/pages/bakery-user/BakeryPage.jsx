@@ -18,7 +18,11 @@ export default function BakeryPage() {
       name: "성심당",
       rating: 4.9,
       reviewCount: 72,
-      address: "대구광역시 북구 대학로 80 가나다라마바사아자차카파타하",
+      address: {
+        detail: "",
+        lotNumber: "",
+        roadAddress: "대구광역시 북구 대학로 80",
+      },
       imageUrl: logoImg,
       liked: true,
     },
@@ -27,7 +31,11 @@ export default function BakeryPage() {
       name: "앙앙빵집",
       rating: 5.0,
       reviewCount: 1689,
-      address: "대전광역시 중구 대종로 480번길 15",
+      address: {
+        detail: "1층",
+        lotNumber: "1-45",
+        roadAddress: "대전광역시 중구 대종로 480번길 15",
+      },
       imageUrl: logoImg,
       liked: false,
     },
@@ -70,7 +78,9 @@ export default function BakeryPage() {
             name={b.name}
             rating={b.rating}
             reviewCount={b.reviewCount}
-            address={b.address}
+            address={[b.address?.roadAddress, b.address?.detail]
+              .filter(Boolean)
+              .join(" ")}
             imageUrl={b.imageUrl}
             liked={b.liked}
             onToggleLike={() => toggleLike(b.id)}
