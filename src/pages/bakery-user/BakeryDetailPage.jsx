@@ -13,45 +13,54 @@ import PageLayout from "../../components/layout/PageLayout";
 import { useLayoutEffect, useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-function calcIsOpen(businessHours, now = new Date()) {
-  if (!Array.isArray(businessHours) || businessHours.length === 0) return false;
-
-  const dayKeyToday = toKoreanDay(now.getDay());
-  const today = findHoursForDay(businessHours, dayKeyToday);
-  if (!today) return false;
-
-  const parsed = parseRangeNoMidnight(today.time);
-  if (!parsed) return false;
-
-  const minutesNow = now.getHours() * 60 + now.getMinutes();
-  const { startMin, endMin } = parsed;
-
-  return minutesNow >= startMin && minutesNow < endMin;
-}
-
 function toKoreanDay(jsDay) {
   switch (jsDay) {
     case 0:
-      return "일요일";
+      return "일";
     case 1:
-      return "월요일";
+      return "월";
     case 2:
-      return "화요일";
+      return "화";
     case 3:
-      return "수요일";
+      return "수";
     case 4:
-      return "목요일";
+      return "목";
     case 5:
-      return "금요일";
+      return "금";
     case 6:
-      return "토요일";
+      return "토";
     default:
       return "";
   }
 }
 
-function findHoursForDay(list, dayKey) {
-  return list.find((x) => x?.day === dayKey || x?.day?.startsWith(dayKey));
+const dayToLabel = (d) => (d ? `${d}요일` : "");
+
+function getOpenStatus(businessHours, now = new Date()) {
+  if (!Array.isArray(businessHours) || businessHours.length === 0) {
+    return { state: "unknown" };
+  }
+
+  const dayKeyToday = toKoreanDay(now.getDay());
+  const today = businessHours?.find((x) => x?.day === dayKeyToday);
+
+  if (!today) return { state: "unknown" };
+
+  const rawTime = String(today.time ?? "").trim();
+  if (!rawTime) return { state: "unknown" };
+
+  if (rawTime.replace(/\s/g, "") === "00:00-00:00") {
+    return { state: "closed" };
+  }
+
+  const parsed = parseRangeNoMidnight(rawTime);
+  if (!parsed) return { state: "unknown" };
+
+  const minutesNow = now.getHours() * 60 + now.getMinutes();
+  const { startMin, endMin } = parsed;
+
+  const isOpen = minutesNow >= startMin && minutesNow < endMin;
+  return { state: isOpen ? "open" : "closed" };
 }
 
 function parseRangeNoMidnight(timeStr) {
@@ -61,11 +70,7 @@ function parseRangeNoMidnight(timeStr) {
 
   if (raw.replace(/\s/g, "") === "00:00-00:00") return null;
 
-  const parts = raw
-    .replace("~", "-")
-    .replace("–", "-")
-    .split("-")
-    .map((s) => s.trim());
+  const parts = raw.split("-").map((s) => s.trim());
 
   if (parts.length !== 2) return null;
 
@@ -116,12 +121,12 @@ export default function BakeryDetailPage() {
       phoneNumber: "010-1234-5678",
       websiteUrl: "https://www.instagram.com/",
       businessHours: [
-        { day: "월요일", time: "09:00 - 18:00" },
-        { day: "화요일", time: "09:00 - 18:00" },
-        { day: "수요일", time: "09:00 - 18:00" },
-        { day: "목요일", time: "09:00 - 10:00" },
-        { day: "금요일", time: "09:00 - 18:00" },
-        { day: "토요일", time: "00:00 - 00:00" },
+        { day: "월", time: "09:00 - 18:00" },
+        { day: "화", time: "09:00 - 18:00" },
+        { day: "수", time: "09:00 - 18:00" },
+        { day: "목", time: "09:00 - 10:00" },
+        { day: "금", time: "09:00 - 18:00" },
+        { day: "토", time: "00:00 - 00:00" },
         { day: "일", time: "" },
       ],
       bestBread: "소금빵",
@@ -176,8 +181,8 @@ export default function BakeryDetailPage() {
     return () => clearInterval(t);
   }, []);
 
-  const isOpen = useMemo(
-    () => calcIsOpen(bakery.businessHours, now),
+  const status = useMemo(
+    () => getOpenStatus(bakery.businessHours, now),
     [bakery.businessHours, now],
   );
 
@@ -251,7 +256,7 @@ export default function BakeryDetailPage() {
           </Tabs>
 
           {tab === "home" ? (
-            <HomeSection bakery={bakery} isOpen={isOpen} />
+            <HomeSection bakery={bakery} status={status} />
           ) : tab === "menu" ? (
             <MenuSection menus={bakery.menus} bestBread={bakery.bestBread} />
           ) : (
@@ -267,10 +272,19 @@ export default function BakeryDetailPage() {
 }
 
 // home section
-function HomeSection({ bakery, isOpen }) {
-  const isClosed = !isOpen;
+function HomeSection({ bakery, status }) {
   const [hoursOpen, setHoursOpen] = useState(false);
   const hoursPanelId = `hours-panel-${bakery.id}`;
+  const canShowHours = status.state !== "unknown";
+
+  const hoursOpenUI = canShowHours && hoursOpen;
+
+  const statusText =
+    status.state === "open"
+      ? "영업중"
+      : status.state === "closed"
+        ? "영업종료"
+        : "영업정보없음";
 
   const active = {
     beverage: bakery.features.beverage,
@@ -308,25 +322,29 @@ function HomeSection({ bakery, isOpen }) {
 
         <InfoRowButton
           type="button"
-          onClick={() => setHoursOpen((v) => !v)}
-          aria-expanded={hoursOpen}
+          onClick={() => {
+            if (!canShowHours) return;
+            setHoursOpen((v) => !v);
+          }}
+          aria-expanded={hoursOpenUI}
           aria-controls={hoursPanelId}
           aria-label="영업시간 펼치기"
+          disabled={!canShowHours}
         >
           <InfoIconWrap>
             <ClockIcon src={clock} />
           </InfoIconWrap>
-          <OpenStatus $closed={isClosed}>
-            {isClosed ? "영업종료" : "영업중"}
-          </OpenStatus>
-          <ChevronIcon src={dropboxIcon} $open={hoursOpen} />
+          <OpenStatus $state={status.state}>{statusText}</OpenStatus>
+          {canShowHours && (
+            <ChevronIcon src={dropboxIcon} $open={hoursOpenUI} />
+          )}
         </InfoRowButton>
-        {hoursOpen && (
+        {hoursOpenUI && (
           <HoursDropdown id={hoursPanelId}>
             <HoursList>
               {bakery.businessHours?.map((h) => (
                 <HoursItem key={h.day}>
-                  <HoursDay>{h.day}</HoursDay>
+                  <HoursDay>{dayToLabel(h.day)}</HoursDay>
                   <HoursTime>{h.time || "-"}</HoursTime>
                 </HoursItem>
               ))}
@@ -888,12 +906,22 @@ const InfoRowButton = styled.button`
   padding: 7px 12px;
   text-align: left;
   cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
 `;
 
 const OpenStatus = styled.div`
   font-size: 14px;
   font-weight: 500;
-  color: ${(p) => (p.$closed ? "var(--red-color)" : "#000000")};
+  color: ${(p) =>
+    p.$state === "open"
+      ? "#000000"
+      : p.$state === "closed"
+        ? "var(--red-color)"
+        : "#9e9e9e"};
 `;
 
 const ChevronIcon = styled.img`
