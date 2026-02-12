@@ -10,7 +10,7 @@ const dropboxIcon = "/dropboxIcon.svg";
 
 import PageLayout from "../../components/layout/PageLayout";
 
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const TAB_ORDER = ["home", "menu", "review"];
@@ -62,6 +62,30 @@ export default function BakeryDetailPage() {
           name: "바게트",
           price: 4500,
           thumbnailUrl: exampleImg,
+        },
+      ],
+
+      // review
+      reviews: [
+        {
+          id: 1,
+          authorName: "논서",
+          createdAt: "2026-01-30",
+          rating: 5,
+          content:
+            "맛있어요 남남 굿!\n굿굿남\n남남굿! | | | | | | | | | | !!!!!!!!!!!",
+          photos: [exampleImg, exampleImg],
+          avatarUrl: exampleImg,
+        },
+        {
+          id: 2,
+          authorName: "논서",
+          createdAt: "2026-01-30",
+          rating: 4,
+          content:
+            "가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하",
+          photos: [exampleImg, exampleImg, exampleImg, exampleImg, exampleImg],
+          avatarUrl: exampleImg,
         },
       ],
     };
@@ -141,9 +165,10 @@ export default function BakeryDetailPage() {
           ) : tab === "menu" ? (
             <MenuSection menus={bakery.menus} bestBread={bakery.bestBread} />
           ) : (
-            <Placeholder>
-              <PlaceholderTitle>TODO</PlaceholderTitle>
-            </Placeholder>
+            <ReviewSection
+              reviews={bakery.reviews}
+              onCreate={() => nav(`/bakery/${bakery.id}/review/new`)} // 라우트는 네 프로젝트에 맞게
+            />
           )}
         </Card>
       </Scroll>
@@ -277,6 +302,240 @@ function MenuSection({ menus, bestBread }) {
         })}
       </MenuList>
     </MenuWrap>
+  );
+}
+
+// review section
+function ReviewSection({ reviews, onCreate }) {
+  return (
+    <ReviewWrap aria-label="리뷰">
+      <ReviewCtaBtn type="button" onClick={onCreate} aria-label="리뷰 등록하기">
+        리뷰 등록하기
+      </ReviewCtaBtn>
+
+      <ReviewList role="list">
+        {reviews?.map((r) => (
+          <ReviewItem key={r.id} role="listitem">
+            <ReviewHeader>
+              <ReviewerAvatar>
+                <ReviewerAvatarImg src={r.avatarUrl || exampleImg} alt="" />
+              </ReviewerAvatar>
+
+              <HeaderMeta>
+                <MetaTopRow>
+                  <ReviewerName>{r.authorName}</ReviewerName>
+                  <ReviewDate>{formatDotDate(r.createdAt)}</ReviewDate>
+                </MetaTopRow>
+
+                <StarRow aria-label={`별점 ${r.rating}점`}>
+                  <StarRating rating={r.rating} />
+                </StarRow>
+              </HeaderMeta>
+            </ReviewHeader>
+
+            <ReviewBody>
+              <ExpandableReviewText text={r.content} clampLines={3} />
+
+              {!!r.photos?.length && <ReviewPhotos photos={r.photos} />}
+            </ReviewBody>
+          </ReviewItem>
+        ))}
+      </ReviewList>
+    </ReviewWrap>
+  );
+}
+
+function StarRating({ rating }) {
+  const filled = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <StarSmall
+          key={i}
+          src={star}
+          alt=""
+          aria-hidden="true"
+          $dim={i >= filled}
+        />
+      ))}
+    </>
+  );
+}
+
+function formatDotDate(dateStr) {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}. ${m}. ${day}`;
+}
+
+function ExpandableReviewText({ text, clampLines = 3 }) {
+  const [expanded, setExpanded] = useState(false);
+  const [canToggle, setCanToggle] = useState(false);
+  const textRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+
+    const compute = () => {
+      const style = getComputedStyle(el);
+
+      const fontSize = parseFloat(style.fontSize) || 12;
+      const lineHeightRaw = style.lineHeight;
+      const lineHeight =
+        lineHeightRaw === "normal" || Number.isNaN(parseFloat(lineHeightRaw))
+          ? fontSize * 1.45
+          : parseFloat(lineHeightRaw);
+
+      const collapsedHeight = lineHeight * clampLines;
+
+      setCanToggle(el.scrollHeight > collapsedHeight + 1);
+    };
+
+    compute();
+
+    let ro;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(compute);
+      ro.observe(el);
+    } else {
+      window.addEventListener("resize", compute);
+    }
+
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", compute);
+    };
+  }, [text, clampLines]);
+
+  return (
+    <ReviewTextWrap>
+      <ReviewText
+        ref={textRef}
+        $expanded={expanded}
+        $clampLines={clampLines}
+        $canToggle={canToggle}
+      >
+        {text}
+      </ReviewText>
+
+      {canToggle && (
+        <ReviewToggleRow>
+          <ReviewToggleBtn
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+          >
+            {expanded ? "접기" : "더보기"}
+          </ReviewToggleBtn>
+        </ReviewToggleRow>
+      )}
+    </ReviewTextWrap>
+  );
+}
+
+function ReviewPhotos({ photos }) {
+  const trackRef = useRef(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  const updateArrows = () => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    // 오차 방지용 epsilon
+    const EPS = 2;
+
+    setCanLeft(el.scrollLeft > EPS);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - EPS);
+  };
+
+  const getStep = () => {
+    const el = trackRef.current;
+    if (!el) return 240;
+
+    const first = el.firstElementChild;
+    const slideW = first ? first.getBoundingClientRect().width : 120;
+
+    const style = getComputedStyle(el);
+    const gap = parseFloat(style.columnGap || style.gap || "0") || 0;
+
+    return slideW + gap;
+  };
+
+  const scrollByDir = (dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * getStep(), behavior: "smooth" });
+  };
+
+  useLayoutEffect(() => {
+    updateArrows();
+
+    const el = trackRef.current;
+    if (!el) return;
+
+    const onScroll = () => updateArrows();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updateArrows);
+
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, [photos?.length]);
+
+  if (!photos?.length) return null;
+
+  if (photos.length <= 2) {
+    return (
+      <ReviewPhotoGrid aria-label="리뷰 사진">
+        {photos.map((url, idx) => (
+          <ReviewPhotoItem key={`${idx}-${url}`}>
+            <ReviewPhotoImg src={url} alt={`리뷰 사진 ${idx + 1}`} />
+          </ReviewPhotoItem>
+        ))}
+      </ReviewPhotoGrid>
+    );
+  }
+
+  return (
+    <PhotoCarousel aria-label="리뷰 사진">
+      <PhotoTrack
+        ref={trackRef}
+        tabIndex={0}
+        aria-label="좌우로 스크롤하여 사진 보기"
+      >
+        {photos.map((url, idx) => (
+          <PhotoSlide key={`${idx}-${url}`}>
+            <PhotoSlideImg src={url} alt={`리뷰 사진 ${idx + 1}`} />
+          </PhotoSlide>
+        ))}
+      </PhotoTrack>
+
+      <CarouselArrowBtn
+        type="button"
+        $pos="left"
+        onClick={() => scrollByDir(-1)}
+        disabled={!canLeft}
+        aria-label="이전 사진"
+      >
+        <CarouselArrowIcon src={arrow_left} alt="" aria-hidden="true" />
+      </CarouselArrowBtn>
+
+      <CarouselArrowBtn
+        type="button"
+        $pos="right"
+        onClick={() => scrollByDir(1)}
+        disabled={!canRight}
+        aria-label="다음 사진"
+      >
+        <CarouselArrowIcon src={arrow_left} alt="" aria-hidden="true" $flip />
+      </CarouselArrowBtn>
+    </PhotoCarousel>
   );
 }
 
@@ -628,19 +887,6 @@ const Tag = styled.div`
   padding: 0 13px;
 `;
 
-const Placeholder = styled.div`
-  border-radius: 16px;
-  border: 1px dashed #e6e6e6;
-
-  margin-top: 18px;
-  padding: 22px 14px;
-`;
-
-const PlaceholderTitle = styled.div`
-  font-weight: 900;
-  margin-bottom: 6px;
-`;
-
 // menu
 
 const MenuWrap = styled.div`
@@ -731,4 +977,303 @@ const MenuBadge = styled.div`
   background: var(--main-color2);
 
   padding: 3px 10px;
+`;
+
+// review
+
+const ReviewWrap = styled.section`
+  padding: 12px 20px;
+`;
+
+const ReviewCtaBtn = styled.button`
+  font-size: 12px;
+  color: var(--main-color4);
+
+  width: 100%;
+  height: 40px;
+
+  border: none;
+  border-radius: 20px;
+  background: var(--main-color2);
+
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.9;
+  }
+`;
+
+const ReviewList = styled.div`
+  margin-top: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const ReviewItem = styled.article`
+  width: 100%;
+`;
+
+const ReviewHeader = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+`;
+
+const ReviewerAvatar = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #eeeeee;
+
+  flex: 0 0 auto;
+`;
+
+const ReviewerAvatarImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const HeaderMeta = styled.div`
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const MetaTopRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+`;
+
+const ReviewerName = styled.div`
+  font-size: 12px;
+  font-weight: 500;
+  color: #000000;
+`;
+
+const ReviewDate = styled.div`
+  font-size: 12px;
+  font-weight: 500;
+  color: #d5d5d5;
+`;
+
+const StarRow = styled.div`
+  display: flex;
+  gap: 3px;
+`;
+
+const StarSmall = styled.img`
+  width: 14px;
+  height: 14px;
+  opacity: ${(p) => (p.$dim ? 0.25 : 1)};
+`;
+
+const ReviewBody = styled.div`
+  margin-top: 16px;
+`;
+
+const ReviewTextWrap = styled.div`
+  position: relative;
+`;
+
+const ReviewText = styled.div`
+  font-size: 12px;
+  font-weight: 400;
+  color: #000000;
+
+  line-height: 1.45;
+  white-space: pre-line;
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  overflow: hidden;
+  max-height: ${(p) =>
+    p.$expanded ? "none" : `calc(${p.$clampLines} * 1.45em)`};
+
+  position: relative;
+
+  ${(p) =>
+    !p.$expanded &&
+    p.$canToggle &&
+    `
+    padding-bottom: 6px;
+
+    &::after{
+      content:'';
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:18px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), #fff);
+      pointer-events:none;
+    }
+  `}
+`;
+
+const ReviewToggleRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const ReviewToggleBtn = styled.button`
+  border: 0;
+  background: transparent;
+
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--main-color2);
+
+  padding: 4px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.85;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(0, 0, 0, 0.25);
+    outline-offset: 2px;
+  }
+`;
+
+const PhotoCarousel = styled.div`
+  margin-top: 10px;
+  position: relative;
+`;
+
+const PhotoTrack = styled.div`
+  display: flex;
+  gap: 8px;
+
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+
+  scroll-snap-type: x mandatory;
+
+  padding: 2px 2px 2px 2px;
+
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(0, 0, 0, 0.18);
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
+`;
+
+const PhotoSlide = styled.div`
+  flex: 0 0 auto;
+  width: 120px;
+  height: 120px;
+
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: #f7dfe2;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+
+  scroll-snap-align: start;
+`;
+
+const PhotoSlideImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const ReviewPhotoGrid = styled.div`
+  margin-top: 10px;
+
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+
+  max-width: 270px;
+`;
+
+const ReviewPhotoItem = styled.div`
+  position: relative;
+
+  width: 120px;
+  height: 120px;
+
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: #f7dfe2;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+`;
+
+const ReviewPhotoImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const CarouselArrowBtn = styled.button`
+  position: absolute;
+  top: 50%;
+  ${(p) => (p.$pos === "left" ? "left: 6px;" : "right: 6px;")}
+  transform: translateY(-50%);
+
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 0;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+
+  cursor: pointer;
+
+  opacity: 0;
+  pointer-events: none;
+
+  ${PhotoCarousel}:hover & {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    display: none;
+  }
+
+  &:disabled {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(-50%) scale(0.96);
+  }
+`;
+
+const CarouselArrowIcon = styled.img`
+  width: 18px;
+  height: 18px;
+  transform: rotate(${(p) => (p.$flip ? "180deg" : "0deg")});
 `;
