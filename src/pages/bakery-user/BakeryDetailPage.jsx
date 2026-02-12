@@ -262,7 +262,7 @@ export default function BakeryDetailPage() {
           ) : (
             <ReviewSection
               reviews={bakery.reviews}
-              onCreate={() => nav(`/bakery/${bakery.id}/review/new`)} // 라우트는 네 프로젝트에 맞게
+              onCreate={() => nav(`/bakery/${bakery.id}/addreview`)}
             />
           )}
         </Card>
