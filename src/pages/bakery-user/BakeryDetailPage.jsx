@@ -10,10 +10,89 @@ const dropboxIcon = "/dropboxIcon.svg";
 
 import PageLayout from "../../components/layout/PageLayout";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-const TAB_ORDER = ["home", "menu", "review"];
+function calcIsOpen(businessHours, now = new Date()) {
+  if (!Array.isArray(businessHours) || businessHours.length === 0) return false;
+
+  const dayKeyToday = toKoreanDay(now.getDay());
+  const today = findHoursForDay(businessHours, dayKeyToday);
+  if (!today) return false;
+
+  const parsed = parseRangeNoMidnight(today.time);
+  if (!parsed) return false;
+
+  const minutesNow = now.getHours() * 60 + now.getMinutes();
+  const { startMin, endMin } = parsed;
+
+  return minutesNow >= startMin && minutesNow < endMin;
+}
+
+function toKoreanDay(jsDay) {
+  switch (jsDay) {
+    case 0:
+      return "일요일";
+    case 1:
+      return "월요일";
+    case 2:
+      return "화요일";
+    case 3:
+      return "수요일";
+    case 4:
+      return "목요일";
+    case 5:
+      return "금요일";
+    case 6:
+      return "토요일";
+    default:
+      return "";
+  }
+}
+
+function findHoursForDay(list, dayKey) {
+  return list.find((x) => x?.day === dayKey || x?.day?.startsWith(dayKey));
+}
+
+function parseRangeNoMidnight(timeStr) {
+  if (!timeStr) return null;
+  const raw = String(timeStr).trim();
+  if (!raw) return null;
+
+  if (raw.replace(/\s/g, "") === "00:00-00:00") return null;
+
+  const parts = raw
+    .replace("~", "-")
+    .replace("–", "-")
+    .split("-")
+    .map((s) => s.trim());
+
+  if (parts.length !== 2) return null;
+
+  const startMin = parseHHMM(parts[0]);
+  const endMin = parseHHMM(parts[1]);
+  if (startMin == null || endMin == null) return null;
+
+  if (endMin <= startMin) return null;
+
+  return { startMin, endMin };
+}
+
+function parseHHMM(s) {
+  const m = String(s).match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+
+  const hh = Number(m[1]);
+  const mm = Number(m[2]);
+  if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
+
+  if (hh === 24 && mm === 0) return 24 * 60;
+
+  if (hh < 0 || hh > 23) return null;
+  if (mm < 0 || mm > 59) return null;
+
+  return hh * 60 + mm;
+}
 
 const exampleImg = "/examplePhoto.jpg";
 export default function BakeryDetailPage() {
@@ -40,7 +119,7 @@ export default function BakeryDetailPage() {
         { day: "월요일", time: "09:00 - 18:00" },
         { day: "화요일", time: "09:00 - 18:00" },
         { day: "수요일", time: "09:00 - 18:00" },
-        { day: "목요일", time: "09:00 - 18:00" },
+        { day: "목요일", time: "09:00 - 10:00" },
         { day: "금요일", time: "09:00 - 18:00" },
         { day: "토요일", time: "00:00 - 00:00" },
         { day: "일", time: "" },
@@ -90,6 +169,17 @@ export default function BakeryDetailPage() {
       ],
     };
   }, [id]);
+
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const isOpen = useMemo(
+    () => calcIsOpen(bakery.businessHours, now),
+    [bakery.businessHours, now],
+  );
 
   return (
     <PageLayout>
@@ -161,7 +251,7 @@ export default function BakeryDetailPage() {
           </Tabs>
 
           {tab === "home" ? (
-            <HomeSection bakery={bakery} />
+            <HomeSection bakery={bakery} isOpen={isOpen} />
           ) : tab === "menu" ? (
             <MenuSection menus={bakery.menus} bestBread={bakery.bestBread} />
           ) : (
@@ -177,8 +267,8 @@ export default function BakeryDetailPage() {
 }
 
 // home section
-function HomeSection({ bakery }) {
-  const isClosed = !bakery.isOpen;
+function HomeSection({ bakery, isOpen }) {
+  const isClosed = !isOpen;
   const [hoursOpen, setHoursOpen] = useState(false);
   const hoursPanelId = `hours-panel-${bakery.id}`;
 
@@ -362,12 +452,11 @@ function StarRating({ rating }) {
   );
 }
 
+// TODO : date 형식보고 수정
 function formatDotDate(dateStr) {
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return dateStr;
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
+  const parts = typeof dateStr === "string" ? dateStr.split("-") : [];
+  if (parts.length !== 3) return dateStr;
+  const [y, m, day] = parts;
   return `${y}. ${m}. ${day}`;
 }
 
