@@ -147,7 +147,7 @@ const Title = styled.h1`
   font-family: "Fredoka";
   font-size: 48px;
   color: #ffdc8b;
-  letter-spacing: 5%;
+  letter-spacing: 2px;
 
   margin: 0;
 `;
