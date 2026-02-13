@@ -1,12 +1,13 @@
 import { getApiUrl, AUTH_CONFIG } from "../config/env";
+import { getAccessToken } from "./token-storage.js";
 
-const STORAGE_KEY_LAST_REFRESH = "bread_feet_last_token_refresh"; // 마지막 refresh 시각
+const STORAGE_KEY_LAST_REFRESH = "bread_feet_last_token_refresh"; // 마�?�?refresh ?�각
 const STORAGE_KEY_REFRESH_LOCK = "bread_feet_refresh_lock";
 const LOCK_TIMEOUT = 10000;
 
-// private mode/SSR에서 오류나지 않게 방지
-// window 없으면 null
-// localStorage 접근 중 에러 발생시 catch로 실패 처리
+// private mode/SSR?�서 ?�류?��? ?�게 방�?
+// window ?�으�?null
+// localStorage ?�근 �??�러 발생??catch�??�패 처리
 function safeLocalStorage() {
   return {
     getItem(key) {
@@ -34,38 +35,38 @@ function safeLocalStorage() {
 
 const storage = safeLocalStorage();
 
-// 프론트에서 api 호출시 발생하는 문제를 해결하고자
-// 1. 여러 컴포넌트/요청에서 동시에 api 접근
-// 2. access token 만료(만료 직전)로 다수가 동시에 /auth/refresh 호출
+// ?�론?�에??api ?�출??발생?�는 문제�??�결?�고??
+// 1. ?�러 컴포?�트/?�청?�서 ?�시??api ?�근
+// 2. access token 만료(만료 직전)�??�수가 ?�시??/auth/refresh ?�출
 class AuthService {
   constructor() {
-    // 지금 refresh 요청이 진행 중이면, 그 Promise를 저장해두고 공유
-    // 같은 탭에서 401이 동시에 여러개 떠도 refresh 호출이 1번만 발생
+    // 지�?refresh ?�청??진행 중이�? �?Promise�??�?�해?�고 공유
+    // 같�? ??��??401???�시???�러�??�도 refresh ?�출??1번만 발생
     this.refreshPromise = null;
   }
 
   getLastRefreshTime() {
     const stored = storage.getItem(STORAGE_KEY_LAST_REFRESH);
-    return stored ? parseInt(stored, 10) : 0; // 마지막으로 refresh된 시간이 있으면 문자열을 숫자로 변환, 없으면 0 반환
+    return stored ? parseInt(stored, 10) : 0; // 마�?막으�?refresh???�간???�으�?문자?�을 ?�자�?변?? ?�으�?0 반환
   }
 
   setLastRefreshTime() {
     storage.setItem(STORAGE_KEY_LAST_REFRESH, Date.now().toString());
   }
 
-  // lock 획득(시도)
+  // lock ?�득(?�도)
   acquireLock() {
     const lockData = storage.getItem(STORAGE_KEY_REFRESH_LOCK);
 
     if (lockData) {
       const lockTime = parseInt(lockData, 10);
       if (Date.now() - lockTime < LOCK_TIMEOUT) {
-        // 누군가 lock(유효)을 잡고 있으면 false
+        // ?�군가 lock(?�효)???�고 ?�으�?false
         return false;
       }
     }
 
-    // lock이 없거나 오래되어서 timeout이 지났으면 true
+    // lock???�거???�래?�어??timeout??지?�으�?true
     storage.setItem(STORAGE_KEY_REFRESH_LOCK, Date.now().toString());
     return true;
   }
@@ -74,29 +75,29 @@ class AuthService {
     storage.removeItem(STORAGE_KEY_REFRESH_LOCK);
   }
 
-  // 선제 refresh가 필요한지
+  // ?�제 refresh가 ?�요?��?
   shouldRefreshPreemptively() {
     const lastRefresh = this.getLastRefreshTime();
-    if (lastRefresh === 0) return false; // 마지막 refresh가 없다면 false(선제 refresh X)
-    return Date.now() - lastRefresh > AUTH_CONFIG.TOKEN_REFRESH_THRESHOLD_MS; // 남은 시간이 AUTH_CONFIG.TOKEN_REFRESH_THRESHOLD_MS보다 크면 true
+    if (lastRefresh === 0) return false; // 마�?�?refresh가 ?�다�?false(?�제 refresh X)
+    return Date.now() - lastRefresh > AUTH_CONFIG.TOKEN_REFRESH_THRESHOLD_MS; // ?��? ?�간??AUTH_CONFIG.TOKEN_REFRESH_THRESHOLD_MS보다 ?�면 true
   }
 
   async refreshTokens() {
-    // 단일 탭 중복 방지
-    // 이미 refresh 중이면,
-    // 새 refresh 요청 만들지 않고 기존 Promise 반환(첫 호출이 만든 Promise를 나머지 호출이 공유)
+    // ?�일 ??중복 방�?
+    // ?��? refresh 중이�?
+    // ??refresh ?�청 만들지 ?�고 기존 Promise 반환(�??�출??만든 Promise�??�머지 ?�출??공유)
     if (this.refreshPromise) {
       return this.refreshPromise;
     }
 
-    // 멀티탭 중복 방지
-    // lock 못잡으면 잠깐 기다리고 true 반환(다른 탭이 refresh해서 쿠키가 갱신될 거니까 그냥 성공했다고 판단하고 넘어감)
+    // 멀?�탭 중복 방�?
+    // lock 못잡?�면 ?�깐 기다리고 true 반환(?�른 ??�� refresh?�서 쿠키가 갱신??거니�?그냥 ?�공?�다�??�단?�고 ?�어�?
     if (!this.acquireLock()) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       return true;
     }
 
-    // 실제 refresh 호출 & 상태 업데이트
+    // ?�제 refresh ?�출 & ?�태 ?�데?�트
     this.refreshPromise = (async () => {
       try {
         //url
@@ -114,19 +115,19 @@ class AuthService {
         return false;
       } finally {
         this.releaseLock();
-        this.refreshPromise = null; // 포인터 비우기
+        this.refreshPromise = null; // ?�인??비우�?
       }
     })();
 
     return this.refreshPromise; // Promise 객체 반환
   }
 
-  // login 성공 표시
+  // login ?�공 ?�시
   markLoginSuccess() {
     this.setLastRefreshTime();
   }
 
-  // logout/인증 reset 시점 등에서 refresh 관련 상태 초기화
+  // logout/?�증 reset ?�점 ?�에??refresh 관???�태 초기??
   clearRefreshData() {
     storage.removeItem(STORAGE_KEY_LAST_REFRESH);
     storage.removeItem(STORAGE_KEY_REFRESH_LOCK);
@@ -143,46 +144,68 @@ class ApiClient {
   async request(endpoint, options = {}, retryOnUnauthorized = true) {
     const url = `${this.getBaseURL()}${endpoint}`;
 
-    // FormData 형식일 경우에는 Content-type을 직접 세팅하면 안되므로 확인 필요
+    // FormData ?�식??경우?�는 Content-type??직접 ?�팅?�면 ?�되므�??�인 ?�요
     const isFormData = options.body instanceof FormData;
+
+    // api ?�출???�큰???�동?�로 ?�함
+    const providedHeaders = options.headers ? { ...options.headers } : {};
+
+    if (!providedHeaders.Authorization && !providedHeaders.authorization) {
+      const accessToken = await getAccessToken();
+      if (accessToken) {
+        providedHeaders.Authorization = `Bearer ${accessToken}`;
+      }
+    }
 
     // 공통 options
     const defaultOptions = {
       credentials: "include",
       headers: isFormData
-        ? { ...options.headers } // true
+        ? { ...providedHeaders } // true
         : {
             // false
             "Content-Type": "application/json",
-            ...options.headers, // 사용자가 추가로 준 options
+            ...providedHeaders, // ?�용?��? 추�?�?준 options
           },
     };
 
-    const response = await fetch(url, { ...defaultOptions, ...options });
+    const mergedHeaders = {
+      ...defaultOptions.headers,
+      ...(options.headers ? options.headers : {}),
+    };
+
+    const response = await fetch(url, {
+      ...defaultOptions,
+      ...options,
+      headers: mergedHeaders,
+    });
 
     if (!response.ok) {
-      // response code가 401인 경우(유저 정보 가져오지 못함)
-      // retryOnUnauthorized는 재시도를 1번만 하기 위함
+      // response code가 401??경우(?��? ?�보 가?�오지 못함)
+      // retryOnUnauthorized???�시?��? 1번만 ?�기 ?�함
       if (response.status === 401 && retryOnUnauthorized) {
+        // Access-token only?�서 refresh token 부분�? ??��
+        /*
         const refreshed = await authService.refreshTokens(); // token refresh
 
-        // token refresh 성공
+        // token refresh ?�공
         if (refreshed) {
-          return this.request(endpoint, options, false); // 재시도(retryOnUnauthorized를 false로 변경)
+          return this.request(endpoint, options, false); // ?�시??retryOnUnauthorized�?false�?변�?
         }
+        */
 
-        // token refresh 실패
+        // token refresh ?�패
         if (
-          typeof window !== "undefined" && // 브라우저에서 실행 중인지 확인
-          !window.location.pathname.startsWith("/login") // 이미 login 페이지에 있을때 login으로 보내면 무한 루프 발생
+          typeof window !== "undefined" && // 브라?��??�서 ?�행 중인지 ?�인
+          !window.location.pathname.startsWith("/login") // ?��? login ?�이지???�을??login?�로 보내�?무한 루프 발생
         ) {
           const returnUrl = window.location.pathname + window.location.search;
-          window.location.href = `/login?returnUrl=${encodeURIComponent(returnUrl)}`; // login 페이지로 이동
+          window.location.href = `/login?returnUrl=${encodeURIComponent(returnUrl)}`; // login ?�이지�??�동
           return;
         }
       }
 
-      // 401이 아닌 다른 코드거나, 재시도(1번) 후에도 실패시
+      // 401???�닌 ?�른 코드거나, ?�시??1�? ?�에???�패??
       const errorData = await response.json().catch(() => ({
         message: "An error occurred",
       }));
@@ -192,12 +215,12 @@ class ApiClient {
       );
     }
 
-    // 204/205는 body가 없으므로 undefined return
+    // 204/205??body가 ?�으므�?undefined return
     if (response.status === 204 || response.status === 205) {
       return undefined;
     }
 
-    // 다른 code인데도 body 없으면 undefined return
+    // ?�른 code?�데??body ?�으�?undefined return
     const contentLength = response.headers.get("content-length");
     if (contentLength === "0") {
       return undefined;
@@ -264,3 +287,5 @@ export function markLoginSuccess() {
 export function clearAuthData() {
   authService.clearRefreshData();
 }
+
+

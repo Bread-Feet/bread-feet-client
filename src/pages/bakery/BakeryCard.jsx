@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 import star from "/starIcon.svg";
 
-export default function BakeryCard() {
+export default function BakeryCard({ onModifyClick, onDeleteClick }) {
   return (
     <Card>
       <Info>
@@ -16,8 +16,12 @@ export default function BakeryCard() {
         </Address>
       </Info>
       <Actions>
-        <ActionButton $variant="outline">수정하기</ActionButton>
-        <ActionButton $variant="danger">삭제하기</ActionButton>
+        <ActionButton $variant="outline" onClick={onModifyClick}>
+          수정하기
+        </ActionButton>
+        <ActionButton $variant="danger" onClick={onDeleteClick}>
+          삭제하기
+        </ActionButton>
       </Actions>
     </Card>
   );
