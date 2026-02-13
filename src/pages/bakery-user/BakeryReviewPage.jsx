@@ -5,12 +5,26 @@ const PlusIcon = "/plus.svg";
 import PageLayout from "../../components/layout/PageLayout";
 
 import { useNavigate } from "react-router-dom";
+import { useState, useRef } from "react";
 
 const MAX_LEN = 299;
 const MAX_PHOTOS = 5;
 
 export default function BakeryReviewPage() {
   const nav = useNavigate();
+  const [text, setText] = useState("");
+  const fileRef = useRef(null);
+
+  const openFilePicker = () => {
+    fileRef.current?.click();
+  };
+
+  const handleFiles = (e) => {
+    const files = Array.from(e.target.files || []);
+    console.log("selected:", files);
+
+    e.target.value = "";
+  };
 
   return (
     <PageLayout>
@@ -25,15 +39,28 @@ export default function BakeryReviewPage() {
       <ReviewWrapper>
         <Body>
           <TextAreaCard>
-            <TextArea maxLength={MAX_LEN} placeholder="리뷰를 작성해주세요" />
+            <TextArea
+              maxLength={MAX_LEN}
+              placeholder="리뷰를 작성해주세요"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
           </TextAreaCard>
-          <Counter>0 / {MAX_LEN}</Counter>
+          <Counter>
+            {text.length} / {MAX_LEN}
+          </Counter>
 
           <PhotoRow>
-            <PhotoInputBox>
+            <PhotoInputBox onClick={openFilePicker}>
               <PlusImg src={PlusIcon} />
             </PhotoInputBox>
-            <PhotoInput type="file" accept="image/*" />
+            <PhotoInput
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFiles}
+            />
             <PhotoWrapper>
               {Array.from({ length: MAX_PHOTOS }).map((_, i) => {
                 return <PhotoBox key={i}></PhotoBox>;
@@ -151,6 +178,8 @@ const PhotoRow = styled.div`
 
 const PhotoInput = styled.input`
   display: none;
+
+  cursor: pointer;
 `;
 
 const PhotoInputBox = styled.button`
