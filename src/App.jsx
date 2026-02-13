@@ -2,6 +2,8 @@ import "./App.css";
 import { GlobalStyle } from "../GlobalStyle";
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
+import DiaryEditorPage from "./pages/diary/DiaryEditorPage";
+import DiaryCalenderPage from "./pages/diary/DiaryCalendarPage";
 import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
 import DiaryPage from "./pages/diary/DiaryPage";
 import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
@@ -18,7 +20,6 @@ function App() {
     <>
       <GlobalStyle />
       <Routes>
-        <Route path="/diary" element={<DiaryPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/login/oauth2/code/kakao"
@@ -35,6 +36,8 @@ function App() {
         />
         <Route path="/bakery/:id/addreview" element={<BakeryReviewPage />} />
         <Route element={<AppLayout />}>
+          <Route path="/mydiary" element={<DiaryCalenderPage />} />
+          <Route path="/diaryEditor" element={<DiaryEditorPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/diary" element={<DiaryPage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />
