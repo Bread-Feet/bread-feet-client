@@ -10,6 +10,7 @@ import BakeryFormPage from "./pages/bakery/form/BakeryFormPage";
 
 import BakeryPage from "./pages/bakery-user/BakeryPage";
 import BakeryDetailPage from "./pages/bakery-user/BakeryDetailPage";
+import BakeryReviewPage from "./pages/bakery-user/BakeryReviewPage";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           path="/mybakery/modify"
           element={<BakeryFormPage title="수정하기" />}
         />
+        <Route path="/bakery/:id/addreview" element={<BakeryReviewPage />} />
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />
