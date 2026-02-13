@@ -21,13 +21,24 @@ export default function BakeryCreatePage() {
 
   const bakeryInfo = useBakeryInfo();
   const operatingHours = useOperatingHours();
-  const storeTags = useStoreTags();
+  const tags = useStoreTags();
   const menuManager = useMenuManager();
 
   const { submitCreate, isSubmitting } = useBakerySubmit();
 
   const mainMenu = menuManager.menus?.find((m) => m.isMain);
   const bestBread = (mainMenu?.name ?? "").trim();
+  const trimOrEmpty = (v) => (typeof v === "string" ? v.trim() : "");
+
+  const menusForApi = Array.isArray(menuManager.menus)
+    ? menuManager.menus
+        .filter((m) => trimOrEmpty(m?.name).length > 0)
+        .map((m) => ({
+          name: trimOrEmpty(m?.name),
+          price: Number(m?.price ?? 0),
+          thumbnailUrl: "temp",
+        }))
+    : [];
 
   const handleSubmit = async (err) => {
     err.preventDefault();
@@ -37,14 +48,23 @@ export default function BakeryCreatePage() {
       address: {
         detail: (bakeryInfo.detailedAddress ?? "").trim(),
         lotNumber: (bakeryInfo.lotNumber ?? "").trim(),
-        address: (bakeryInfo.address ?? "").trim(),
+        roadAddress: (bakeryInfo.address ?? "").trim(),
       },
       // imageUrl: (bakeryInfo.mainPhoto ?? "").trim(),
       imageUrl: "temp",
       phoneNumber: (bakeryInfo.phoneNumber ?? "").trim(),
       businessHours: serializeBusinessHours(operatingHours.hours),
       bestBread: (bestBread ?? "").trim(),
+
+      isDrink: tags.storeTags.drink,
+      isEatIn: tags.storeTags.eatIn,
+      isWaiting: tags.storeTags.waiting,
+      isParking: tags.storeTags.parking,
+
+      menus: menusForApi,
     };
+
+    console.log(body);
 
     try {
       await submitCreate(body);
@@ -66,7 +86,7 @@ export default function BakeryCreatePage() {
       </Header>
       <Form onSubmit={handleSubmit}>
         <BakeryInfoSection {...bakeryInfo} />
-        <OperationSection {...operatingHours} {...storeTags} />
+        <OperationSection {...operatingHours} {...tags} />
         <MenuSection {...menuManager} />
         <SubmitButton>완료</SubmitButton>
       </Form>
@@ -103,7 +123,7 @@ const Title = styled.h1`
   margin: 0;
 `;
 
-const Form = styled.div`
+const Form = styled.form`
   width: 100%;
 
   display: flex;

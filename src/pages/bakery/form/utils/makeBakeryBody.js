@@ -3,7 +3,7 @@ export function validateBakeryBody(body) {
 
   const a = body?.address;
   if (!a?.lotNumber?.trim()) throw new Error("지번 주소는 필수입니다.");
-  if (!a?.address?.trim()) throw new Error("도로명 주소는 필수입니다.");
+  if (!a?.roadAddress?.trim()) throw new Error("도로명 주소는 필수입니다.");
 
   if (!body?.imageUrl?.trim()) throw new Error("대표 사진은 필수입니다.");
 
@@ -34,5 +34,5 @@ export function serializeBusinessHours(hours) {
       return aOrder - bOrder;
     })
     .map((h) => `${h.day} ${h.start}-${h.end}`)
-    .join("; ");
+    .join(" ");
 }

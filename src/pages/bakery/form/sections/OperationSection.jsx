@@ -157,65 +157,68 @@ export default function OperationSection({
         <StoreTagGrid>
           <StoreTag
             type="button"
-            $active={storeTags.drink === "SELL"}
-            aria-pressed={storeTags.drink === "SELL"}
-            onClick={() => setTag("drink", "SELL")}
+            $active={storeTags.drink === true}
+            aria-pressed={storeTags.drink === true}
+            onClick={() => setTag("drink", true)}
           >
             음료 판매
           </StoreTag>
           <StoreTag
             type="button"
-            $active={storeTags.drink === "NO_SELL"}
-            aria-pressed={storeTags.drink === "NO_SELL"}
-            onClick={() => setTag("drink", "NO_SELL")}
+            $active={storeTags.drink === false}
+            aria-pressed={storeTags.drink === false}
+            onClick={() => setTag("drink", false)}
           >
             음료 미판매
           </StoreTag>
+
           <StoreTag
             type="button"
-            $active={storeTags.eatIn === "POSSIBLE"}
-            aria-pressed={storeTags.eatIn === "POSSIBLE"}
-            onClick={() => setTag("eatIn", "POSSIBLE")}
+            $active={storeTags.eatIn === true}
+            aria-pressed={storeTags.eatIn === true}
+            onClick={() => setTag("eatIn", true)}
           >
             매장 취식 가능
           </StoreTag>
           <StoreTag
             type="button"
-            $active={storeTags.eatIn === "IMPOSSIBLE"}
-            aria-pressed={storeTags.eatIn === "IMPOSSIBLE"}
-            onClick={() => setTag("eatIn", "IMPOSSIBLE")}
+            $active={storeTags.eatIn === false}
+            aria-pressed={storeTags.eatIn === false}
+            onClick={() => setTag("eatIn", false)}
           >
             매장 취식 불가능
           </StoreTag>
+
           <StoreTag
             type="button"
-            $active={storeTags.waiting === "ONSITE"}
-            aria-pressed={storeTags.waiting === "ONSITE"}
-            onClick={() => setTag("waiting", "ONSITE")}
+            $active={storeTags.waiting === true}
+            aria-pressed={storeTags.waiting === true}
+            onClick={() => setTag("waiting", true)}
           >
             현장 웨이팅
           </StoreTag>
           <StoreTag
             type="button"
-            $active={storeTags.waiting === "ONLINE"}
-            aria-pressed={storeTags.waiting === "ONLINE"}
-            onClick={() => setTag("waiting", "ONLINE")}
+            $active={storeTags.waiting === false}
+            aria-pressed={storeTags.waiting === false}
+            onClick={() => setTag("waiting", false)}
           >
             온라인 웨이팅
           </StoreTag>
+
           <StoreTag
             type="button"
-            $active={storeTags.parking === "HAVE"}
-            aria-pressed={storeTags.parking === "HAVE"}
-            onClick={() => setTag("parking", "HAVE")}
+            $active={storeTags.parking === true}
+            aria-pressed={storeTags.parking === true}
+            onClick={() => setTag("parking", true)}
           >
             전용 주차장 보유
           </StoreTag>
           <StoreTag
             type="button"
-            $active={storeTags.parking === "NONE"}
-            aria-pressed={storeTags.parking === "NONE"}
-            onClick={() => setTag("parking", "NONE")}
+            $active={storeTags.parking === false}
+            aria-pressed={storeTags.parking === false}
+            onClick={() => setTag("parking", false)}
           >
             전용 주차장 미보유
           </StoreTag>

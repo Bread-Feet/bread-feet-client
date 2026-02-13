@@ -16,7 +16,7 @@ export default function useBakeryInfo() {
   const handleSearchAddress = async () => {
     try {
       const data = await openDaumPostcode();
-      setLotNumber(data.zonecode);
+      setLotNumber(data.autoJibunAddress);
       setAddress(data.roadAddress || data.jibunAddress || "");
     } catch (err) {
       const msg = String(err?.message || "");
