@@ -23,6 +23,7 @@ export default function BakeryReviewPage() {
     const files = Array.from(e.target.files || []);
     console.log("selected:", files);
 
+    // TODO : photo preview and delete
     e.target.value = "";
   };
 
@@ -71,6 +72,7 @@ export default function BakeryReviewPage() {
       </ReviewWrapper>
 
       <BottomBar>
+        {/* TODO : submit handdler */}
         <SubmitBtn type="button">완료</SubmitBtn>
       </BottomBar>
     </PageLayout>
