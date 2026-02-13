@@ -5,7 +5,6 @@ import LoginPage from "./pages/login/LoginPage";
 import DiaryEditorPage from "./pages/diary/DiaryEditorPage";
 import DiaryCalenderPage from "./pages/diary/DiaryCalendarPage";
 import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
-import DiaryPage from "./pages/diary/DiaryPage";
 import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
 import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
@@ -39,7 +38,6 @@ function App() {
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
           <Route path="/diaryEditor" element={<DiaryEditorPage />} />
           <Route path="/" element={<HomePage />} />
-          <Route path="/diary" element={<DiaryPage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />
           <Route path="/bakery" element={<BakeryPage />} />
           <Route path="/bakery/:id" element={<BakeryDetailPage />} />

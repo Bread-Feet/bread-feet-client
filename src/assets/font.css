@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wdth,wght@75..125,300..700&display=swap");
+
 @font-face {
   font-family: "OngleIpSeaBreeze";
   src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2510-1@1.0/Ownglyph_the_sea_breeze-Rg.woff2")
@@ -91,5 +93,14 @@
   src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408@1.0/YoonChildfundkoreaManSeh.woff2")
     format("woff2");
   font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FredokaOne";
+  src: url("https://fonts.gstatic.com/s/fredokaone/v17/k3kUo8kEI-tA1RRcTZGmTlHGCac.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
   font-display: swap;
 }
