@@ -182,7 +182,7 @@ const Scroll = styled.div`
   flex: 1;
   overflow-y: auto;
 
-  padding-bottom: calc(var(--tabbar-height) + 72px);
+  padding-bottom: calc(var(--tabbar-height) + 60px);
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -200,7 +200,7 @@ const Scroll = styled.div`
 
 const MyBakeryFab = styled.button`
   position: fixed;
-  bottom: calc(var(--tabbar-height) + 20px);
+  bottom: calc(var(--tabbar-height) + 8px);
   left: 50%;
   transform: translateX(-50%);
 
