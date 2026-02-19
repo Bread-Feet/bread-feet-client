@@ -1,122 +1,190 @@
-import styled, { css } from "styled-components";
-import star from "/starIcon.svg";
+import styled from "styled-components";
 
-export default function BakeryCard({ onModifyClick, onDeleteClick }) {
+const star = "/starIcon.svg";
+const heart_off = "/heart_off.svg";
+const heart_on = "/heart_on.svg";
+
+export default function BakeryCard({
+  name,
+  rating,
+  reviewCount,
+  address,
+  imageUrl,
+  liked = false,
+  onToggleLike,
+  onClick,
+}) {
+  const handleToggleLike = (e) => {
+    e.stopPropagation();
+    onToggleLike?.(!liked);
+  };
+
   return (
-    <Card>
+    <Card
+      role="button"
+      tabIndex={0}
+      aria-label={`${name} 상세 보기`}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+    >
+      <ThumbWrap>
+        {imageUrl ? (
+          <Thumb src={imageUrl} alt={`${name} 사진`} />
+        ) : (
+          <ThumbFallback aria-hidden />
+        )}
+
+        <LikeButton
+          type="button"
+          aria-label={liked ? "즐겨찾기 해제" : "즐겨찾기"}
+          aria-pressed={liked}
+          onClick={handleToggleLike}
+        >
+          <HeartIcon src={liked ? heart_on : heart_off} />
+        </LikeButton>
+      </ThumbWrap>
+
       <Info>
-        <Title>성심당</Title>
-        <RatingRow>
-          <StarIcon src={star} alt="" />
-          <Rating>5.0</Rating>
-          <Count>(1689)</Count>
-        </RatingRow>
-        <Address>
-          대전광역시 중구 대종로 480번길 15 가나다라마바사아자차카타파하
-        </Address>
+        <Name title={name}>{name}</Name>
+
+        <MetaRow>
+          <StarIcon src={star} alt="" aria-hidden="true" />
+          <RatingText>{Number(rating).toFixed(1)}</RatingText>
+          <ReviewCount>({reviewCount ?? 0})</ReviewCount>
+        </MetaRow>
+
+        <Address title={address}>{address}</Address>
       </Info>
-      <Actions>
-        <ActionButton $variant="outline" onClick={onModifyClick}>
-          수정하기
-        </ActionButton>
-        <ActionButton $variant="danger" onClick={onDeleteClick}>
-          삭제하기
-        </ActionButton>
-      </Actions>
     </Card>
   );
 }
 
 const Card = styled.div`
-  font-family: "Pretendard";
-  font-weight: 600;
-  color: var(--main-color2);
+  display: flex;
+  align-items: center;
+  gap: 20px;
 
-  display: inline-flex;
+  border-bottom: solid 1px #d5d5d5;
+  background: #ffffff;
+
+  padding: 14px 24px;
+
+  cursor: pointer;
+`;
+
+const ThumbWrap = styled.div`
+  width: 120px;
+  height: 120px;
+
+  flex: 0 0 120px;
+
+  position: relative;
+`;
+
+const ThumbBase = styled.div`
+  width: 120px;
+  height: 120px;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+`;
+
+const Thumb = styled.img`
+  width: 120px;
+  height: 120px;
+
+  display: block;
+  border-radius: 20px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+
+  object-fit: cover;
+`;
+
+const ThumbFallback = styled(ThumbBase)`
+  background: #f1f3f5;
+`;
+
+const LikeButton = styled.button`
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 52px;
+  height: 52px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+
+  padding: 8px;
+
+  cursor: pointer;
+`;
+
+const HeartIcon = styled.img`
   width: 100%;
-  justify-content: space-between;
-  border-bottom: solid #d5d5d5 1px;
-  padding: 20px var(--page-padding);
+  height: 100%;
 `;
 
 const Info = styled.div`
+  min-width: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  gap: 20px;
 
-  width: min(215px, 100vw);
-  margin: 4px 0;
+  margin: 10px 0;
 `;
 
-const Title = styled.h3`
-  margin: 0;
+const Name = styled.div`
   font-size: 20px;
+  font-weight: 600;
+  color: #080808;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
-const RatingRow = styled.div`
+const MetaRow = styled.div`
   display: flex;
-  margin: 17px 0;
+  align-items: center;
+  gap: 3px;
 `;
 
 const StarIcon = styled.img`
-  width: 10px;
-  height: auto;
-  display: block;
-
-  margin: 0 3px;
+  width: 13px;
+  height: 13px;
 `;
 
-const Rating = styled.div`
+const RatingText = styled.div`
   font-size: 12px;
-  color: black;
-
-  margin: 0 2px;
+  font-weight: 600;
+  color: #000000;
 `;
 
-const Count = styled.div`
+const ReviewCount = styled.div`
   font-size: 12px;
-  font-weight: 400;
-  color: var(--gray-color);
+  font-weight: 500;
+  color: #9e9e9e;
 `;
 
 const Address = styled.div`
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--gray-color);
+  font-size: 12.5px;
+  color: #b0b5bb;
+  line-height: 1.35;
 
-  text-align: left;
-`;
-
-const Actions = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-`;
-
-const ActionButton = styled.button`
-  font-size: 12px;
-  font-weight: 500;
-
-  border-radius: 999px;
-  cursor: pointer;
-
-  padding: 9px 25px;
-
-  ${({ $variant }) =>
-    $variant === "outline" &&
-    css`
-      background: #fff;
-      color: var(--main-color2);
-
-      border: none;
-      box-shadow: inset 0 0 0 2px var(--main-color2);
-    `}
-
-  ${({ $variant }) =>
-    $variant === "danger" &&
-    css`
-      background: var(--red-color);
-      border: 0;
-      color: #fff;
-    `}
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;

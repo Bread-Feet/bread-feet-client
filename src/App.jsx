@@ -3,15 +3,15 @@ import { GlobalStyle } from "../GlobalStyle";
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
 import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
-import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
+import BakeryAdminPage from "./pages/bakery-admin/BakeryAdminPage";
 import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
-import BakeryCreatePage from "./pages/bakery/form/BakeryCreatePage";
-import BakeryModifyPage from "./pages/bakery/form/BakeryModifyPage";
+import BakeryCreatePage from "./pages/bakery-admin/form/BakeryCreatePage";
+import BakeryModifyPage from "./pages/bakery-admin/form/BakeryModifyPage";
 
-import BakeryPage from "./pages/bakery-user/BakeryPage";
-import BakeryDetailPage from "./pages/bakery-user/BakeryDetailPage";
-import BakeryReviewPage from "./pages/bakery-user/BakeryReviewPage";
+import BakeryPage from "./pages/bakery/BakeryPage";
+import BakeryDetailPage from "./pages/bakery/BakeryDetailPage";
+import BakeryReviewPage from "./pages/bakery/BakeryReviewPage";
 
 function App() {
   return (
