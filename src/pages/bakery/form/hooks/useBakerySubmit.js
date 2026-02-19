@@ -1,17 +1,15 @@
 import { useState } from "react";
-import { submitBakeryForm } from "../../../../lib/api/bakery-form";
-import { validateBakeryBody } from "../utils/makeBakeryBody";
+import { createBakeryUseCase } from "../../../../lib/usecases/bakery/createBakery.usecase";
 
 export default function useBakerySubmit() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  const submitCreate = async (body) => {
+  const submitCreate = async ({ draftBody, files }) => {
     setError(null);
     setIsSubmitting(true);
     try {
-      validateBakeryBody(body);
-      return await submitBakeryForm(body);
+      return await createBakeryUseCase({ draftBody, files });
     } catch (err) {
       setError(err);
       throw err;

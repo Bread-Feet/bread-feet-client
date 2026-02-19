@@ -10,7 +10,7 @@ import useOperatingHours from "./hooks/useOperatingHours";
 import useStoreTags from "./hooks/useStoreTags";
 import useMenuManager from "./hooks/useMenuManager";
 import useBakerySubmit from "./hooks/useBakerySubmit";
-import { serializeBusinessHours } from "./utils/makeBakeryBody";
+import { makeBakeryDraftBody } from "./utils/makeBakeryBody";
 
 import BakeryInfoSection from "./sections/BakeryInfoSection";
 import OperationSection from "./sections/OperationSection";
@@ -24,50 +24,31 @@ export default function BakeryCreatePage() {
   const tags = useStoreTags();
   const menuManager = useMenuManager();
 
-  const { submitCreate, isSubmitting } = useBakerySubmit();
+  const { submitCreate } = useBakerySubmit();
 
-  const mainMenu = menuManager.menus?.find((m) => m.isMain);
-  const bestBread = (mainMenu?.name ?? "").trim();
-  const trimOrEmpty = (v) => (typeof v === "string" ? v.trim() : "");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const menusForApi = Array.isArray(menuManager.menus)
-    ? menuManager.menus
-        .filter((m) => trimOrEmpty(m?.name).length > 0)
-        .map((m) => ({
-          name: trimOrEmpty(m?.name),
-          price: Number(m?.price ?? 0),
-          thumbnailUrl: "temp",
-        }))
-    : [];
+    const draftBody = makeBakeryDraftBody({
+      bakeryInfo,
+      operatingHours,
+      tags,
+      menuManager,
+    });
 
-  const handleSubmit = async (err) => {
-    err.preventDefault();
+    const validMenus = Array.isArray(menuManager.menus)
+      ? menuManager.menus.filter(
+          (m) => typeof m?.name === "string" && m.name.trim().length > 0,
+        )
+      : [];
 
-    const body = {
-      name: (bakeryInfo.bakeryName ?? "").trim(),
-      address: {
-        detail: (bakeryInfo.detailedAddress ?? "").trim(),
-        lotNumber: (bakeryInfo.lotNumber ?? "").trim(),
-        roadAddress: (bakeryInfo.address ?? "").trim(),
-      },
-      // imageUrl: (bakeryInfo.mainPhoto ?? "").trim(),
-      imageUrl: "temp",
-      phoneNumber: (bakeryInfo.phoneNumber ?? "").trim(),
-      businessHours: serializeBusinessHours(operatingHours.hours),
-      bestBread: (bestBread ?? "").trim(),
-
-      isDrink: tags.storeTags.drink,
-      isEatIn: tags.storeTags.eatIn,
-      isWaiting: tags.storeTags.waiting,
-      isParking: tags.storeTags.parking,
-
-      menus: menusForApi,
+    const files = {
+      mainPhoto: bakeryInfo.mainPhoto,
+      menuPhotos: validMenus.map((m) => m?.photo ?? null),
     };
 
-    console.log(body);
-
     try {
-      await submitCreate(body);
+      await submitCreate({ draftBody, files });
       alert("빵집 등록 완료");
       nav("/mybakery");
     } catch (err) {

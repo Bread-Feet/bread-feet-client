@@ -1,5 +1,22 @@
 import { getApiUrl, AUTH_CONFIG } from "../config/env";
 import { getAccessToken } from "./token-storage.js";
+import axios from "axios";
+
+export const uploadApi = axios.create({
+  baseURL: getApiUrl(),
+  withCredentials: false,
+});
+
+uploadApi.interceptors.request.use(async (config) => {
+  if (!config.headers?.Authorization && !config.headers?.authorization) {
+    const token = await getAccessToken();
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
 
 const STORAGE_KEY_LAST_REFRESH = "bread_feet_last_token_refresh"; // 마지막 refresh 시각
 const STORAGE_KEY_REFRESH_LOCK = "bread_feet_refresh_lock";

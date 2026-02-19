@@ -1,16 +1,41 @@
-export function validateBakeryBody(body) {
-  if (!body?.name?.trim()) throw new Error("빵집 이름은 필수입니다.");
+export function makeBakeryDraftBody({
+  bakeryInfo,
+  operatingHours,
+  tags,
+  menuManager,
+}) {
+  const trimOrEmpty = (v) => (typeof v === "string" ? v.trim() : "");
 
-  const a = body?.address;
-  if (!a?.lotNumber?.trim()) throw new Error("지번 주소는 필수입니다.");
-  if (!a?.roadAddress?.trim()) throw new Error("도로명 주소는 필수입니다.");
+  const validMenus = Array.isArray(menuManager.menus)
+    ? menuManager.menus.filter((m) => trimOrEmpty(m?.name).length > 0)
+    : [];
 
-  if (!body?.imageUrl?.trim()) throw new Error("대표 사진은 필수입니다.");
+  const mainMenu = validMenus.find((m) => m.isMain);
 
-  if (!body?.phoneNumber?.trim()) throw new Error("전화번호는 필수입니다.");
-  if (!body?.businessHours?.trim()) throw new Error("영업 시간은 필수입니다.");
+  return {
+    name: trimOrEmpty(bakeryInfo.bakeryName),
+    address: {
+      detail: trimOrEmpty(bakeryInfo.detailedAddress),
+      lotNumber: trimOrEmpty(bakeryInfo.lotNumber),
+      roadAddress: trimOrEmpty(bakeryInfo.address),
+    },
+    imageUrl: "",
+    phoneNumber: trimOrEmpty(bakeryInfo.phoneNumber),
+    businessHours: serializeBusinessHours(operatingHours.hours),
+    bestBread: trimOrEmpty(mainMenu?.name),
 
-  if (!body?.bestBread?.trim()) throw new Error("대표 빵은 필수입니다.");
+    isDrink: tags.storeTags.drink,
+    isEatIn: tags.storeTags.eatIn,
+    isWaiting: tags.storeTags.waiting,
+    isParking: tags.storeTags.parking,
+
+    menus: validMenus.map((m) => ({
+      name: trimOrEmpty(m?.name),
+      price: Number(m?.price ?? 0),
+      thumbnailUrl: "",
+      isRepresentation: m?.isMain ?? false,
+    })),
+  };
 }
 
 export function serializeBusinessHours(hours) {
