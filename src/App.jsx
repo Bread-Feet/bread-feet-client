@@ -11,6 +11,7 @@ import BakeryModifyPage from "./pages/bakery/form/BakeryModifyPage";
 
 import BakeryPage from "./pages/bakery-user/BakeryPage";
 import BakeryDetailPage from "./pages/bakery-user/BakeryDetailPage";
+import BakeryReviewPage from "./pages/bakery-user/BakeryReviewPage";
 
 function App() {
   return (
