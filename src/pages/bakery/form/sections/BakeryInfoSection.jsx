@@ -13,29 +13,17 @@ import {
   Plus,
 } from "../styles";
 
-import { openDaumPostcode } from "../../../../lib/daum-postcode";
-
 export default function BakeryInfoSection({
+  bakeryName,
   handleBakeryNameChange,
   address,
-  setAddress,
+  handleSearchAddress,
   handleDetailedAddressChange,
   handlePhoneNumberChange,
   handleWebpageChange,
   mainPhotoPreview,
   handleMainPhotoChange,
 }) {
-  async function handleSearchAddress() {
-    try {
-      const data = await openDaumPostcode();
-      setAddress(data.roadAddress || data.jibunAddress || "");
-    } catch (err) {
-      const msg = String(err?.message || "");
-      if (msg.startsWith("Postcode closed:")) return;
-      console.warn(err);
-    }
-  }
-
   return (
     <>
       <FormSection>
@@ -44,6 +32,7 @@ export default function BakeryInfoSection({
           <Label>빵집 이름</Label>
           <Input
             placeholder="빵집 이름을 입력해주세요"
+            value={bakeryName}
             onChange={(e) => {
               handleBakeryNameChange(e);
             }}
@@ -57,7 +46,6 @@ export default function BakeryInfoSection({
               type="text"
               value={address}
               readOnly
-              disabled
               style={{ cursor: "not-allowed" }}
             />
             <SearchButton type="button" onClick={handleSearchAddress}>
@@ -77,14 +65,14 @@ export default function BakeryInfoSection({
         <Field>
           <Label>전화번호</Label>
           <Input
-            placeholder="010-XXXX-XXXX"
+            placeholder="XXX-XXXX-XXXX"
             onChange={(e) => handlePhoneNumberChange(e)}
           />
         </Field>
         <Field>
           <Label>웹페이지</Label>
           <Input
-            placeholder="https://www.instagram.com/example"
+            placeholder="https://www...."
             onChange={(e) => handleWebpageChange(e)}
           />
         </Field>

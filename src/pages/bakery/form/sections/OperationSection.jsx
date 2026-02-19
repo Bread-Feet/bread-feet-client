@@ -22,6 +22,28 @@ export default function OperationSection({
   storeTags,
   setTag,
 }) {
+  const DAYS = [
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+    "일요일",
+  ];
+
+  const calcUsedDays = new Map(
+    hours.map((h) => {
+      const used = new Set(
+        hours
+          .filter((x) => x.id !== h.id)
+          .map((x) => x.day)
+          .filter(Boolean),
+      );
+      return [h.id, used];
+    }),
+  );
+
   return (
     <>
       <FormSection>
@@ -35,79 +57,99 @@ export default function OperationSection({
         </TimeRow>
         <TimeText>시작 시간을 먼저 선택해주세요</TimeText>
         <HoursList>
-          {hours.map((h) => (
-            <HoursRow key={h.id}>
-              <SelectBox
-                required
-                aria-label="요일"
-                value={h.day || ""}
-                onChange={(e) => updateHour(h.id, "day", e.target.value)}
-              >
-                <option value="" disabled>
-                  요일 선택
-                </option>
-                {[
-                  "월요일",
-                  "화요일",
-                  "수요일",
-                  "목요일",
-                  "금요일",
-                  "토요일",
-                  "일요일",
-                ].map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </SelectBox>
-              <TimeRange>
-                <TimeSelect
-                  required
-                  aria-label="시작 시간"
-                  value={h.start || ""}
-                  onChange={(e) => {
-                    const start = e.target.value;
-                    updateHour(h.id, "start", start);
+          {hours.map((h) => {
+            const usedDays = calcUsedDays.get(h.id) ?? new Set();
 
-                    // start 바꾸면 end가 start보다 이르면 end 초기화
-                    if (h.end && toMinutes(h.end) <= toMinutes(start)) {
-                      updateHour(h.id, "end", "");
-                    }
+            const availableDays = DAYS.filter(
+              (d) => !usedDays.has(d) || d === h.day,
+            );
+
+            return (
+              <HoursRow key={h.id}>
+                <SelectBox
+                  required
+                  aria-label="요일"
+                  value={h.day || ""}
+                  onInvalid={(e) =>
+                    e.target.setCustomValidity("요일을 선택해주세요.")
+                  }
+                  onChange={(e) => {
+                    e.target.setCustomValidity("");
+                    updateHour(h.id, "day", e.target.value);
                   }}
                 >
                   <option value="" disabled>
-                    시작
+                    요일 선택
                   </option>
-                  {TIME_OPTIONS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {availableDays.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
                     </option>
                   ))}
-                </TimeSelect>
-                <TimeSelect
-                  required
-                  aria-label="마감 시간"
-                  value={h.end || ""}
-                  disabled={!h.start}
-                  onChange={(e) => updateHour(h.id, "end", e.target.value)}
-                >
-                  <option value="" disabled>
-                    마감
-                  </option>
-                  {TIME_OPTIONS.filter(
-                    (t) => !h.start || toMinutes(t) > toMinutes(h.start),
-                  ).map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                </SelectBox>
+                <TimeRange>
+                  <TimeSelect
+                    required
+                    aria-label="시작 시간"
+                    value={h.start || ""}
+                    onInvalid={(e) =>
+                      e.target.setCustomValidity("시작시간을 선택해주세요.")
+                    }
+                    onChange={(e) => {
+                      e.target.setCustomValidity("");
+
+                      const start = e.target.value;
+                      updateHour(h.id, "start", start);
+
+                      // start 바꾸면 end가 start보다 이르면 end 초기화
+                      if (h.end && toMinutes(h.end) <= toMinutes(start)) {
+                        updateHour(h.id, "end", "");
+                      }
+                    }}
+                  >
+                    <option value="" disabled>
+                      시작
                     </option>
-                  ))}
-                </TimeSelect>
-                <DeleteButton type="button" onClick={() => removeHourRow(h.id)}>
-                  <DeleteImg src={deleteIcon} alt="삭제" />
-                </DeleteButton>
-              </TimeRange>
-            </HoursRow>
-          ))}
+                    {TIME_OPTIONS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </TimeSelect>
+                  <TimeSelect
+                    required
+                    aria-label="마감 시간"
+                    value={h.end || ""}
+                    disabled={!h.start}
+                    onInvalid={(e) =>
+                      e.target.setCustomValidity("마감시간을 선택해주세요.")
+                    }
+                    onChange={(e) => {
+                      e.target.setCustomValidity("");
+                      updateHour(h.id, "end", e.target.value);
+                    }}
+                  >
+                    <option value="" disabled>
+                      마감
+                    </option>
+                    {TIME_OPTIONS.filter(
+                      (t) => !h.start || toMinutes(t) > toMinutes(h.start),
+                    ).map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </TimeSelect>
+                  <DeleteButton
+                    type="button"
+                    onClick={() => removeHourRow(h.id)}
+                  >
+                    <DeleteImg src={deleteIcon} alt="삭제" />
+                  </DeleteButton>
+                </TimeRange>
+              </HoursRow>
+            );
+          })}
         </HoursList>
       </FormSection>
       <FormSection>
@@ -115,65 +157,68 @@ export default function OperationSection({
         <StoreTagGrid>
           <StoreTag
             type="button"
-            $active={storeTags.drink === "SELL"}
-            aria-pressed={storeTags.drink === "SELL"}
-            onClick={() => setTag("drink", "SELL")}
+            $active={storeTags.drink === true}
+            aria-pressed={storeTags.drink === true}
+            onClick={() => setTag("drink", true)}
           >
             음료 판매
           </StoreTag>
           <StoreTag
             type="button"
-            $active={storeTags.drink === "NO_SELL"}
-            aria-pressed={storeTags.drink === "NO_SELL"}
-            onClick={() => setTag("drink", "NO_SELL")}
+            $active={storeTags.drink === false}
+            aria-pressed={storeTags.drink === false}
+            onClick={() => setTag("drink", false)}
           >
             음료 미판매
           </StoreTag>
+
           <StoreTag
             type="button"
-            $active={storeTags.eatIn === "POSSIBLE"}
-            aria-pressed={storeTags.eatIn === "POSSIBLE"}
-            onClick={() => setTag("eatIn", "POSSIBLE")}
+            $active={storeTags.eatIn === true}
+            aria-pressed={storeTags.eatIn === true}
+            onClick={() => setTag("eatIn", true)}
           >
             매장 취식 가능
           </StoreTag>
           <StoreTag
             type="button"
-            $active={storeTags.eatIn === "IMPOSSIBLE"}
-            aria-pressed={storeTags.eatIn === "IMPOSSIBLE"}
-            onClick={() => setTag("eatIn", "IMPOSSIBLE")}
+            $active={storeTags.eatIn === false}
+            aria-pressed={storeTags.eatIn === false}
+            onClick={() => setTag("eatIn", false)}
           >
             매장 취식 불가능
           </StoreTag>
+
           <StoreTag
             type="button"
-            $active={storeTags.waiting === "ONSITE"}
-            aria-pressed={storeTags.waiting === "ONSITE"}
-            onClick={() => setTag("waiting", "ONSITE")}
+            $active={storeTags.waiting === true}
+            aria-pressed={storeTags.waiting === true}
+            onClick={() => setTag("waiting", true)}
           >
             현장 웨이팅
           </StoreTag>
           <StoreTag
             type="button"
-            $active={storeTags.waiting === "ONLINE"}
-            aria-pressed={storeTags.waiting === "ONLINE"}
-            onClick={() => setTag("waiting", "ONLINE")}
+            $active={storeTags.waiting === false}
+            aria-pressed={storeTags.waiting === false}
+            onClick={() => setTag("waiting", false)}
           >
             온라인 웨이팅
           </StoreTag>
+
           <StoreTag
             type="button"
-            $active={storeTags.parking === "HAVE"}
-            aria-pressed={storeTags.parking === "HAVE"}
-            onClick={() => setTag("parking", "HAVE")}
+            $active={storeTags.parking === true}
+            aria-pressed={storeTags.parking === true}
+            onClick={() => setTag("parking", true)}
           >
             전용 주차장 보유
           </StoreTag>
           <StoreTag
             type="button"
-            $active={storeTags.parking === "NONE"}
-            aria-pressed={storeTags.parking === "NONE"}
-            onClick={() => setTag("parking", "NONE")}
+            $active={storeTags.parking === false}
+            aria-pressed={storeTags.parking === false}
+            onClick={() => setTag("parking", false)}
           >
             전용 주차장 미보유
           </StoreTag>

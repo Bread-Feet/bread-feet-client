@@ -19,7 +19,6 @@ export default function MenuSection({
   menus,
   newMenu,
   setNewMenu,
-  draftMenuPhotoPreview,
   handleDraftMenuPhotoChange,
   addMenu,
   removeMenu,
@@ -40,15 +39,15 @@ export default function MenuSection({
           onClick={() => {}}
           aria-label="메뉴 사진 추가"
         >
-          {draftMenuPhotoPreview ? (
-            <PreviewImg src={draftMenuPhotoPreview} alt="대표사진 미리보기" />
+          {newMenu.photoPreview ? (
+            <PreviewImg src={newMenu.photoPreview} alt="메뉴사진 미리보기" />
           ) : (
             <PlusSmaller src={plus} alt="추가하기" />
           )}
           <PhotoInput
             type="file"
             accept="image/*"
-            onChange={(e) => handleDraftMenuPhotoChange(e)}
+            onChange={handleDraftMenuPhotoChange}
           />
         </MenuPhotoBox>
         <MenuInputColumn>
@@ -61,7 +60,8 @@ export default function MenuSection({
           />
           <SmallInput
             placeholder="가격"
-            inputMode="numeric"
+            type="number"
+            min="0"
             value={newMenu.price}
             onChange={(e) =>
               setNewMenu((p) => ({ ...p, price: e.target.value }))
@@ -137,7 +137,7 @@ const PlusSmaller = styled.img`
 `;
 
 const MenuInputColumn = styled.div`
-  flex: 1px;
+  flex: 1;
   min-width: 0;
 
   display: flex;
