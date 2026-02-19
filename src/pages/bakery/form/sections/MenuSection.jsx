@@ -60,7 +60,8 @@ export default function MenuSection({
           />
           <SmallInput
             placeholder="가격"
-            inputMode="numeric"
+            type="number"
+            min="0"
             value={newMenu.price}
             onChange={(e) =>
               setNewMenu((p) => ({ ...p, price: e.target.value }))
@@ -136,7 +137,7 @@ const PlusSmaller = styled.img`
 `;
 
 const MenuInputColumn = styled.div`
-  flex: 1px;
+  flex: 1;
   min-width: 0;
 
   display: flex;

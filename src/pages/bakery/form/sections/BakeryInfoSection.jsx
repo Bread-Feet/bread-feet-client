@@ -48,10 +48,7 @@ export default function BakeryInfoSection({
               readOnly
               style={{ cursor: "not-allowed" }}
             />
-            <SearchButton
-              type="button"
-              onClick={handleSearchAddress}
-            >
+            <SearchButton type="button" onClick={handleSearchAddress}>
               검색
             </SearchButton>
           </AddressRow>
@@ -75,7 +72,7 @@ export default function BakeryInfoSection({
         <Field>
           <Label>웹페이지</Label>
           <Input
-            placeholder="https://www.example.."
+            placeholder="https://www...."
             onChange={(e) => handleWebpageChange(e)}
           />
         </Field>

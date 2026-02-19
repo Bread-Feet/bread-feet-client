@@ -82,7 +82,7 @@ export default function useMenuManager() {
 
     const priceNum = Number(newMenu.price);
     if (!Number.isFinite(priceNum) || priceNum < 0) {
-      alert("가격을 올바르게 입력해주세요.");
+      alert("가격은 0 이상 숫자만 입력할 수 있어요.");
       return;
     }
 
@@ -109,7 +109,7 @@ export default function useMenuManager() {
   const removeMenu = (id) => {
     setMenus((prev) => {
       const target = prev.find((m) => m.id === id);
-      if (isBlobUrl(prev.photoPreview))
+      if (target && isBlobUrl(target.photoPreview))
         URL.revokeObjectURL(target.photoPreview);
       return prev.filter((m) => m.id !== id);
     });

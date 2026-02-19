@@ -31,7 +31,7 @@ export function makeBakeryDraftBody({
 
     menus: validMenus.map((m) => ({
       name: trimOrEmpty(m?.name),
-      price: Number(m?.price ?? 0),
+      price: m?.price ?? 0,
       thumbnailUrl: "",
       isRepresentation: m?.isMain ?? false,
     })),

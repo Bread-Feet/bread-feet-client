@@ -1,4 +1,4 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 const arrow_left = "/arrow_left_black.svg";
 
 import PageLayout from "../../../components/layout/PageLayout";
@@ -24,30 +24,30 @@ export default function BakeryCreatePage() {
   const tags = useStoreTags();
   const menuManager = useMenuManager();
 
-  const { submitCreate } = useBakerySubmit();
+  const { submitCreate, isSubmitting } = useBakerySubmit();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const draftBody = makeBakeryDraftBody({
-      bakeryInfo,
-      operatingHours,
-      tags,
-      menuManager,
-    });
-
-    const validMenus = Array.isArray(menuManager.menus)
-      ? menuManager.menus.filter(
-          (m) => typeof m?.name === "string" && m.name.trim().length > 0,
-        )
-      : [];
-
-    const files = {
-      mainPhoto: bakeryInfo.mainPhoto,
-      menuPhotos: validMenus.map((m) => m?.photo ?? null),
-    };
-
     try {
+      const draftBody = makeBakeryDraftBody({
+        bakeryInfo,
+        operatingHours,
+        tags,
+        menuManager,
+      });
+
+      const validMenus = Array.isArray(menuManager.menus)
+        ? menuManager.menus.filter(
+            (m) => typeof m?.name === "string" && m.name.trim().length > 0,
+          )
+        : [];
+
+      const files = {
+        mainPhoto: bakeryInfo.mainPhoto,
+        menuPhotos: validMenus.map((m) => m?.photo ?? null),
+      };
+
       await submitCreate({ draftBody, files });
       alert("빵집 등록 완료");
       nav("/mybakery");
@@ -69,7 +69,9 @@ export default function BakeryCreatePage() {
         <BakeryInfoSection {...bakeryInfo} />
         <OperationSection {...operatingHours} {...tags} />
         <MenuSection {...menuManager} />
-        <SubmitButton>완료</SubmitButton>
+        <SubmitButton disabled={isSubmitting}>
+          {isSubmitting ? "등록 중..." : "빵집 등록하기"}
+        </SubmitButton>
       </Form>
     </PageLayout>
   );

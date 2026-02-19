@@ -8,7 +8,9 @@ export async function uploadMainPhoto({ file }) {
     const response = await uploadApi.post("/s3", formData, {
       params: { folderName: "bakery" },
     });
-    return response.data.data.publicUrl;
+    const publicUrl = response.data?.data?.publicUrl;
+    if (!publicUrl) throw new Error("업로드에 실패했습니다. 다시 시도해주세요.");
+    return publicUrl;
   } catch (error) {
     const msg =
       error?.response?.data?.message ||

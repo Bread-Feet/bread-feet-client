@@ -29,12 +29,8 @@ export async function createBakeryUseCase({ draftBody, files }) {
       const file = menuPhotos[idx];
       if (!file) return menu;
 
-      try {
-        const thumbnailUrl = await uploadMainPhoto({ file });
-        return { ...menu, thumbnailUrl };
-      } catch {
-        return menu;
-      }
+      const thumbnailUrl = await uploadMainPhoto({ file });
+      return { ...menu, thumbnailUrl };
     }),
   );
 

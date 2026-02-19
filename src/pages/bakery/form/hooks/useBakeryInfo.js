@@ -16,8 +16,8 @@ export default function useBakeryInfo() {
   const handleSearchAddress = async () => {
     try {
       const data = await openDaumPostcode();
-      setLotNumber(data.autoJibunAddress);
-      setAddress(data.roadAddress || data.jibunAddress || "");
+      setLotNumber(data.jibunAddress || data.autoJibunAddress || "");
+      setAddress(data.roadAddress || data.autoRoadAddress || "");
     } catch (err) {
       const msg = String(err?.message || "");
       if (msg.startsWith("Postcode closed:")) return;
