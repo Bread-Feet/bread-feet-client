@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const logoImg = "/menu_example_img.svg";
+const plus = "/xIcon.svg";
 
 export default function BakeryPage() {
   const nav = useNavigate();
@@ -28,6 +29,45 @@ export default function BakeryPage() {
     },
     {
       id: 2,
+      name: "앙앙빵집",
+      rating: 5.0,
+      reviewCount: 1689,
+      address: {
+        detail: "1층",
+        lotNumber: "1-45",
+        roadAddress: "대전광역시 중구 대종로 480번길 15",
+      },
+      imageUrl: logoImg,
+      liked: false,
+    },
+    {
+      id: 3,
+      name: "앙앙빵집",
+      rating: 5.0,
+      reviewCount: 1689,
+      address: {
+        detail: "1층",
+        lotNumber: "1-45",
+        roadAddress: "대전광역시 중구 대종로 480번길 15",
+      },
+      imageUrl: logoImg,
+      liked: false,
+    },
+    {
+      id: 4,
+      name: "앙앙빵집",
+      rating: 5.0,
+      reviewCount: 1689,
+      address: {
+        detail: "1층",
+        lotNumber: "1-45",
+        roadAddress: "대전광역시 중구 대종로 480번길 15",
+      },
+      imageUrl: logoImg,
+      liked: false,
+    },
+    {
+      id: 5,
       name: "앙앙빵집",
       rating: 5.0,
       reviewCount: 1689,
@@ -88,6 +128,13 @@ export default function BakeryPage() {
           />
         ))}
       </Scroll>
+      <MyBakeryFab
+        type="button"
+        onClick={() => nav("/mybakery")}
+        aria-label="내 빵집으로 이동"
+      >
+        <FabIcon src={plus} alt="" />
+      </MyBakeryFab>
     </PageLayout>
   );
 }
@@ -134,7 +181,8 @@ const Scroll = styled.div`
   width: 100%;
   flex: 1;
   overflow-y: auto;
-  padding-bottom: var(--tabbar-height);
+
+  padding-bottom: calc(var(--tabbar-height) + 72px);
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -148,4 +196,32 @@ const Scroll = styled.div`
     background: #000000;
     border-radius: 999px;
   }
+`;
+
+const MyBakeryFab = styled.button`
+  position: fixed;
+  bottom: calc(var(--tabbar-height) + 20px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+  border-radius: 999px;
+  background: var(--main-color2);
+
+  display: grid;
+  align-content: center;
+  justify-content: center;
+
+  cursor: pointer;
+  z-index: 20;
+`;
+
+const FabIcon = styled.img`
+  width: 50px;
+  height: 50px;
+
+  transform: rotate(45deg);
 `;

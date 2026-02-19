@@ -15,9 +15,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 const tabs = [
   { key: "map", label: "위치", to: "/map", off: mapOff, on: mapOn },
   {
-    key: "mybakery",
+    key: "bakery",
     label: "나의 빵집",
-    to: "/mybakery",
+    to: "/bakery",
+    extraPaths: ["/mybakery"],
     off: heartOff,
     on: heartOn,
   },
@@ -36,9 +37,11 @@ export default function TabBar() {
   const nav = useNavigate();
   const { pathname } = useLocation();
 
-  const matchedTab = tabs.find((t) =>
-    t.to === "/" ? pathname === "/" : pathname.startsWith(t.to),
-  );
+  const matchedTab = tabs.find((t) => {
+    if (t.to === "/") return pathname === "/";
+    if (pathname.startsWith(t.to)) return true;
+    return t.extraPaths?.some((p) => pathname.startsWith(p)) ?? false;
+  });
   let activeKey;
   if (matchedTab !== undefined && matchedTab !== null) {
     activeKey = matchedTab.key;
