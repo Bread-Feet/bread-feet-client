@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
-import SearchBar from "../bakery-admin/SearchBar";
+import SearchBar from "../../components/SearchBar";
 import BakeryCard from "./BakeryCard";
 
 import { useNavigate } from "react-router-dom";

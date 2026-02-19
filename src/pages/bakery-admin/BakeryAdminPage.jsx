@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
-import SearchBar from "./SearchBar";
+import SearchBar from "../../components/SearchBar";
 import BakeryCard from "./BakeryCard";
 import DeleteConfirmModal from "./components/DeleteConfirmModal";
 import { useState } from "react";
