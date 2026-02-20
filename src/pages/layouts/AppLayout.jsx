@@ -13,20 +13,33 @@ export default function AppLayout() {
   }, []);
 
   return (
-    <Frame>
-      <Content>
-        <Outlet />
-      </Content>
-      <TabBar />
-    </Frame>
+    <PageWrapper>
+      <Frame>
+        <Content>
+          <Outlet />
+        </Content>
+        <TabBar />
+      </Frame>
+    </PageWrapper>
   );
 }
 
+/* 뷰포트 전체를 덮고 모바일 컨테이너를 중앙에 배치 */
+const PageWrapper = styled.div`
+  width: 100vw;
+  height: var(--app-100vh);
+  display: flex;
+  justify-content: center;
+`;
+
+/* 모바일 앱 너비로 고정된 폰 프레임 */
 const Frame = styled.div`
+  width: min(402px, 100vw);
   height: var(--app-100vh);
   display: flex;
   flex-direction: column;
-  padding: 0;
+  overflow: hidden;
+  background: var(--main-color4);
 `;
 
 const Content = styled.main`

@@ -35,10 +35,20 @@ export const TopRow = styled.div`
 
 export const MonthTitle = styled.div`
   font-family: "Fredoka";
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 700;
   color: ${COLORS.brown};
   letter-spacing: -0.2px;
+
+  display: flex;
+  align-items: flex-end;
+`;
+
+export const MonthMarkImg = styled.img`
+  width: 30px;
+  height: 40px;
+  display: block;
+  transform: translateY(3px);
 `;
 
 export const IconButton = styled.button`

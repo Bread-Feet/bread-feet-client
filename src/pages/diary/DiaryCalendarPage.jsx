@@ -40,7 +40,7 @@ export default function DiaryCalenderPage() {
             year={year}
             month={month}
             onPrevMonth={goPrevMonth}
-            onNextMont={goNextMonth}
+            onNextMonth={goNextMonth}
           />
         </CardWrap>
         <Fab onClick={() => navigate("/diaryEdior")}>
@@ -52,14 +52,14 @@ export default function DiaryCalenderPage() {
 }
 
 export const Screen = styled.main`
-  max-width: 400px;
+  width: 100%;
   min-height: 100vh;
   background: #f8edd0;
   overflow: hidden;
 `;
 
 export const Content = styled.div`
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 16px;
@@ -78,7 +78,7 @@ export const CardWrap = styled.div`
 
 const Fab = styled.button`
   position: fixed;
-  right: 20px;
+  right: calc(max(0px, (100vw - 402px) / 2) + 20px);
   bottom: 100px; /* 탭바 고려 */
 
   background: transparent;

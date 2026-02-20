@@ -7,6 +7,7 @@ import {
   CupCake,
   Donut,
 } from "../../assets/sticker";
+import MonthMark from "../../assets/MonthMark.png";
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -31,12 +32,6 @@ export default function CalendarCard({
     const month = viewDate.getMonth();
 
     return new Date(year, month + 1, 0).getDate();
-  }, [viewDate]);
-
-  const monthLabel = useMemo(() => {
-    return new Intl.DateTimeFormat("en-US", { month: "short" }).format(
-      viewDate,
-    );
   }, [viewDate]);
 
   const leadingBlancks = useMemo(() => {
@@ -74,7 +69,10 @@ export default function CalendarCard({
         >
           ‹
         </S.IconButton>
-        <S.MonthTitle>{monthLabel}</S.MonthTitle>
+        <S.MonthTitle>
+          {month}
+          <S.MonthMarkImg src={MonthMark} alt="월" />
+        </S.MonthTitle>
         <S.IconButton
           type="button"
           aria-label="next month"
