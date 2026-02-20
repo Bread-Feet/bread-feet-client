@@ -10,7 +10,12 @@ import {
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-export default function CalendarCard() {
+export default function CalendarCard({
+  year,
+  month,
+  onPrevMonth,
+  onNextMonth,
+}) {
   const stickerDays = useMemo(() => {
     return new Map([
       [10, Baguette],
@@ -19,10 +24,7 @@ export default function CalendarCard() {
     ]);
   }, []);
 
-  const [viewDate, setViewDate] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const viewDate = useMemo(() => new Date(year, month - 1, 1), [year, month]);
 
   const daysInMonth = useMemo(() => {
     const year = viewDate.getFullYear();
@@ -53,12 +55,12 @@ export default function CalendarCard() {
   });
 
   const goPrevMonth = () => {
-    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+    onPrevMonth?.();
     setselectedDay(1);
   };
 
   const goNextMonth = () => {
-    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+    onNextMonth?.();
     setselectedDay(1);
   };
 

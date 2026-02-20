@@ -1,33 +1,92 @@
-import CalenderCard from "../../components/diary/CalendarCard";
+import CalendarCard from "../../components/diary/CalendarCard";
+import Header from "../../components/diary/TopHeader";
 import styled from "styled-components";
+import AddIcon from "../../assets/AddButton.png";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function DiaryCalenderPage() {
+  const navigate = useNavigate();
+  const today = new Date();
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth() + 1);
+
+  const goPrevMonth = () => {
+    setMonth((m) => {
+      if (m === 1) {
+        setYear((y) => y - 1);
+        return 12;
+      }
+      return m - 1;
+    });
+  };
+
+  const goNextMonth = () => {
+    setMonth((m) => {
+      if (m === 12) {
+        setYear((y) => y + 1);
+        return 1;
+      }
+      return m + 1;
+    });
+  };
+
   return (
     <Screen>
       <Content>
+        <Header year={year} onYearChange={setYear} />
         <CardWrap>
-          <CalenderCard />
+          <CalendarCard
+            year={year}
+            month={month}
+            onPrevMonth={goPrevMonth}
+            onNextMont={goNextMonth}
+          />
         </CardWrap>
+        <Fab onClick={() => navigate("/diaryEdior")}>
+          <img src={AddIcon} alt="새 기록 추가" />
+        </Fab>
       </Content>
     </Screen>
   );
 }
 
 export const Screen = styled.main`
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
+  max-width: 400px;
+  min-height: 100vh;
+  background: #f8edd0;
+  overflow: hidden;
 `;
 
 export const Content = styled.div`
-  width: 100%;
-  margin: 0 auto;
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 16px;
+  padding-bottom: 120px;
   box-sizing: border-box;
+
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 `;
 
 export const CardWrap = styled.div`
   width: min(360px, 100%);
+`;
+
+const Fab = styled.button`
+  position: fixed;
+  right: 20px;
+  bottom: 100px; /* 탭바 고려 */
+
+  background: transparent;
+  border: none;
+  cursor: position;
+
+  img {
+    width: 72px;
+    height: 72px;
+  }
 `;

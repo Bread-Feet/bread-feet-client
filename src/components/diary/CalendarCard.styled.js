@@ -12,11 +12,12 @@ const S = 35;
 const GAP = 15;
 
 export const Card = styled.div`
+  padding-top: 4px;
   width: min(360px, 100%);
   aspect-ratio: 460 / 430;
   height: auto;
 
-  border-radius: 2px;
+  border-radius: 20px;
   box-sizing: border-box;
 
   background: rgba(255, 255, 255, 0.75);
