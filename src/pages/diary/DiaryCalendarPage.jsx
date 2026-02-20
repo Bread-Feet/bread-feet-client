@@ -43,7 +43,7 @@ export default function DiaryCalenderPage() {
             onNextMonth={goNextMonth}
           />
         </CardWrap>
-        <Fab onClick={() => navigate("/diaryEdior")}>
+        <Fab onClick={() => navigate("/diaryEditor")}>
           <img src={AddIcon} alt="새 기록 추가" />
         </Fab>
       </Content>
