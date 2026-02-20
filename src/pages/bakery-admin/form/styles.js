@@ -29,6 +29,7 @@ export const Label = styled.label`
 
 export const Input = styled.input`
   font-size: 16px;
+  font-weight: 500;
 
   width: 100%;
   height: 56px;
@@ -48,6 +49,7 @@ export const Input = styled.input`
   }
 
   &::placeholder {
+    font-weight: 400;
     color: #a5a5a5;
   }
 `;

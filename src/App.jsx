@@ -5,14 +5,15 @@ import LoginPage from "./pages/login/LoginPage";
 import DiaryEditorPage from "./pages/diary/DiaryEditorPage";
 import DiaryCalenderPage from "./pages/diary/DiaryCalendarPage";
 import LoginPopupCallbackPage from "./pages/login/LoginPopupCallbackPage";
-import BakeryAdminPage from "./pages/bakery/BakeryAdminPage";
+import BakeryAdminPage from "./pages/bakery-admin/BakeryAdminPage";
 import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
-import BakeryFormPage from "./pages/bakery/form/BakeryFormPage";
+import BakeryCreatePage from "./pages/bakery-admin/form/BakeryCreatePage";
+import BakeryModifyPage from "./pages/bakery-admin/form/BakeryModifyPage";
 
-import BakeryPage from "./pages/bakery-user/BakeryPage";
-import BakeryDetailPage from "./pages/bakery-user/BakeryDetailPage";
-import BakeryReviewPage from "./pages/bakery-user/BakeryReviewPage";
+import BakeryPage from "./pages/bakery/BakeryPage";
+import BakeryDetailPage from "./pages/bakery/BakeryDetailPage";
+import BakeryReviewPage from "./pages/bakery/BakeryReviewPage";
 
 function App() {
   return (
@@ -25,14 +26,8 @@ function App() {
           element={<LoginPopupCallbackPage />}
         />
         <Route path="/oauth/callback" element={<LoginPopupCallbackPage />} />
-        <Route
-          path="/mybakery/register"
-          element={<BakeryFormPage title="빵집 등록하기" />}
-        />
-        <Route
-          path="/mybakery/modify"
-          element={<BakeryFormPage title="수정하기" />}
-        />
+        <Route path="/mybakery/register" element={<BakeryCreatePage />} />
+        <Route path="/mybakery/modify" element={<BakeryModifyPage />} />
         <Route path="/bakery/:id/addreview" element={<BakeryReviewPage />} />
         <Route element={<AppLayout />}>
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
