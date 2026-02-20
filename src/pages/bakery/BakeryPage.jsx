@@ -6,92 +6,22 @@ import BakeryCard from "./BakeryCard";
 
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import useSearch from "../../hooks/useSearch";
+import useBakeries from "./hooks/useBakeries";
 
-const logoImg = "/menu_example_img.svg";
 const plus = "/xIcon.svg";
 
 export default function BakeryPage() {
   const nav = useNavigate();
   const [sortKey, setSortKey] = useState("RECENT"); // "RECENT" | "KOREAN"
-  const [bakeries, setBakeries] = useState([
-    {
-      id: 1,
-      name: "성심당",
-      rating: 4.9,
-      reviewCount: 72,
-      address: {
-        detail: "",
-        lotNumber: "",
-        roadAddress: "대구광역시 북구 대학로 80",
-      },
-      imageUrl: logoImg,
-      liked: true,
-    },
-    {
-      id: 2,
-      name: "앙앙빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "1층",
-        lotNumber: "1-45",
-        roadAddress: "대전광역시 중구 대종로 480번길 15",
-      },
-      imageUrl: logoImg,
-      liked: false,
-    },
-    {
-      id: 3,
-      name: "앙앙빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "1층",
-        lotNumber: "1-45",
-        roadAddress: "대전광역시 중구 대종로 480번길 15",
-      },
-      imageUrl: logoImg,
-      liked: false,
-    },
-    {
-      id: 4,
-      name: "앙앙빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "1층",
-        lotNumber: "1-45",
-        roadAddress: "대전광역시 중구 대종로 480번길 15",
-      },
-      imageUrl: logoImg,
-      liked: false,
-    },
-    {
-      id: 5,
-      name: "앙앙빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "1층",
-        lotNumber: "1-45",
-        roadAddress: "대전광역시 중구 대종로 480번길 15",
-      },
-      imageUrl: logoImg,
-      liked: false,
-    },
-  ]);
-
-  const toggleLike = (id) => {
-    setBakeries((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, liked: !b.liked } : b)),
-    );
-  };
+  const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
+  const { bakeries } = useBakeries(debouncedQuery);
 
   return (
     <PageLayout>
       <Header>
         <Title>나의 빵집</Title>
-        <SearchBar />
+        <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
       </Header>
       <ButtonWrapper>
         <SortButton
@@ -114,17 +44,17 @@ export default function BakeryPage() {
       <Scroll>
         {bakeries.map((b) => (
           <BakeryCard
-            key={b.id}
+            key={b.bakeryId}
             name={b.name}
-            rating={b.rating}
+            rating={b.averageRating}
             reviewCount={b.reviewCount}
             address={[b.address?.roadAddress, b.address?.detail]
               .filter(Boolean)
               .join(" ")}
             imageUrl={b.imageUrl}
-            liked={b.liked}
-            onToggleLike={() => toggleLike(b.id)}
-            onClick={() => nav(`/bakery/${b.id}`)}
+            liked={false}
+            onToggleLike={() => {}}
+            onClick={() => nav(`/bakery/${b.bakeryId}`)}
           />
         ))}
       </Scroll>

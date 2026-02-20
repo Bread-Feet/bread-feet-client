@@ -1,13 +1,19 @@
 import styled from "styled-components";
 import xIcon from "/xIcon.svg";
 
-export default function SearchBar() {
+export default function SearchBar({ value, onChange, onClear }) {
   return (
     <Search>
-      <SearchInput placeholder="" />
-      <ClearButton type="button" aria-label="검색어 지우기">
-        <Image src={xIcon} alt="검색어 지우기" />
-      </ClearButton>
+      <SearchInput
+        placeholder=""
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {value.length > 0 && (
+        <ClearButton type="button" aria-label="검색어 지우기" onClick={onClear}>
+          <Image src={xIcon} alt="검색어 지우기" />
+        </ClearButton>
+      )}
     </Search>
   );
 }

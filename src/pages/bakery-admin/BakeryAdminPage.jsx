@@ -7,10 +7,14 @@ import DeleteConfirmModal from "./components/DeleteConfirmModal";
 import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
+import useSearch from "../../hooks/useSearch";
+import useMyBakeries from "./hooks/useMyBakeries";
 
 export default function BakeryAdminPage() {
   const nav = useNavigate();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
+  const { bakeries } = useMyBakeries(debouncedQuery);
 
   const openModifyPage = () => {
     nav("/mybakery/modify");
@@ -32,7 +36,7 @@ export default function BakeryAdminPage() {
     <PageLayout>
       <Header>
         <Title>나의 빵집</Title>
-        <SearchBar />
+        <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
       </Header>
       <ButtonWrapper>
         <RegisterButton onClick={() => nav("/mybakery/register")}>
@@ -40,30 +44,19 @@ export default function BakeryAdminPage() {
         </RegisterButton>
       </ButtonWrapper>
       <Scroll>
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
+        {bakeries.map((b) => (
+          <BakeryCard
+            key={b.bakeryId}
+            name={b.name}
+            rating={b.averageRating}
+            reviewCount={b.reviewCount}
+            address={[b.address?.roadAddress, b.address?.detail]
+              .filter(Boolean)
+              .join(" ")}
+            onModifyClick={openModifyPage}
+            onDeleteClick={openDeleteModal}
+          />
+        ))}
       </Scroll>
       <DeleteConfirmModal
         open={isDeleteModalOpen}
