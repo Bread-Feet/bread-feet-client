@@ -2,7 +2,7 @@ import CalendarCard from "../../components/diary/CalendarCard";
 import Header from "../../components/diary/TopHeader";
 import styled from "styled-components";
 import AddIcon from "../../assets/AddButton.png";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function DiaryCalenderPage() {
@@ -10,6 +10,7 @@ export default function DiaryCalenderPage() {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
+  const [selectedDate, setSelectedDate] = useState(today.getDate());
 
   const goPrevMonth = () => {
     setMonth((m) => {
@@ -19,6 +20,7 @@ export default function DiaryCalenderPage() {
       }
       return m - 1;
     });
+    setSelectedDate(1);
   };
 
   const goNextMonth = () => {
@@ -29,7 +31,12 @@ export default function DiaryCalenderPage() {
       }
       return m + 1;
     });
+    setSelectedDate(1);
   };
+
+  const yyyyMmDd = useMemo(() => {
+    return `${year}-${String(month).padStart(2, "0")}-${String(selectedDate).padStart(2, "0")}`;
+  }, [year, month, selectedDate]);
 
   return (
     <Screen>
@@ -41,9 +48,11 @@ export default function DiaryCalenderPage() {
             month={month}
             onPrevMonth={goPrevMonth}
             onNextMonth={goNextMonth}
+            onSelectDate={setSelectedDate}
+            selectedDay={selectedDate}
           />
         </CardWrap>
-        <Fab onClick={() => navigate("/diaryEditor")}>
+        <Fab onClick={() => navigate(`/diary/new?date=${yyyyMmDd}`)}>
           <img src={AddIcon} alt="새 기록 추가" />
         </Fab>
       </Content>
@@ -83,7 +92,7 @@ const Fab = styled.button`
 
   background: transparent;
   border: none;
-  cursor: position;
+  cursor: pointer;
 
   img {
     width: 72px;

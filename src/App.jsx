@@ -31,7 +31,7 @@ function App() {
         <Route path="/bakery/:id/addreview" element={<BakeryReviewPage />} />
         <Route element={<AppLayout />}>
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
-          <Route path="/diaryEditor" element={<DiaryEditorPage />} />
+          <Route path="/diary/new" element={<DiaryEditorPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />
           <Route path="/bakery" element={<BakeryPage />} />

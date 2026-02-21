@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import * as S from "./CalendarCard.styled";
 import {
   Baguette,
@@ -16,6 +16,8 @@ export default function CalendarCard({
   month,
   onPrevMonth,
   onNextMonth,
+  selectedDay,
+  onSelectDate,
 }) {
   const stickerDays = useMemo(() => {
     return new Map([
@@ -45,18 +47,12 @@ export default function CalendarCard({
     return Array.from({ length: daysInMonth }, (_, i) => i + 1);
   }, [daysInMonth]);
 
-  const [selectedDay, setselectedDay] = useState(() => {
-    return new Date().getDate();
-  });
-
   const goPrevMonth = () => {
     onPrevMonth?.();
-    setselectedDay(1);
   };
 
   const goNextMonth = () => {
     onNextMonth?.();
-    setselectedDay(1);
   };
 
   return (
@@ -102,7 +98,7 @@ export default function CalendarCard({
             <S.DayCellButton
               key={day}
               type="button"
-              onClick={() => setselectedDay(day)}
+              onClick={() => onSelectDate?.(day)}
               $selected={isSelected}
             >
               {hasSticker ? (
