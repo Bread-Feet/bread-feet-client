@@ -71,7 +71,7 @@ const TabBarWrapper = styled.nav`
   margin: 0 auto;
 
   background: var(--main-color4);
-  box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 -4px 4px rgba(210, 205, 205, 0.25);
 
   display: grid;
   grid-template-columns: repeat(5, 1fr);
