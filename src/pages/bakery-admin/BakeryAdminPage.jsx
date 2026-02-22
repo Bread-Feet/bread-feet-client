@@ -4,8 +4,9 @@ import PageLayout from "../../components/layout/PageLayout";
 import SearchBar from "../../components/SearchBar";
 import BakeryCard from "./BakeryCard";
 import DeleteConfirmModal from "./components/DeleteConfirmModal";
-import { useState } from "react";
+import MoveBakeryPage from "../../components/MoveBakeryPage";
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSearch from "../../hooks/useSearch";
 import useMyBakeries from "./hooks/useMyBakeries";
@@ -35,7 +36,7 @@ export default function BakeryAdminPage() {
   return (
     <PageLayout>
       <Header>
-        <Title>나의 빵집</Title>
+        <MoveBakeryPage />
         <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
       </Header>
       <ButtonWrapper>
@@ -72,13 +73,6 @@ const Header = styled.header`
 
   background: var(--main-color2);
   padding: 57px var(--page-padding) 10px var(--page-padding);
-`;
-
-const Title = styled.h1`
-  font-size: 20px;
-  font-weight: 600;
-
-  margin: 12px 0;
 `;
 
 const ButtonWrapper = styled.div`

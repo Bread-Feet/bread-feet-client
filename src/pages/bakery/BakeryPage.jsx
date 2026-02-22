@@ -1,15 +1,14 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
 import SearchBar from "../../components/SearchBar";
 import BakeryCard from "./BakeryCard";
+import MoveBakeryPage from "../../components/MoveBakeryPage";
 
 import { useNavigate } from "react-router-dom";
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import useSearch from "../../hooks/useSearch";
 import useBakeries from "./hooks/useBakeries";
-
-const plus = "/xIcon.svg";
 
 export default function BakeryPage() {
   const nav = useNavigate();
@@ -39,7 +38,7 @@ export default function BakeryPage() {
   return (
     <PageLayout>
       <Header>
-        <Title>나의 빵집</Title>
+        <MoveBakeryPage />
         <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
       </Header>
       <ButtonWrapper>
@@ -78,13 +77,6 @@ export default function BakeryPage() {
         ))}
         <Sentinel ref={sentinelRef} />
       </Scroll>
-      <MyBakeryFab
-        type="button"
-        onClick={() => nav("/mybakery")}
-        aria-label="내 빵집으로 이동"
-      >
-        <FabIcon src={plus} alt="" />
-      </MyBakeryFab>
     </PageLayout>
   );
 }
@@ -96,11 +88,8 @@ const Header = styled.header`
   padding: 57px var(--page-padding) 10px var(--page-padding);
 `;
 
-const Title = styled.h1`
-  font-size: 20px;
-  font-weight: 600;
-
-  margin: 12px 0;
+const Sentinel = styled.div`
+  height: 1px;
 `;
 
 const ButtonWrapper = styled.div`
@@ -146,36 +135,4 @@ const Scroll = styled.div`
     background: #000000;
     border-radius: 999px;
   }
-`;
-
-const MyBakeryFab = styled.button`
-  position: fixed;
-  bottom: calc(var(--tabbar-height) + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-
-  width: 40px;
-  height: 40px;
-
-  border: none;
-  border-radius: 999px;
-  background: var(--main-color2);
-
-  display: grid;
-  align-content: center;
-  justify-content: center;
-
-  cursor: pointer;
-  z-index: 20;
-`;
-
-const FabIcon = styled.img`
-  width: 50px;
-  height: 50px;
-
-  transform: rotate(45deg);
-`;
-
-const Sentinel = styled.div`
-  height: 1px;
 `;
