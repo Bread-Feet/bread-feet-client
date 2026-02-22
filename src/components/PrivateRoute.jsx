@@ -7,9 +7,13 @@ export default function PrivateRoute({ children }) {
   const location = useLocation();
 
   useEffect(() => {
-    getValidAccessToken().then((token) => {
-      setStatus(token ? "ok" : "no-token");
-    });
+    getValidAccessToken()
+      .then((token) => {
+        setStatus(token ? "ok" : "no-token");
+      })
+      .catch(() => {
+        setStatus("no-token");
+      });
   }, []);
 
   if (status === "checking") return null;
