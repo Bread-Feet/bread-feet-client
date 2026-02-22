@@ -30,6 +30,7 @@ export default function useBakeries(keyword) {
       }
     } catch (err) {
       console.error(err);
+      setHasMore(false);
     } finally {
       setIsLoading(false);
     }
