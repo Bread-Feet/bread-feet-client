@@ -1,97 +1,46 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
-import SearchBar from "../bakery-admin/SearchBar";
+import SearchBar from "../../components/SearchBar";
 import BakeryCard from "./BakeryCard";
+import MoveBakeryPage from "../../components/MoveBakeryPage";
 
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-
-const logoImg = "/menu_example_img.svg";
-const plus = "/xIcon.svg";
+import { useState, useRef, useEffect, useCallback } from "react";
+import useSearch from "../../hooks/useSearch";
+import useBakeries from "./hooks/useBakeries";
 
 export default function BakeryPage() {
   const nav = useNavigate();
+  // TODO : add sort param to api
   const [sortKey, setSortKey] = useState("RECENT"); // "RECENT" | "KOREAN"
-  const [bakeries, setBakeries] = useState([
-    {
-      id: 1,
-      name: "성심당",
-      rating: 4.9,
-      reviewCount: 72,
-      address: {
-        detail: "",
-        lotNumber: "",
-        roadAddress: "대구광역시 북구 대학로 80",
-      },
-      imageUrl: logoImg,
-      liked: true,
-    },
-    {
-      id: 2,
-      name: "앙앙빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "1층",
-        lotNumber: "1-45",
-        roadAddress: "대전광역시 중구 대종로 480번길 15",
-      },
-      imageUrl: logoImg,
-      liked: false,
-    },
-    {
-      id: 3,
-      name: "앙앙빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "1층",
-        lotNumber: "1-45",
-        roadAddress: "대전광역시 중구 대종로 480번길 15",
-      },
-      imageUrl: logoImg,
-      liked: false,
-    },
-    {
-      id: 4,
-      name: "앙앙빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "1층",
-        lotNumber: "1-45",
-        roadAddress: "대전광역시 중구 대종로 480번길 15",
-      },
-      imageUrl: logoImg,
-      liked: false,
-    },
-    {
-      id: 5,
-      name: "앙앙빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "1층",
-        lotNumber: "1-45",
-        roadAddress: "대전광역시 중구 대종로 480번길 15",
-      },
-      imageUrl: logoImg,
-      liked: false,
-    },
-  ]);
+  const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
+  const { bakeries, isLoading, hasMore, loadMore } =
+    useBakeries(debouncedQuery);
+  const sentinelRef = useRef(null);
 
-  const toggleLike = (id) => {
-    setBakeries((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, liked: !b.liked } : b)),
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && hasMore) loadMore();
+  }, [isLoading, hasMore, loadMore]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) handleLoadMore();
+      },
+      { threshold: 0.1 },
     );
-  };
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [handleLoadMore]);
 
   return (
     <PageLayout>
       <Header>
-        <Title>나의 빵집</Title>
-        <SearchBar />
+        <MoveBakeryPage />
+        <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
       </Header>
       <ButtonWrapper>
         <SortButton
@@ -114,27 +63,21 @@ export default function BakeryPage() {
       <Scroll>
         {bakeries.map((b) => (
           <BakeryCard
-            key={b.id}
+            key={b.bakeryId}
             name={b.name}
-            rating={b.rating}
+            rating={b.averageRating}
             reviewCount={b.reviewCount}
             address={[b.address?.roadAddress, b.address?.detail]
               .filter(Boolean)
               .join(" ")}
             imageUrl={b.imageUrl}
-            liked={b.liked}
-            onToggleLike={() => toggleLike(b.id)}
-            onClick={() => nav(`/bakery/${b.id}`)}
+            liked={false}
+            onToggleLike={() => {}}
+            onClick={() => nav(`/bakery/${b.bakeryId}`)}
           />
         ))}
+        <Sentinel ref={sentinelRef} />
       </Scroll>
-      <MyBakeryFab
-        type="button"
-        onClick={() => nav("/mybakery")}
-        aria-label="내 빵집으로 이동"
-      >
-        <FabIcon src={plus} alt="" />
-      </MyBakeryFab>
     </PageLayout>
   );
 }
@@ -146,11 +89,8 @@ const Header = styled.header`
   padding: 57px var(--page-padding) 10px var(--page-padding);
 `;
 
-const Title = styled.h1`
-  font-size: 20px;
-  font-weight: 600;
-
-  margin: 12px 0;
+const Sentinel = styled.div`
+  height: 1px;
 `;
 
 const ButtonWrapper = styled.div`
@@ -196,32 +136,4 @@ const Scroll = styled.div`
     background: #000000;
     border-radius: 999px;
   }
-`;
-
-const MyBakeryFab = styled.button`
-  position: fixed;
-  bottom: calc(var(--tabbar-height) + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-
-  width: 40px;
-  height: 40px;
-
-  border: none;
-  border-radius: 999px;
-  background: var(--main-color2);
-
-  display: grid;
-  align-content: center;
-  justify-content: center;
-
-  cursor: pointer;
-  z-index: 20;
-`;
-
-const FabIcon = styled.img`
-  width: 50px;
-  height: 50px;
-
-  transform: rotate(45deg);
 `;

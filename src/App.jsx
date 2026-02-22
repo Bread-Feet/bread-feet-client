@@ -8,6 +8,7 @@ import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
 import BakeryCreatePage from "./pages/bakery-admin/form/BakeryCreatePage";
 import BakeryModifyPage from "./pages/bakery-admin/form/BakeryModifyPage";
+import PrivateRoute from "./components/PrivateRoute";
 
 import BakeryPage from "./pages/bakery/BakeryPage";
 import BakeryDetailPage from "./pages/bakery/BakeryDetailPage";
@@ -24,12 +25,12 @@ function App() {
           element={<LoginPopupCallbackPage />}
         />
         <Route path="/oauth/callback" element={<LoginPopupCallbackPage />} />
-        <Route path="/mybakery/register" element={<BakeryCreatePage />} />
-        <Route path="/mybakery/modify" element={<BakeryModifyPage />} />
-        <Route path="/bakery/:id/addreview" element={<BakeryReviewPage />} />
+        <Route path="/mybakery/register" element={<PrivateRoute><BakeryCreatePage /></PrivateRoute>} />
+        <Route path="/mybakery/modify" element={<PrivateRoute><BakeryModifyPage /></PrivateRoute>} />
+        <Route path="/bakery/:id/addreview" element={<PrivateRoute><BakeryReviewPage /></PrivateRoute>} />
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/mybakery" element={<BakeryAdminPage />} />
+          <Route path="/mybakery" element={<PrivateRoute><BakeryAdminPage /></PrivateRoute>} />
           <Route path="/bakery" element={<BakeryPage />} />
           <Route path="/bakery/:id" element={<BakeryDetailPage />} />
         </Route>

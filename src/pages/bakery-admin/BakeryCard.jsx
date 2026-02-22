@@ -1,19 +1,24 @@
 import styled, { css } from "styled-components";
 import star from "/starIcon.svg";
 
-export default function BakeryCard({ onModifyClick, onDeleteClick }) {
+export default function BakeryCard({
+  name,
+  rating,
+  reviewCount,
+  address,
+  onModifyClick,
+  onDeleteClick,
+}) {
   return (
     <Card>
       <Info>
-        <Title>성심당</Title>
+        <Title>{name}</Title>
         <RatingRow>
           <StarIcon src={star} alt="" />
-          <Rating>5.0</Rating>
-          <Count>(1689)</Count>
+          <Rating>{Number(rating || 0).toFixed(1)}</Rating>
+          <Count>({reviewCount ?? 0})</Count>
         </RatingRow>
-        <Address>
-          대전광역시 중구 대종로 480번길 15 가나다라마바사아자차카타파하
-        </Address>
+        <Address>{address}</Address>
       </Info>
       <Actions>
         <ActionButton $variant="outline" onClick={onModifyClick}>

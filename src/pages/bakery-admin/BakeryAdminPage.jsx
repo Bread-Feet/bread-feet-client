@@ -1,16 +1,40 @@
 import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
-import SearchBar from "./SearchBar";
+import SearchBar from "../../components/SearchBar";
 import BakeryCard from "./BakeryCard";
 import DeleteConfirmModal from "./components/DeleteConfirmModal";
-import { useState } from "react";
+import MoveBakeryPage from "../../components/MoveBakeryPage";
 
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import useSearch from "../../hooks/useSearch";
+import useMyBakeries from "./hooks/useMyBakeries";
 
 export default function BakeryAdminPage() {
   const nav = useNavigate();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
+  const { bakeries, isLoading, hasMore, loadMore } =
+    useMyBakeries(debouncedQuery);
+  const sentinelRef = useRef(null);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && hasMore) loadMore();
+  }, [isLoading, hasMore, loadMore]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) handleLoadMore();
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [handleLoadMore]);
 
   const openModifyPage = () => {
     nav("/mybakery/modify");
@@ -31,8 +55,8 @@ export default function BakeryAdminPage() {
   return (
     <PageLayout>
       <Header>
-        <Title>나의 빵집</Title>
-        <SearchBar />
+        <MoveBakeryPage />
+        <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
       </Header>
       <ButtonWrapper>
         <RegisterButton onClick={() => nav("/mybakery/register")}>
@@ -40,30 +64,20 @@ export default function BakeryAdminPage() {
         </RegisterButton>
       </ButtonWrapper>
       <Scroll>
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
-        <BakeryCard
-          onModifyClick={openModifyPage}
-          onDeleteClick={openDeleteModal}
-        />
+        {bakeries.map((b) => (
+          <BakeryCard
+            key={b.bakeryId}
+            name={b.name}
+            rating={b.averageRating}
+            reviewCount={b.reviewCount}
+            address={[b.address?.roadAddress, b.address?.detail]
+              .filter(Boolean)
+              .join(" ")}
+            onModifyClick={openModifyPage}
+            onDeleteClick={openDeleteModal}
+          />
+        ))}
+        <Sentinel ref={sentinelRef} />
       </Scroll>
       <DeleteConfirmModal
         open={isDeleteModalOpen}
@@ -81,11 +95,8 @@ const Header = styled.header`
   padding: 57px var(--page-padding) 10px var(--page-padding);
 `;
 
-const Title = styled.h1`
-  font-size: 20px;
-  font-weight: 600;
-
-  margin: 12px 0;
+const Sentinel = styled.div`
+  height: 1px;
 `;
 
 const ButtonWrapper = styled.div`
