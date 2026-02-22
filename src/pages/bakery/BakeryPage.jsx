@@ -5,7 +5,7 @@ import SearchBar from "../../components/SearchBar";
 import BakeryCard from "./BakeryCard";
 
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import useSearch from "../../hooks/useSearch";
 import useBakeries from "./hooks/useBakeries";
 
@@ -15,7 +15,26 @@ export default function BakeryPage() {
   const nav = useNavigate();
   const [sortKey, setSortKey] = useState("RECENT"); // "RECENT" | "KOREAN"
   const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
-  const { bakeries } = useBakeries(debouncedQuery);
+  const { bakeries, isLoading, hasMore, loadMore } =
+    useBakeries(debouncedQuery);
+  const sentinelRef = useRef(null);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && hasMore) loadMore();
+  }, [isLoading, hasMore, loadMore]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) handleLoadMore();
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [handleLoadMore]);
 
   return (
     <PageLayout>
@@ -57,6 +76,7 @@ export default function BakeryPage() {
             onClick={() => nav(`/bakery/${b.bakeryId}`)}
           />
         ))}
+        <Sentinel ref={sentinelRef} />
       </Scroll>
       <MyBakeryFab
         type="button"
@@ -154,4 +174,8 @@ const FabIcon = styled.img`
   height: 50px;
 
   transform: rotate(45deg);
+`;
+
+const Sentinel = styled.div`
+  height: 1px;
 `;

@@ -1,24 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { fetchBakeries } from "../../../lib/api/bakery";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export default function useBakeries(keyword) {
   const [bakeries, setBakeries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const cursorRef = useRef(0);
+  const cursorRef = useRef(null); // cursor=0 에러 대응
 
   const load = useCallback(async (kw, cursor) => {
     setIsLoading(true);
     try {
       const data = await fetchBakeries({
         keyword: kw,
-        cursorId: cursor,
+        cursor,
         size: PAGE_SIZE,
       });
       const content = data?.content ?? [];
-      setBakeries((prev) => (cursor === 0 ? content : [...prev, ...content]));
+      setBakeries((prev) =>
+        cursor === null ? content : [...prev, ...content],
+      );
       if (content.length < PAGE_SIZE) {
         setHasMore(false);
         cursorRef.current = null;
@@ -37,7 +39,7 @@ export default function useBakeries(keyword) {
     cursorRef.current = 0;
     setHasMore(true);
     setBakeries([]);
-    load(keyword, 0);
+    load(keyword, null);
   }, [keyword, load]);
 
   const loadMore = () => {
