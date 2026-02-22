@@ -16,7 +16,6 @@ export const useUserStore = create(
           isAuthenticated: !!user, // user가 존재하면 true, boolean으로 강제 변경
           isLoading: false,
         }),
-      setAuthenticated: (v) => set({ isAuthenticated: v }),
       setLoading: (loading) => set({ isLoading: loading }),
       setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
       logout: () =>

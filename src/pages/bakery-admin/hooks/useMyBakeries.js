@@ -7,14 +7,20 @@ export default function useMyBakeries(keyword) {
   const [bakeries, setBakeries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const cursorRef = useRef(0);
+  const cursorRef = useRef(null);
 
   const load = useCallback(async (kw, cursor) => {
     setIsLoading(true);
     try {
-      const data = await fetchMyBakeries({ keyword: kw, cursorId: cursor, size: PAGE_SIZE });
+      const data = await fetchMyBakeries({
+        keyword: kw,
+        cursor,
+        size: PAGE_SIZE,
+      });
       const content = data?.content ?? [];
-      setBakeries((prev) => (cursor === 0 ? content : [...prev, ...content]));
+      setBakeries((prev) =>
+        cursor === null ? content : [...prev, ...content],
+      );
       if (content.length < PAGE_SIZE) {
         setHasMore(false);
         cursorRef.current = null;
@@ -24,6 +30,7 @@ export default function useMyBakeries(keyword) {
       }
     } catch (err) {
       console.error(err);
+      setHasMore(false);
     } finally {
       setIsLoading(false);
     }
@@ -33,7 +40,7 @@ export default function useMyBakeries(keyword) {
     cursorRef.current = 0;
     setHasMore(true);
     setBakeries([]);
-    load(keyword, 0);
+    load(keyword, null);
   }, [keyword, load]);
 
   const loadMore = () => {

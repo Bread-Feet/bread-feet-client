@@ -1,13 +1,20 @@
+import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useUserStore } from "../store/userStore";
+import { getAccessToken } from "../lib/token-storage";
 
 export default function PrivateRoute({ children }) {
-  const { isAuthenticated, hasHydrated } = useUserStore();
+  const [status, setStatus] = useState("checking"); // "checking" | "ok" | "no-token"
   const location = useLocation();
 
-  if (!hasHydrated) return null;
+  useEffect(() => {
+    getAccessToken().then((token) => {
+      setStatus(token ? "ok" : "no-token");
+    });
+  }, []);
 
-  if (!isAuthenticated) {
+  if (status === "checking") return null;
+
+  if (status === "no-token") {
     return (
       <Navigate
         to={`/login?returnUrl=${encodeURIComponent(location.pathname + location.search)}`}

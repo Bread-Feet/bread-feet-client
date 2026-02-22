@@ -1,14 +1,21 @@
 import styled, { css } from "styled-components";
 import star from "/starIcon.svg";
 
-export default function BakeryCard({ name, rating, reviewCount, address, onModifyClick, onDeleteClick }) {
+export default function BakeryCard({
+  name,
+  rating,
+  reviewCount,
+  address,
+  onModifyClick,
+  onDeleteClick,
+}) {
   return (
     <Card>
       <Info>
         <Title>{name}</Title>
         <RatingRow>
           <StarIcon src={star} alt="" />
-          <Rating>{Number(rating).toFixed(1)}</Rating>
+          <Rating>{Number(rating || 0).toFixed(1)}</Rating>
           <Count>({reviewCount ?? 0})</Count>
         </RatingRow>
         <Address>{address}</Address>

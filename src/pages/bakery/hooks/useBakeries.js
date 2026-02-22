@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { fetchBakeries } from "../../../lib/api/bakery";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 export default function useBakeries(keyword) {
   const [bakeries, setBakeries] = useState([]);

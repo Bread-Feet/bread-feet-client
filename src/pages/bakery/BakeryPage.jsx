@@ -12,6 +12,7 @@ import useBakeries from "./hooks/useBakeries";
 
 export default function BakeryPage() {
   const nav = useNavigate();
+  // TODO : add sort param to api
   const [sortKey, setSortKey] = useState("RECENT"); // "RECENT" | "KOREAN"
   const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
   const { bakeries, isLoading, hasMore, loadMore } =

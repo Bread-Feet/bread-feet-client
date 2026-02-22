@@ -6,7 +6,6 @@ import { OAUTH_STORAGE_KEY, OAUTH_CHANNEL_NAME } from "../../lib/oauth-popup";
 import { getApiUrl } from "../../config/env";
 import { markLoginSuccess } from "../../lib/api-client";
 import { saveTokens } from "../../lib/token-storage.js";
-import { useUserStore } from "../../store/userStore";
 
 export default function LoginPopupCallbackPage() {
   const [searchParams] = useSearchParams();
@@ -82,7 +81,6 @@ export default function LoginPopupCallbackPage() {
         try {
           await saveTokens(tokens.accessToken);
           markLoginSuccess();
-          useUserStore.getState().setAuthenticated(true);
           console.log("[PopupCallback] Tokens saved to IndexedDB");
         } catch (tokenError) {
           console.warn("[PopupCallback] Token save failed:", tokenError);

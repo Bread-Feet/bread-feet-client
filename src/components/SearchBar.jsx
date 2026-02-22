@@ -9,7 +9,7 @@ export default function SearchBar({ value, onChange, onClear }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
-      {value.length > 0 && (
+      {value?.length > 0 && (
         <ClearButton type="button" aria-label="검색어 지우기" onClick={onClear}>
           <Image src={xIcon} alt="검색어 지우기" />
         </ClearButton>

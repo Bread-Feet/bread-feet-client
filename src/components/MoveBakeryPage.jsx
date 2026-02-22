@@ -28,6 +28,20 @@ export default function MoveBakeryPage() {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
+
   return (
     <BakeryPageMoveWrapper>
       <TitleMenuWrap ref={titleMenuRef}>
@@ -40,7 +54,7 @@ export default function MoveBakeryPage() {
           <Title>나의 빵집</Title>
         </TitleButton>
         {isMenuOpen && (
-          <TitleDropdown role="menu" aria-label="빵집 이동 메뉴">
+          <TitleDropdown aria-label="빵집 이동 메뉴">
             <TitleDropdownItem
               type="button"
               role="menuitem"
@@ -48,11 +62,7 @@ export default function MoveBakeryPage() {
             >
               나의 빵집
             </TitleDropdownItem>
-            <TitleDropdownItem
-              type="button"
-              role="menuitem"
-              onClick={moveToMyBakery}
-            >
+            <TitleDropdownItem type="button" onClick={moveToMyBakery}>
               관리자 페이지
             </TitleDropdownItem>
           </TitleDropdown>
