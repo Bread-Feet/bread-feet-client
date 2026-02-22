@@ -108,3 +108,24 @@ export async function getAccessToken() {
     return null;
   }
 }
+
+function decodeJwtExp(token) {
+  try {
+    const payload = token.split(".")[1];
+    const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(decoded)?.exp ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getValidAccessToken() {
+  const token = await getAccessToken();
+  if (!token) return null;
+
+  const exp = decodeJwtExp(token);
+  if (exp === null) return token;
+
+  const isExpired = exp * 1000 < Date.now();
+  return isExpired ? null : token;
+}

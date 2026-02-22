@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { getAccessToken } from "../lib/token-storage";
+import { getValidAccessToken } from "../lib/token-storage";
 
 export default function PrivateRoute({ children }) {
   const [status, setStatus] = useState("checking"); // "checking" | "ok" | "no-token"
   const location = useLocation();
 
   useEffect(() => {
-    getAccessToken().then((token) => {
+    getValidAccessToken().then((token) => {
       setStatus(token ? "ok" : "no-token");
     });
   }, []);

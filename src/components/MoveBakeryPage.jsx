@@ -47,7 +47,6 @@ export default function MoveBakeryPage() {
       <TitleMenuWrap ref={titleMenuRef}>
         <TitleButton
           type="button"
-          aria-haspopup="menu"
           aria-expanded={isMenuOpen}
           onClick={() => setIsMenuOpen((v) => !v)}
         >
@@ -55,11 +54,7 @@ export default function MoveBakeryPage() {
         </TitleButton>
         {isMenuOpen && (
           <TitleDropdown aria-label="빵집 이동 메뉴">
-            <TitleDropdownItem
-              type="button"
-              role="menuitem"
-              onClick={moveToBakery}
-            >
+            <TitleDropdownItem type="button" onClick={moveToBakery}>
               나의 빵집
             </TitleDropdownItem>
             <TitleDropdownItem type="button" onClick={moveToMyBakery}>
