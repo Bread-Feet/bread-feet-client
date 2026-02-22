@@ -10,12 +10,12 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { getApiUrl } from "../../config/env";
 import { isPWAStandalone, openOAuthPopup } from "../../lib/oauth-popup";
 import { markLoginSuccess } from "../../lib/api-client";
-// import { useUserStore } from "../../store/userStore";
+import { useUserStore } from "../../store/userStore";
 import { saveTokens } from "../../lib/token-storage.js";
 
 function LoginContent() {
   const [searchParams] = useSearchParams();
-  // const setUser = useUserStore((state) => state.setUser);
+  const setAuthenticated = useUserStore((state) => state.setAuthenticated);
   const navigate = useNavigate();
   const [isAuthChecking, setIsAuthChecking] = useState(false);
 
@@ -56,8 +56,8 @@ function LoginContent() {
                   result.tokens.accessToken,
                   // result.tokens.refreshToken,
                 );
-                // token refresh time 초기화
                 markLoginSuccess();
+                setAuthenticated(true);
                 console.log(
                   "[Login] PWA tokens saved to IndexedDB from postMessage",
                 );
