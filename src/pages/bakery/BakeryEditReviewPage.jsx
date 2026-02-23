@@ -1,11 +1,11 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 const left_arrow = "/arrow_left_black.svg";
 const PlusIcon = "/plus.svg";
 const star = "/starIcon.svg";
 
 import PageLayout from "../../components/layout/PageLayout";
 
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 
 import { uploadReviewPhoto } from "../../lib/api/imgUpload";
@@ -16,12 +16,14 @@ const MAX_PHOTOS = 5;
 
 export default function BakeryEditReviewPage() {
   const nav = useNavigate();
+  const { id: bakeryId, reviewId } = useParams();
   const { state } = useLocation();
   const review = state?.review;
+  const resolvedReviewId = review?.id ?? Number(reviewId);
 
   const [text, setText] = useState(review?.content ?? "");
   const [rating, setRating] = useState(review?.rating ?? 0);
-  const [existingPhotos, setExistingPhotos] = useState(review?.photos ?? []); // 기존 S3 URL
+  const [existingPhotos, setExistingPhotos] = useState(review?.photos ?? []); // 湲곗〈 S3 URL
   const [newPhotos, setNewPhotos] = useState([]); // { file, previewUrl }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileRef = useRef(null);
@@ -35,6 +37,12 @@ export default function BakeryEditReviewPage() {
       newPhotosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
     };
   }, []);
+
+  useEffect(() => {
+    if (!review?.id && !reviewId) {
+      nav(bakeryId ? `/bakery/${bakeryId}` : "/bakery", { replace: true });
+    }
+  }, [review?.id, reviewId, bakeryId, nav]);
 
   const openFilePicker = () => {
     if (totalCount >= MAX_PHOTOS) return;
@@ -65,6 +73,10 @@ export default function BakeryEditReviewPage() {
   };
 
   const handleSubmit = async () => {
+    if (!resolvedReviewId) {
+      nav(bakeryId ? `/bakery/${bakeryId}` : "/bakery", { replace: true });
+      return;
+    }
     if (!text.trim()) {
       alert("리뷰 내용을 입력해주세요.");
       return;
@@ -81,7 +93,7 @@ export default function BakeryEditReviewPage() {
       );
       const reviewPictureUrls = [...existingPhotos, ...uploadedUrls];
       await updateReview({
-        reviewId: review.id,
+        reviewId: resolvedReviewId,
         content: text,
         rating,
         reviewPictureUrls,
@@ -166,11 +178,7 @@ export default function BakeryEditReviewPage() {
       </ReviewWrapper>
 
       <BottomBar>
-        <SubmitBtn
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
+        <SubmitBtn type="button" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? "수정 중..." : "완료"}
         </SubmitBtn>
       </BottomBar>
