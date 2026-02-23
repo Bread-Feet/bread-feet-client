@@ -1,6 +1,7 @@
 import styled from "styled-components";
 const arrow_left = "/arrow_left_white.svg";
-const heart = "/heart_off.svg";
+const heart_off = "/heart_off.svg";
+const heart_on = "/heart_on.svg";
 const star = "/starIcon.svg";
 const location = "/location.svg";
 const tell = "/tell.svg";
@@ -13,6 +14,7 @@ import PageLayout from "../../components/layout/PageLayout";
 import { useLayoutEffect, useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useReviews from "./hooks/useReviews";
+import useBookmark from "./hooks/useBookmark";
 
 function toKoreanDay(jsDay) {
   switch (jsDay) {
@@ -152,7 +154,8 @@ export default function BakeryDetailPage() {
     };
   }, [id]);
 
-  const { reviews: rawReviews, isLoading: reviewsLoading, hasMore: reviewsHasMore, loadMore: loadMoreReviews } = useReviews(id);
+  const { reviews: rawReviews, isLoading: reviewsLoading, hasMore: reviewsHasMore, loadMore: loadMoreReviews } = useReviews(tab === "review" ? id : null);
+  const { isBookmarked, toggle: toggleBookmark } = useBookmark(id);
 
   const reviews = useMemo(
     () =>
@@ -196,8 +199,13 @@ export default function BakeryDetailPage() {
             >
               <ArrowLeftIcon src={arrow_left} alt="" aria-hidden="true" />
             </CircleBtn>
-            <CircleBtn type="button" aria-label="즐겨찾기">
-              <HeartIcon src={heart} alt="" aria-hidden="true" />
+            <CircleBtn
+              type="button"
+              aria-label={isBookmarked ? "즐겨찾기 해제" : "즐겨찾기"}
+              aria-pressed={isBookmarked}
+              onClick={toggleBookmark}
+            >
+              <HeartIcon src={isBookmarked ? heart_on : heart_off} alt="" aria-hidden="true" />
             </CircleBtn>
           </HeroTop>
         </Hero>

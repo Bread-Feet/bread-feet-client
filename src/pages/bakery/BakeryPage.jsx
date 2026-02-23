@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, useCallback } from "react";
 import useSearch from "../../hooks/useSearch";
 import useBakeries from "./hooks/useBakeries";
+import { getValidAccessToken } from "../../lib/token-storage";
+import { createBookmark, deleteBookmark } from "../../lib/api/bookmark";
 
 export default function BakeryPage() {
   const nav = useNavigate();
@@ -18,10 +20,46 @@ export default function BakeryPage() {
   const { bakeries, isLoading, hasMore, loadMore } =
     useBakeries(debouncedQuery);
   const sentinelRef = useRef(null);
+  const [bookmarks, setBookmarks] = useState({});
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMore) loadMore();
   }, [isLoading, hasMore, loadMore]);
+
+  useEffect(() => {
+    setBookmarks((prev) => {
+      const next = { ...prev };
+      bakeries.forEach((b) => {
+        if (!(b.bakeryId in next)) {
+          next[b.bakeryId] = b.isBookmark ?? false;
+        }
+      });
+      return next;
+    });
+  }, [bakeries]);
+
+  const handleToggleLike = useCallback(
+    async (bakeryId) => {
+      const token = await getValidAccessToken();
+      if (!token) {
+        const returnUrl = window.location.pathname + window.location.search;
+        nav(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
+        return;
+      }
+      const current = bookmarks[bakeryId] ?? false;
+      setBookmarks((prev) => ({ ...prev, [bakeryId]: !current }));
+      try {
+        if (!current) {
+          await createBookmark({ bakeryId });
+        } else {
+          await deleteBookmark({ bakeryId });
+        }
+      } catch {
+        setBookmarks((prev) => ({ ...prev, [bakeryId]: current }));
+      }
+    },
+    [bookmarks, nav],
+  );
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -71,8 +109,8 @@ export default function BakeryPage() {
               .filter(Boolean)
               .join(" ")}
             imageUrl={b.imageUrl}
-            liked={false}
-            onToggleLike={() => {}}
+            liked={bookmarks[b.bakeryId] ?? false}
+            onToggleLike={() => handleToggleLike(b.bakeryId)}
             onClick={() => nav(`/bakery/${b.bakeryId}`)}
           />
         ))}
