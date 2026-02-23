@@ -29,3 +29,7 @@ export async function fetchBakery(bakeryId) {
 export async function fetchRandomBakeries(size = 4) {
   return apiClient.get(`/api/v1/bakeries/random?size=${size}`);
 }
+
+export async function deleteBakery(bakeryId) {
+  return apiClient.delete(`/api/v1/bakeries/${bakeryId}`);
+}

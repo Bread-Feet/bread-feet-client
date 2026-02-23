@@ -53,5 +53,12 @@ export default function useMyBakeries(keyword, sort) {
     }
   };
 
-  return { bakeries, isLoading, hasMore, loadMore };
+  const refresh = useCallback(() => {
+    cursorRef.current = null;
+    setHasMore(true);
+    setBakeries([]);
+    load(keyword, null);
+  }, [keyword, load]);
+
+  return { bakeries, isLoading, hasMore, loadMore, refresh };
 }
