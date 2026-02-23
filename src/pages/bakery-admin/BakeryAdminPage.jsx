@@ -36,8 +36,8 @@ export default function BakeryAdminPage() {
     return () => observer.disconnect();
   }, [handleLoadMore]);
 
-  const openModifyPage = () => {
-    nav("/mybakery/modify");
+  const openModifyPage = (bakeryId) => {
+    nav(`/mybakery/${bakeryId}/modify`);
   };
 
   const openDeleteModal = () => {
@@ -73,8 +73,8 @@ export default function BakeryAdminPage() {
             address={[b.address?.roadAddress, b.address?.detail]
               .filter(Boolean)
               .join(" ")}
-            onModifyClick={openModifyPage}
-            onDeleteClick={openDeleteModal}
+            onModifyClick={() => openModifyPage(b.bakeryId)}
+            onDeleteClick={() => openDeleteModal(b.bakeryId)}
           />
         ))}
         <Sentinel ref={sentinelRef} />

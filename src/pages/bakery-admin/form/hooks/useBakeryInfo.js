@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import { openDaumPostcode } from "../../../../lib/daum-postcode";
 
-export default function useBakeryInfo() {
-  const [bakeryName, setBakeryName] = useState("");
+export default function useBakeryInfo(initialData = null) {
+  const [bakeryName, setBakeryName] = useState(initialData?.name ?? "");
   const handleBakeryNameChange = (e) => {
     setBakeryName(e.target.value);
   };
 
-  const [lotNumber, setLotNumber] = useState("");
-  const [address, setAddress] = useState("");
-  const [detailedAddress, setDetailedAddress] = useState("");
+  const [lotNumber, setLotNumber] = useState(
+    initialData?.address?.lotNumber ?? "",
+  );
+  const [address, setAddress] = useState(
+    initialData?.address?.roadAddress ?? "",
+  );
+  const [detailedAddress, setDetailedAddress] = useState(
+    initialData?.address?.detail ?? "",
+  );
   const handleDetailedAddressChange = (e) => {
     setDetailedAddress(e.target.value);
   };
@@ -25,18 +31,17 @@ export default function useBakeryInfo() {
     }
   };
 
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(
+    initialData?.phoneNumber ?? "",
+  );
   const handlePhoneNumberChange = (e) => {
     setPhoneNumber(e.target.value);
   };
 
-  const [webpage, setWebpage] = useState("");
-  const handleWebpageChange = (e) => {
-    setWebpage(e.target.value);
-  };
-
   const [mainPhoto, setMainPhoto] = useState(null);
-  const [mainPhotoPreview, setMainPhotoPreview] = useState(null);
+  const [mainPhotoPreview, setMainPhotoPreview] = useState(
+    initialData?.imageUrl ?? null,
+  );
 
   const handleMainPhotoChange = (e) => {
     const file = e.target.files?.[0];
@@ -50,14 +55,14 @@ export default function useBakeryInfo() {
 
     setMainPhoto(file);
     setMainPhotoPreview((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
       return URL.createObjectURL(file);
     });
   };
 
   useEffect(() => {
     return () => {
-      if (mainPhotoPreview) {
+      if (mainPhotoPreview?.startsWith("blob:")) {
         URL.revokeObjectURL(mainPhotoPreview);
       }
     };
@@ -75,8 +80,6 @@ export default function useBakeryInfo() {
     handleSearchAddress,
     phoneNumber,
     handlePhoneNumberChange,
-    webpage,
-    handleWebpageChange,
     mainPhotoPreview,
     handleMainPhotoChange,
     mainPhoto,
