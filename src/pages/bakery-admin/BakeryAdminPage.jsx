@@ -10,14 +10,18 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import useSearch from "../../hooks/useSearch";
 import useMyBakeries from "./hooks/useMyBakeries";
+import useBakery from "../../hooks/useBakery";
 
 export default function BakeryAdminPage() {
   const nav = useNavigate();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingBakeryId, setDeletingBakeryId] = useState(null);
   const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
-  const { bakeries, isLoading, hasMore, loadMore } =
+  const { bakeries, isLoading, hasMore, loadMore, refresh } =
     useMyBakeries(debouncedQuery);
   const sentinelRef = useRef(null);
+
+  const { remove } = useBakery();
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMore) loadMore();
@@ -40,16 +44,21 @@ export default function BakeryAdminPage() {
     nav(`/mybakery/${bakeryId}/modify`);
   };
 
-  const openDeleteModal = () => {
+  const openDeleteModal = (bakeryId) => {
+    setDeletingBakeryId(bakeryId);
     setIsDeleteModalOpen(true);
   };
 
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
+    setDeletingBakeryId(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
+    await remove(deletingBakeryId);
     setIsDeleteModalOpen(false);
+    setDeletingBakeryId(null);
+    refresh();
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { fetchBakery } from "../lib/api/bakery";
+import { fetchBakery, deleteBakery } from "../lib/api/bakery";
 
 export default function useBakery(bakeryId) {
   const [bakery, setBakery] = useState(null);
@@ -27,5 +27,25 @@ export default function useBakery(bakeryId) {
     }
   }, [bakeryId]);
 
-  return { bakery, isLoading, error, load, loaded };
+  const remove = useCallback(async (id) => {
+    const targetId = id ?? bakeryId;
+    if (!targetId) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await deleteBakery(targetId);
+      return data;
+    } catch (err) {
+      console.error(err);
+      setError(err);
+      return null;
+    } finally {
+      setIsLoading(false);
+      setLoaded(true);
+    }
+  }, [bakeryId]);
+
+  return { bakery, isLoading, error, load, loaded, remove };
 }

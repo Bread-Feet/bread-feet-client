@@ -18,3 +18,7 @@ export async function fetchMyBakeries({ keyword, cursor, size = 10 } = {}) {
 export async function fetchBakery(bakeryId) {
   return apiClient.get(`/api/v1/bakeries/${bakeryId}`);
 }
+
+export async function deleteBakery(bakeryId) {
+  return apiClient.delete(`/api/v1/bakeries/${bakeryId}`);
+}
