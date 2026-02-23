@@ -1,72 +1,111 @@
 import styled from "styled-components";
-import arrow_left from "/arrow_left_black.svg";
+const arrow_left = "/arrow_left_black.svg";
 
-import { useNavigate } from "react-router-dom";
+import PageLayout from "../../../components/layout/PageLayout";
 
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import useBakery from "../../../hooks/useBakery";
 import useBakeryInfo from "./hooks/useBakeryInfo";
 import useOperatingHours from "./hooks/useOperatingHours";
 import useStoreTags from "./hooks/useStoreTags";
 import useMenuManager from "./hooks/useMenuManager";
+import useBakerySubmit from "./hooks/useBakerySubmit";
+import { makeBakeryDraftBody } from "./utils/makeBakeryBody";
 
 import BakeryInfoSection from "./sections/BakeryInfoSection";
 import OperationSection from "./sections/OperationSection";
 import MenuSection from "./sections/MenuSection";
 
 export default function BakeryModifyPage() {
+  const { id } = useParams();
   const nav = useNavigate();
+  const { bakery, isLoading, load } = useBakery(id);
 
-  const bakeryInfo = useBakeryInfo();
-  const operatingHours = useOperatingHours();
-  const storeTags = useStoreTags();
-  const menuManager = useMenuManager();
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  return (
-    <Page>
-      <PhoneFrame>
+  if (isLoading || !bakery) {
+    return (
+      <PageLayout>
         <Header>
           <ActionButton onClick={() => nav("/mybakery")}>
             <Image src={arrow_left} alt="뒤로가기" />
           </ActionButton>
           <Title>수정하기</Title>
         </Header>
-        <Form>
-          <BakeryInfoSection {...bakeryInfo} />
-          <OperationSection {...operatingHours} {...storeTags} />
-          <MenuSection {...menuManager} />
-          <SubmitButton>완료</SubmitButton>
-        </Form>
-      </PhoneFrame>
-    </Page>
-  );
+      </PageLayout>
+    );
+  }
+
+  return <BakeryModifyForm bakery={bakery} />;
 }
 
-const Page = styled.main`
-  min-height: var(--app-100vh);
-  height: var(--app-100vh);
-  background: var(--main-color4);
+function BakeryModifyForm({ bakery }) {
+  const { id } = useParams();
+  const nav = useNavigate();
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  const bakeryInfo = useBakeryInfo(bakery);
+  const operatingHours = useOperatingHours(bakery);
+  const tags = useStoreTags(bakery);
+  const menuManager = useMenuManager(bakery);
 
-  /* pwa iOS safe area */
-  padding-top: env(safe-area-inset-top);
-  padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-`;
+  const { submitUpdate, isSubmitting } = useBakerySubmit();
 
-const PhoneFrame = styled.section`
-  width: min(402px, 100vw);
-  height: var(--app-100vh);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  max-height: var(--app-100vh);
+    try {
+      const draftBody = makeBakeryDraftBody({
+        bakeryInfo,
+        operatingHours,
+        tags,
+        menuManager,
+      });
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-`;
+      const validMenus = Array.isArray(menuManager.menus)
+        ? menuManager.menus.filter(
+            (m) => typeof m?.name === "string" && m.name.trim().length > 0,
+          )
+        : [];
+
+      const files = {
+        mainPhoto: bakeryInfo.mainPhoto,
+        existingImageUrl: bakeryInfo.mainPhotoPreview,
+        menuPhotos: validMenus.map((m) => m?.photo ?? null),
+        existingMenuUrls: validMenus.map((m) => m?.photoPreview ?? null),
+      };
+
+      await submitUpdate({ bakeryId: Number(id), draftBody, files });
+      alert("빵집 수정 완료");
+      nav("/mybakery");
+    } catch (err) {
+      console.error(err);
+      alert(err?.message || "수정에 실패했습니다.");
+    }
+  };
+
+  return (
+    <PageLayout>
+      <Header>
+        <ActionButton onClick={() => nav("/mybakery")}>
+          <Image src={arrow_left} alt="뒤로가기" />
+        </ActionButton>
+        <Title>수정하기</Title>
+      </Header>
+      <Form onSubmit={handleSubmit}>
+        <BakeryInfoSection {...bakeryInfo} />
+        <OperationSection {...operatingHours} {...tags} />
+        <MenuSection {...menuManager} />
+        <SubmitButton disabled={isSubmitting}>
+          {isSubmitting ? "등록 중..." : "빵집 정보 수정하기"}
+        </SubmitButton>
+      </Form>
+    </PageLayout>
+  );
+}
 
 const Header = styled.header`
   width: 100%;
@@ -97,7 +136,7 @@ const Title = styled.h1`
   margin: 0;
 `;
 
-const Form = styled.div`
+const Form = styled.form`
   width: 100%;
 
   display: flex;

@@ -25,12 +25,40 @@ function App() {
           element={<LoginPopupCallbackPage />}
         />
         <Route path="/oauth/callback" element={<LoginPopupCallbackPage />} />
-        <Route path="/mybakery/register" element={<PrivateRoute><BakeryCreatePage /></PrivateRoute>} />
-        <Route path="/mybakery/modify" element={<PrivateRoute><BakeryModifyPage /></PrivateRoute>} />
-        <Route path="/bakery/:id/addreview" element={<PrivateRoute><BakeryReviewPage /></PrivateRoute>} />
+        <Route
+          path="/mybakery/register"
+          element={
+            <PrivateRoute>
+              <BakeryCreatePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/mybakery/:id/modify"
+          element={
+            <PrivateRoute>
+              <BakeryModifyPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/bakery/:id/addreview"
+          element={
+            <PrivateRoute>
+              <BakeryReviewPage />
+            </PrivateRoute>
+          }
+        />
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/mybakery" element={<PrivateRoute><BakeryAdminPage /></PrivateRoute>} />
+          <Route
+            path="/mybakery"
+            element={
+              <PrivateRoute>
+                <BakeryAdminPage />
+              </PrivateRoute>
+            }
+          />
           <Route path="/bakery" element={<BakeryPage />} />
           <Route path="/bakery/:id" element={<BakeryDetailPage />} />
         </Route>

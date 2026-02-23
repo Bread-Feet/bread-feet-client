@@ -14,3 +14,7 @@ export async function fetchMyBakeries({ keyword, cursor, size = 10 } = {}) {
   params.set("isMyBakery", true);
   return apiClient.get(`/api/v1/bakeries?${params}`);
 }
+
+export async function fetchBakery(bakeryId) {
+  return apiClient.get(`/api/v1/bakeries/${bakeryId}`);
+}
