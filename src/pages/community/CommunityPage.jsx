@@ -192,7 +192,7 @@ const List = styled.section`
   padding: 0 15px;
 `;
 
-const PostCard = styled.article`
+const PostCard = styled.button`
   position: relative;
 
   width: 100%;
@@ -200,6 +200,8 @@ const PostCard = styled.article`
   background: #fffcf5;
   border: 1.5px solid #ab9d8b;
   border-radius: 10px;
+  appearance: none;
+  -webkit-appearance: none;
 
   padding: 0 16px;
 
@@ -229,12 +231,14 @@ const StickerImg = styled.img`
   display: block;
 `;
 
-const CardTop = styled.div`
+const CardTop = styled.button`
   display: flex;
   align-items: center;
   gap: 1px;
+  background: none;
+  border: none;
 
-  padding: 8px 0;
+  padding: 8px 5px;
 
   cursor: pointer;
 `;
