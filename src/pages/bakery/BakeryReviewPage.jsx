@@ -23,12 +23,14 @@ export default function BakeryReviewPage() {
   const [photos, setPhotos] = useState([]); // [{ file, previewUrl }]
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileRef = useRef(null);
+  const photosRef = useRef(photos);
+  photosRef.current = photos;
 
   useEffect(() => {
     return () => {
-      photos.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      photosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
     };
-  }, [photos]);
+  }, []);
 
   const openFilePicker = () => {
     if (photos.length >= MAX_PHOTOS) return;
