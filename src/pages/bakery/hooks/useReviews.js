@@ -47,5 +47,12 @@ export default function useReviews(bakeryId) {
     }
   };
 
-  return { reviews, isLoading, hasMore, loadMore };
+  const refresh = useCallback(() => {
+    cursorRef.current = null;
+    setHasMore(true);
+    setReviews([]);
+    load(null);
+  }, [load]);
+
+  return { reviews, isLoading, hasMore, loadMore, refresh };
 }

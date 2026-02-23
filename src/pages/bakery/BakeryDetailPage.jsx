@@ -158,10 +158,19 @@ export default function BakeryDetailPage() {
     };
   }, [id]);
 
-  const { reviews: rawReviews, isLoading: reviewsLoading, hasMore: reviewsHasMore, loadMore: loadMoreReviews } = useReviews(tab === "review" ? id : null);
+  const {
+    reviews: rawReviews,
+    isLoading: reviewsLoading,
+    hasMore: reviewsHasMore,
+    loadMore: loadMoreReviews,
+  } = useReviews(tab === "review" ? id : null);
   const { isBookmarked, toggle: toggleBookmark } = useBookmark(id);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleEditReview = (review) => {
+    nav(`/bakery/${bakery.id}/editreview/${review.id}`, { state: { review } });
+  };
 
   const handleReviewCreate = async () => {
     const token = await getValidAccessToken();
@@ -189,7 +198,11 @@ export default function BakeryDetailPage() {
         createdAt: r.createdAt,
         rating: r.rating,
         content: r.content,
-        photos: r.thumbnailUrl ? [r.thumbnailUrl] : [],
+        photos: r.reviewPictureUrls?.length
+          ? r.reviewPictureUrls
+          : r.thumbnailUrl
+            ? [r.thumbnailUrl]
+            : [],
         likeCount: r.likeCount,
         isLiked: r.isLiked,
         isMyReview: r.isMyReview,
@@ -233,7 +246,11 @@ export default function BakeryDetailPage() {
               aria-pressed={isBookmarked}
               onClick={handleBookmarkToggle}
             >
-              <HeartIcon src={isBookmarked ? heart_on : heart_off} alt="" aria-hidden="true" />
+              <HeartIcon
+                src={isBookmarked ? heart_on : heart_off}
+                alt=""
+                aria-hidden="true"
+              />
             </CircleBtn>
           </HeroTop>
         </Hero>
@@ -297,6 +314,7 @@ export default function BakeryDetailPage() {
               hasMore={reviewsHasMore}
               onLoadMore={loadMoreReviews}
               onCreate={handleReviewCreate}
+              onEdit={handleEditReview}
             />
           )}
         </Card>
@@ -306,7 +324,9 @@ export default function BakeryDetailPage() {
         <LoginModal
           onConfirm={() => {
             setShowLoginModal(false);
-            nav(`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+            nav(
+              `/login?returnUrl=${encodeURIComponent(window.location.pathname)}`,
+            );
           }}
           onClose={() => setShowLoginModal(false)}
         />
@@ -354,7 +374,6 @@ function HomeSection({ bakery, status }) {
           </InfoIconWrap>
           <InfoText>{bakery.phoneNumber}</InfoText>
         </InfoRow>
-
 
         <InfoRowButton
           type="button"
@@ -450,7 +469,14 @@ function MenuSection({ menus, bestBread }) {
 }
 
 // review section
-function ReviewSection({ reviews, isLoading, hasMore, onLoadMore, onCreate }) {
+function ReviewSection({
+  reviews,
+  isLoading,
+  hasMore,
+  onLoadMore,
+  onCreate,
+  onEdit,
+}) {
   const sentinelRef = useRef(null);
 
   useEffect(() => {
@@ -491,6 +517,29 @@ function ReviewSection({ reviews, isLoading, hasMore, onLoadMore, onCreate }) {
                   <StarRating rating={r.rating} />
                 </StarRow>
               </HeaderMeta>
+
+              <ReviewActionCol>
+                <LikeBtn
+                  type="button"
+                  aria-label={r.isLiked ? "좋아요 취소" : "좋아요"}
+                >
+                  <LikeIcon
+                    src={r.isLiked ? heart_on : heart_off}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <LikeCount>{r.likeCount}</LikeCount>
+                </LikeBtn>
+                {r.isMyReview && (
+                  <MyReviewBtns>
+                    <ReviewActionBtn type="button" onClick={() => onEdit?.(r)}>
+                      수정
+                    </ReviewActionBtn>
+                    <ReviewActionDivider>|</ReviewActionDivider>
+                    <ReviewActionBtn type="button">삭제</ReviewActionBtn>
+                  </MyReviewBtns>
+                )}
+              </ReviewActionCol>
             </ReviewHeader>
 
             <ReviewBody>
@@ -921,7 +970,6 @@ const PinIcon = styled.img``;
 
 const PhoneIcon = styled.img``;
 
-
 const ClockIcon = styled.img``;
 
 const InfoText = styled.div`
@@ -929,7 +977,6 @@ const InfoText = styled.div`
   font-weight: 400;
   color: #000000;
 `;
-
 
 const InfoRowButton = styled.button`
   width: 100%;
@@ -1195,10 +1242,66 @@ const ReviewerAvatarImg = styled.img`
 `;
 
 const HeaderMeta = styled.div`
+  flex: 1;
   min-width: 0;
+
   display: flex;
   flex-direction: column;
   gap: 8px;
+`;
+
+const ReviewActionCol = styled.div`
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+`;
+
+const LikeBtn = styled.button`
+  border: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  padding: 2px;
+
+  cursor: pointer;
+`;
+
+const LikeIcon = styled.img`
+  width: 20px;
+  height: 20px;
+
+  filter: brightness(0%);
+`;
+
+const LikeCount = styled.span`
+  font-size: 10px;
+  color: #9e9e9e;
+`;
+
+const MyReviewBtns = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const ReviewActionBtn = styled.button`
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+  color: #9e9e9e;
+  cursor: pointer;
+  padding: 0;
+`;
+
+const ReviewActionDivider = styled.span`
+  font-size: 11px;
+  color: #d5d5d5;
 `;
 
 const MetaTopRow = styled.div`
@@ -1369,7 +1472,7 @@ const ReviewPhotoItem = styled.div`
   border-radius: 16px;
   overflow: hidden;
 
-  background: #f7dfe2;
+  background: #d4d4d4;
   border: 1px solid rgba(0, 0, 0, 0.06);
 `;
 

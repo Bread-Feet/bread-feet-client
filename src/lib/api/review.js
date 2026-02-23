@@ -15,8 +15,8 @@ export async function createReview({ bakeryId, content, rating, reviewPictureUrl
   });
 }
 
-export async function updateReview({ reviewId, content, rating }) {
-  return apiClient.put(`/api/v1/bakery/reviews/${reviewId}`, { content, rating });
+export async function updateReview({ reviewId, content, rating, reviewPictureUrls = [] }) {
+  return apiClient.put(`/api/v1/bakery/reviews/${reviewId}`, { content, rating, reviewPictureUrls });
 }
 
 export async function deleteReview({ reviewId }) {
