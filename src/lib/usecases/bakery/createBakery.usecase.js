@@ -9,6 +9,7 @@ function validateBakeryBody(body) {
   if (!a?.roadAddress?.trim()) throw new Error("도로명 주소는 필수입니다.");
 
   if (!body?.phoneNumber?.trim()) throw new Error("전화번호는 필수입니다.");
+
   if (!body?.businessHours?.trim()) throw new Error("영업 시간은 필수입니다.");
 
   if (!body?.bestBread?.trim()) throw new Error("대표 빵은 필수입니다.");
