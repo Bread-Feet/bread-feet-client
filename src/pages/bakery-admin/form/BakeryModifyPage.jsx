@@ -21,13 +21,13 @@ import MenuSection from "./sections/MenuSection";
 export default function BakeryModifyPage() {
   const { id } = useParams();
   const nav = useNavigate();
-  const { bakery, isLoading, error, load } = useBakery(id);
+  const { bakery, isLoading, error, load, loaded } = useBakery(id);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  if (isLoading || (!bakery && !error)) {
+  if (isLoading || !loaded) {
     return (
       <PageLayout>
         <Header>
