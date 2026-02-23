@@ -6,14 +6,22 @@ const isBlobUrl = (url) => typeof url === "string" && url.startsWith("blob:");
 
 function initMenusFromData(serverMenus, bestBread) {
   if (!Array.isArray(serverMenus) || serverMenus.length === 0) return [];
-  return serverMenus.map((m, idx) => ({
-    id: idx + 1,
-    name: m.name ?? "",
-    price: m.price ?? 0,
-    isMain: m.name === bestBread,
-    photoPreview: m.thumbnailUrl || logoImg,
-    photo: null,
-  }));
+  let mainAssigned = false;
+
+  return serverMenus.map((m, idx) => {
+    const isMatch = m.name === bestBread;
+    const isMain = !mainAssigned && isMatch;
+    if (isMain) mainAssigned = true;
+
+    return {
+      id: idx + 1,
+      name: m.name ?? "",
+      price: m.price ?? 0,
+      isMain,
+      photoPreview: m.thumbnailUrl || logoImg,
+      photo: null,
+    };
+  });
 }
 
 const DEFAULT_MENUS = [
