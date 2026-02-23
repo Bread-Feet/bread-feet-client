@@ -1,30 +1,88 @@
 import styled from "styled-components";
 const left_arrow = "/arrow_left_black.svg";
 const PlusIcon = "/plus.svg";
+const star = "/starIcon.svg";
 
 import PageLayout from "../../components/layout/PageLayout";
 
-import { useNavigate } from "react-router-dom";
-import { useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+
+import { uploadReviewPhoto } from "../../lib/api/imgUpload";
+import { createReview } from "../../lib/api/review";
 
 const MAX_LEN = 299;
 const MAX_PHOTOS = 5;
 
 export default function BakeryReviewPage() {
   const nav = useNavigate();
+  const { id: bakeryId } = useParams();
+
   const [text, setText] = useState("");
+  const [rating, setRating] = useState(0);
+  const [photos, setPhotos] = useState([]); // [{ file, previewUrl }]
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileRef = useRef(null);
+  const photosRef = useRef(photos);
+  photosRef.current = photos;
+
+  useEffect(() => {
+    return () => {
+      photosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    };
+  }, []);
 
   const openFilePicker = () => {
+    if (photos.length >= MAX_PHOTOS) return;
     fileRef.current?.click();
   };
 
   const handleFiles = (e) => {
     const files = Array.from(e.target.files || []);
-    console.log("selected:", files);
-
-    // TODO : photo preview and delete
+    const remaining = MAX_PHOTOS - photos.length;
+    const toAdd = files.slice(0, remaining);
+    const newPhotos = toAdd.map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+    setPhotos((prev) => [...prev, ...newPhotos]);
     e.target.value = "";
+  };
+
+  const removePhoto = (idx) => {
+    setPhotos((prev) => {
+      URL.revokeObjectURL(prev[idx].previewUrl);
+      return prev.filter((_, i) => i !== idx);
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (!text.trim()) {
+      alert("리뷰 내용을 입력해주세요.");
+      return;
+    }
+    if (rating === 0) {
+      alert("별점을 선택해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const reviewPictureUrls = await Promise.all(
+        photos.map((p) => uploadReviewPhoto({ file: p.file })),
+      );
+      await createReview({
+        bakeryId: Number(bakeryId),
+        content: text,
+        rating,
+        reviewPictureUrls,
+      });
+      nav(-1);
+    } catch (err) {
+      alert(err.message || "리뷰 등록에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -39,6 +97,8 @@ export default function BakeryReviewPage() {
 
       <ReviewWrapper>
         <Body>
+          <StarRatingInput rating={rating} onChange={setRating} />
+
           <TextAreaCard>
             <TextArea
               maxLength={MAX_LEN}
@@ -52,7 +112,10 @@ export default function BakeryReviewPage() {
           </Counter>
 
           <PhotoRow>
-            <PhotoInputBox onClick={openFilePicker}>
+            <PhotoInputBox
+              onClick={openFilePicker}
+              disabled={photos.length >= MAX_PHOTOS}
+            >
               <PlusImg src={PlusIcon} />
             </PhotoInputBox>
             <PhotoInput
@@ -63,19 +126,62 @@ export default function BakeryReviewPage() {
               onChange={handleFiles}
             />
             <PhotoWrapper>
-              {Array.from({ length: MAX_PHOTOS }).map((_, i) => {
-                return <PhotoBox key={i}></PhotoBox>;
-              })}
+              {photos.map((p, i) => (
+                <PhotoBox
+                  key={p.previewUrl}
+                  type="button"
+                  onClick={() => removePhoto(i)}
+                  aria-label="사진 삭제"
+                >
+                  <PreviewImg src={p.previewUrl} alt="" />
+                  <DeleteBadge aria-hidden="true">×</DeleteBadge>
+                </PhotoBox>
+              ))}
+              {Array.from({ length: MAX_PHOTOS - photos.length }).map(
+                (_, i) => (
+                  <EmptyPhotoBox key={`empty-${i}`} />
+                ),
+              )}
             </PhotoWrapper>
           </PhotoRow>
         </Body>
       </ReviewWrapper>
 
       <BottomBar>
-        {/* TODO : submit handdler */}
-        <SubmitBtn type="button">완료</SubmitBtn>
+        <SubmitBtn
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "등록 중..." : "완료"}
+        </SubmitBtn>
       </BottomBar>
     </PageLayout>
+  );
+}
+
+function StarRatingInput({ rating, onChange }) {
+  const [hovered, setHovered] = useState(0);
+  const display = hovered || rating;
+
+  return (
+    <StarRow>
+      {Array.from({ length: 5 }).map((_, i) => {
+        const value = i + 1;
+        return (
+          <StarBtn
+            key={i}
+            type="button"
+            aria-label={`별점 ${value}점`}
+            onClick={() => onChange(value)}
+            onMouseEnter={() => setHovered(value)}
+            onMouseLeave={() => setHovered(0)}
+          >
+            <StarIcon src={star} alt="" $dim={value > display} />
+          </StarBtn>
+        );
+      })}
+    </StarRow>
   );
 }
 
@@ -130,6 +236,28 @@ const RightSpace = styled.div``;
 
 const Body = styled.div`
   width: 100%;
+`;
+
+const StarRow = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  margin-bottom: 16px;
+`;
+
+const StarBtn = styled.button`
+  border: 0;
+  background: transparent;
+  padding: 4px;
+  cursor: pointer;
+`;
+
+const StarIcon = styled.img`
+  width: 32px;
+  height: 32px;
+  opacity: ${(p) => (p.$dim ? 0.25 : 1)};
+  transition: opacity 0.1s;
 `;
 
 const TextAreaCard = styled.div`
@@ -195,6 +323,11 @@ const PhotoInputBox = styled.button`
   padding: 0;
 
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
 `;
 
 const PlusImg = styled.img``;
@@ -212,11 +345,50 @@ const PhotoWrapper = styled.div`
 
 const PhotoBox = styled.button`
   flex: 0 0 120px;
+  width: 120px;
+  height: 135px;
 
   display: grid;
   place-items: center;
   position: relative;
   overflow: hidden;
+
+  border: 1px solid #e9e9e9;
+  border-radius: 20px;
+  background: #fff;
+
+  padding: 0;
+  cursor: pointer;
+`;
+
+const PreviewImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const DeleteBadge = styled.div`
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+`;
+
+const EmptyPhotoBox = styled.div`
+  flex: 0 0 120px;
+  width: 120px;
+  height: 135px;
 
   border: 1px solid #e9e9e9;
   border-radius: 20px;
@@ -244,4 +416,9 @@ const SubmitBtn = styled.button`
   padding: 15px 0;
 
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 `;

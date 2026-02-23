@@ -12,6 +12,7 @@ import PageLayout from "../../components/layout/PageLayout";
 
 import { useLayoutEffect, useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useReviews from "./hooks/useReviews";
 
 function toKoreanDay(jsDay) {
   switch (jsDay) {
@@ -148,32 +149,26 @@ export default function BakeryDetailPage() {
           thumbnailUrl: exampleImg,
         },
       ],
-
-      // review
-      reviews: [
-        {
-          id: 1,
-          authorName: "논서",
-          createdAt: "2026-01-30",
-          rating: 5,
-          content:
-            "맛있어요 남남 굿!\n굿굿남\n남남굿! | | | | | | | | | | !!!!!!!!!!!",
-          photos: [exampleImg, exampleImg],
-          avatarUrl: exampleImg,
-        },
-        {
-          id: 2,
-          authorName: "논서",
-          createdAt: "2026-01-30",
-          rating: 4,
-          content:
-            "가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하",
-          photos: [exampleImg, exampleImg, exampleImg, exampleImg, exampleImg],
-          avatarUrl: exampleImg,
-        },
-      ],
     };
   }, [id]);
+
+  const { reviews: rawReviews, isLoading: reviewsLoading, hasMore: reviewsHasMore, loadMore: loadMoreReviews } = useReviews(id);
+
+  const reviews = useMemo(
+    () =>
+      rawReviews.map((r) => ({
+        id: r.reviewId,
+        authorName: r.nickname,
+        createdAt: r.createdAt,
+        rating: r.rating,
+        content: r.content,
+        photos: r.thumbnailUrl ? [r.thumbnailUrl] : [],
+        likeCount: r.likeCount,
+        isLiked: r.isLiked,
+        isMyReview: r.isMyReview,
+      })),
+    [rawReviews],
+  );
 
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -261,7 +256,10 @@ export default function BakeryDetailPage() {
             <MenuSection menus={bakery.menus} bestBread={bakery.bestBread} />
           ) : (
             <ReviewSection
-              reviews={bakery.reviews}
+              reviews={reviews}
+              isLoading={reviewsLoading}
+              hasMore={reviewsHasMore}
+              onLoadMore={loadMoreReviews}
               onCreate={() => nav(`/bakery/${bakery.id}/addreview`)}
             />
           )}
@@ -414,7 +412,23 @@ function MenuSection({ menus, bestBread }) {
 }
 
 // review section
-function ReviewSection({ reviews, onCreate }) {
+function ReviewSection({ reviews, isLoading, hasMore, onLoadMore, onCreate }) {
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) onLoadMore();
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading, onLoadMore]);
+
   return (
     <ReviewWrap aria-label="리뷰">
       <ReviewCtaBtn type="button" onClick={onCreate} aria-label="리뷰 등록하기">
@@ -426,7 +440,7 @@ function ReviewSection({ reviews, onCreate }) {
           <ReviewItem key={r.id} role="listitem">
             <ReviewHeader>
               <ReviewerAvatar>
-                <ReviewerAvatarImg src={r.avatarUrl || exampleImg} alt="" />
+                <ReviewerAvatarImg src={exampleImg} alt="" />
               </ReviewerAvatar>
 
               <HeaderMeta>
@@ -449,6 +463,8 @@ function ReviewSection({ reviews, onCreate }) {
           </ReviewItem>
         ))}
       </ReviewList>
+
+      <div ref={sentinelRef} style={{ height: 1 }} />
     </ReviewWrap>
   );
 }
@@ -470,12 +486,11 @@ function StarRating({ rating }) {
   );
 }
 
-// TODO : date 형식보고 수정
 function formatDotDate(dateStr) {
-  const parts = typeof dateStr === "string" ? dateStr.split("-") : [];
-  if (parts.length !== 3) return dateStr;
-  const [y, m, day] = parts;
-  return `${y}. ${m}. ${day}`;
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr);
+  return `${d.getFullYear()}. ${String(d.getMonth() + 1).padStart(2, "0")}. ${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function ExpandableReviewText({ text, clampLines = 3 }) {
