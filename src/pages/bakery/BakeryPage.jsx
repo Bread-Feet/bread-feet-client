@@ -14,11 +14,12 @@ import { createBookmark, deleteBookmark } from "../../lib/api/bookmark";
 
 export default function BakeryPage() {
   const nav = useNavigate();
-  // TODO : add sort param to api
-  const [sortKey, setSortKey] = useState("RECENT"); // "RECENT" | "KOREAN"
+  const [sortKey, setSortKey] = useState(""); // "" for RECENT, "NAME" for KOREAN
   const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
-  const { bakeries, isLoading, hasMore, loadMore } =
-    useBakeries(debouncedQuery);
+  const { bakeries, isLoading, hasMore, loadMore } = useBakeries(
+    debouncedQuery,
+    sortKey,
+  );
   const sentinelRef = useRef(null);
   const [bookmarks, setBookmarks] = useState({});
 
@@ -83,17 +84,17 @@ export default function BakeryPage() {
       <ButtonWrapper>
         <SortButton
           type="button"
-          aria-pressed={sortKey === "RECENT"}
-          $active={sortKey === "RECENT"}
-          onClick={() => setSortKey("RECENT")}
+          aria-pressed={sortKey === ""}
+          $active={sortKey === ""}
+          onClick={() => setSortKey("")}
         >
           최근순
         </SortButton>
         <SortButton
           type="button"
-          aria-pressed={sortKey === "KOREAN"}
-          $active={sortKey === "KOREAN"}
-          onClick={() => setSortKey("KOREAN")}
+          aria-pressed={sortKey === "NAME"}
+          $active={sortKey === "NAME"}
+          onClick={() => setSortKey("NAME")}
         >
           가나다순
         </SortButton>

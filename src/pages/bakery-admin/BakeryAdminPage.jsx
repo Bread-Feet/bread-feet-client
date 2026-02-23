@@ -14,9 +14,12 @@ import useMyBakeries from "./hooks/useMyBakeries";
 export default function BakeryAdminPage() {
   const nav = useNavigate();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [sort, setSort] = useState(""); // "" for newest, "NAME" for name order
   const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
-  const { bakeries, isLoading, hasMore, loadMore } =
-    useMyBakeries(debouncedQuery);
+  const { bakeries, isLoading, hasMore, loadMore } = useMyBakeries(
+    debouncedQuery,
+    sort,
+  );
   const sentinelRef = useRef(null);
 
   const handleLoadMore = useCallback(() => {
@@ -63,6 +66,15 @@ export default function BakeryAdminPage() {
           빵집 등록하기
         </RegisterButton>
       </ButtonWrapper>
+      <SortWrapper>
+        <SortButton active={sort === ""} onClick={() => setSort("")}>
+          최신순
+        </SortButton>
+        <Divider>|</Divider>
+        <SortButton active={sort === "NAME"} onClick={() => setSort("NAME")}>
+          이름순
+        </SortButton>
+      </SortWrapper>
       <Scroll>
         {bakeries.map((b) => (
           <BakeryCard
@@ -101,7 +113,7 @@ const Sentinel = styled.div`
 
 const ButtonWrapper = styled.div`
   width: 100%;
-  padding: 12px 20px;
+  padding: 12px 20px 0 20px;
 `;
 
 const RegisterButton = styled.button`
@@ -116,6 +128,28 @@ const RegisterButton = styled.button`
 
   width: 100%;
   padding: 9px 0;
+`;
+
+const SortWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 20px;
+  gap: 8px;
+`;
+
+const SortButton = styled.button`
+  border: none;
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  color: ${(props) => (props.active ? "var(--main-color1)" : "#999999")};
+  font-weight: ${(props) => (props.active ? "600" : "400")};
+`;
+
+const Divider = styled.span`
+  font-size: 10px;
+  color: #eeeeee;
 `;
 
 const Scroll = styled.div`

@@ -10,7 +10,9 @@ import homeOn from "/navbar/home_on.svg";
 import mapOff from "/navbar/map_off.svg";
 import mapOn from "/navbar/map_on.svg";
 
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getValidAccessToken } from "../lib/token-storage";
 
 const tabs = [
   { key: "map", label: "위치", to: "/map", off: mapOff, on: mapOn },
@@ -21,6 +23,7 @@ const tabs = [
     extraPaths: ["/mybakery"],
     off: heartOff,
     on: heartOn,
+    requireAuth: true,
   },
   { key: "home", label: "홈", to: "/", off: homeOff, on: homeOn },
   {
@@ -36,31 +39,66 @@ const tabs = [
 export default function TabBar() {
   const nav = useNavigate();
   const { pathname } = useLocation();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const matchedTab = tabs.find((t) => {
     if (t.to === "/") return pathname === "/";
     if (pathname.startsWith(t.to)) return true;
     return t.extraPaths?.some((p) => pathname.startsWith(p)) ?? false;
   });
-  let activeKey;
-  if (matchedTab !== undefined && matchedTab !== null) {
-    activeKey = matchedTab.key;
-  } else {
-    activeKey = "home";
-  }
+  const activeKey = matchedTab?.key ?? "home";
+
+  const handleTabClick = async (t) => {
+    if (t.requireAuth) {
+      const token = await getValidAccessToken();
+      if (!token) {
+        setShowLoginModal(true);
+        return;
+      }
+    }
+    nav(t.to);
+  };
 
   return (
-    <TabBarWrapper>
-      {tabs.map((t) => {
-        const isActive = t.key === activeKey;
-        return (
-          <TabButton key={t.key} type="button" onClick={() => nav(t.to)}>
-            <TabIcon src={isActive ? t.on : t.off} alt="" />
-            <TabLabel>{t.label}</TabLabel>
-          </TabButton>
-        );
-      })}
-    </TabBarWrapper>
+    <>
+      <TabBarWrapper>
+        {tabs.map((t) => {
+          const isActive = t.key === activeKey;
+          return (
+            <TabButton key={t.key} type="button" onClick={() => handleTabClick(t)}>
+              <TabIcon src={isActive ? t.on : t.off} alt="" />
+              <TabLabel>{t.label}</TabLabel>
+            </TabButton>
+          );
+        })}
+      </TabBarWrapper>
+
+      {showLoginModal && (
+        <LoginModal
+          onConfirm={() => {
+            setShowLoginModal(false);
+            nav(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+          }}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
+    </>
+  );
+}
+
+function LoginModal({ onConfirm, onClose }) {
+  return (
+    <ModalOverlay onClick={onClose}>
+      <ModalBox onClick={(e) => e.stopPropagation()}>
+        <ModalCloseBtn type="button" onClick={onClose} aria-label="닫기">
+          ×
+        </ModalCloseBtn>
+        <ModalMessage>로그인하시겠습니까?</ModalMessage>
+        <ModalConfirmBtn type="button" onClick={onConfirm}>
+          네
+        </ModalConfirmBtn>
+      </ModalBox>
+    </ModalOverlay>
   );
 }
 
@@ -102,4 +140,70 @@ const TabLabel = styled.span`
   font-size: 12px;
   font-weight: 400;
   color: var(--gray-color);
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+`;
+
+const ModalBox = styled.div`
+  position: relative;
+  width: 280px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 24px 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+`;
+
+const ModalCloseBtn = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 16px;
+
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: #9e9e9e;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
+`;
+
+const ModalMessage = styled.p`
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+  text-align: center;
+`;
+
+const ModalConfirmBtn = styled.button`
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--main-color4);
+
+  width: 100%;
+  padding: 13px 0;
+
+  border: 0;
+  border-radius: 14px;
+  background: var(--main-color2);
+
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.85;
+  }
 `;
