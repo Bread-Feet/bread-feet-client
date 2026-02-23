@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import styled from "styled-components";
 
-export default function DeleteConfirmModal({ open, onClose, onConfirm }) {
+export default function DeleteConfirmModal({ open, onClose, onConfirm, disabled }) {
   useEffect(() => {
     if (!open) return;
 
@@ -41,11 +41,11 @@ export default function DeleteConfirmModal({ open, onClose, onConfirm }) {
           삭제된 내용은 복구할 수 없습니다.
         </Description>
         <ButtonRow>
-          <CancelButton type="button" onClick={onClose}>
+          <CancelButton type="button" onClick={onClose} disabled={disabled}>
             취소
           </CancelButton>
-          <DeleteButton type="button" onClick={() => onConfirm?.()}>
-            삭제하기
+          <DeleteButton type="button" onClick={() => onConfirm?.()} disabled={disabled}>
+            {disabled ? "삭제 중..." : "삭제하기"}
           </DeleteButton>
         </ButtonRow>
       </Modal>

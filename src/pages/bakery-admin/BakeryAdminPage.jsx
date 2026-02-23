@@ -21,7 +21,7 @@ export default function BakeryAdminPage() {
     useMyBakeries(debouncedQuery);
   const sentinelRef = useRef(null);
 
-  const { remove } = useBakery();
+  const { remove, isDeleting } = useBakery();
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMore) loadMore();
@@ -55,7 +55,8 @@ export default function BakeryAdminPage() {
   };
 
   const confirmDelete = async () => {
-    await remove(deletingBakeryId);
+    const result = await remove(deletingBakeryId);
+    if (result === null) return;
     setIsDeleteModalOpen(false);
     setDeletingBakeryId(null);
     refresh();
@@ -92,6 +93,7 @@ export default function BakeryAdminPage() {
         open={isDeleteModalOpen}
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
+        disabled={isDeleting}
       />
     </PageLayout>
   );

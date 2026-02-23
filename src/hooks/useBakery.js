@@ -7,6 +7,8 @@ export default function useBakery(bakeryId) {
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const load = useCallback(async () => {
     if (!bakeryId) return;
 
@@ -27,25 +29,35 @@ export default function useBakery(bakeryId) {
     }
   }, [bakeryId]);
 
-  const remove = useCallback(async (id) => {
-    const targetId = id ?? bakeryId;
-    if (!targetId) return;
+  const remove = useCallback(
+    async (id) => {
+      const targetId = id ?? bakeryId;
+      if (!targetId) return;
 
-    setIsLoading(true);
-    setError(null);
+      setIsDeleting(true);
+      setError(null);
 
-    try {
-      const data = await deleteBakery(targetId);
-      return data;
-    } catch (err) {
-      console.error(err);
-      setError(err);
-      return null;
-    } finally {
-      setIsLoading(false);
-      setLoaded(true);
-    }
-  }, [bakeryId]);
+      try {
+        const data = await deleteBakery(targetId);
+        return data;
+      } catch (err) {
+        console.error(err);
+        setError(err);
+        return null;
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    [bakeryId],
+  );
 
-  return { bakery, isLoading, error, load, loaded, remove };
+  return {
+    bakery,
+    isLoading,
+    error,
+    load,
+    loaded,
+    remove,
+    isDeleting,
+  };
 }
