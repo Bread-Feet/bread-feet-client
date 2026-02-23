@@ -9,19 +9,58 @@ import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, useCallback } from "react";
 import useSearch from "../../hooks/useSearch";
 import useBakeries from "./hooks/useBakeries";
+import { getValidAccessToken } from "../../lib/token-storage";
+import { createBookmark, deleteBookmark } from "../../lib/api/bookmark";
 
 export default function BakeryPage() {
   const nav = useNavigate();
-  // TODO : add sort param to api
-  const [sortKey, setSortKey] = useState("RECENT"); // "RECENT" | "KOREAN"
+  const [sortKey, setSortKey] = useState(""); // "" for RECENT, "NAME" for KOREAN
   const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
-  const { bakeries, isLoading, hasMore, loadMore } =
-    useBakeries(debouncedQuery);
+  const { bakeries, isLoading, hasMore, loadMore } = useBakeries(
+    debouncedQuery,
+    sortKey,
+  );
   const sentinelRef = useRef(null);
+  const [bookmarks, setBookmarks] = useState({});
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMore) loadMore();
   }, [isLoading, hasMore, loadMore]);
+
+  useEffect(() => {
+    setBookmarks((prev) => {
+      const next = { ...prev };
+      bakeries.forEach((b) => {
+        if (!(b.bakeryId in next)) {
+          next[b.bakeryId] = b.isBookmark ?? false;
+        }
+      });
+      return next;
+    });
+  }, [bakeries]);
+
+  const handleToggleLike = useCallback(
+    async (bakeryId) => {
+      const token = await getValidAccessToken();
+      if (!token) {
+        const returnUrl = window.location.pathname + window.location.search;
+        nav(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
+        return;
+      }
+      const current = bookmarks[bakeryId] ?? false;
+      setBookmarks((prev) => ({ ...prev, [bakeryId]: !current }));
+      try {
+        if (!current) {
+          await createBookmark({ bakeryId });
+        } else {
+          await deleteBookmark({ bakeryId });
+        }
+      } catch {
+        setBookmarks((prev) => ({ ...prev, [bakeryId]: current }));
+      }
+    },
+    [bookmarks, nav],
+  );
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -45,17 +84,17 @@ export default function BakeryPage() {
       <ButtonWrapper>
         <SortButton
           type="button"
-          aria-pressed={sortKey === "RECENT"}
-          $active={sortKey === "RECENT"}
-          onClick={() => setSortKey("RECENT")}
+          aria-pressed={sortKey === ""}
+          $active={sortKey === ""}
+          onClick={() => setSortKey("")}
         >
           최근순
         </SortButton>
         <SortButton
           type="button"
-          aria-pressed={sortKey === "KOREAN"}
-          $active={sortKey === "KOREAN"}
-          onClick={() => setSortKey("KOREAN")}
+          aria-pressed={sortKey === "NAME"}
+          $active={sortKey === "NAME"}
+          onClick={() => setSortKey("NAME")}
         >
           가나다순
         </SortButton>
@@ -71,8 +110,8 @@ export default function BakeryPage() {
               .filter(Boolean)
               .join(" ")}
             imageUrl={b.imageUrl}
-            liked={false}
-            onToggleLike={() => {}}
+            liked={bookmarks[b.bakeryId] ?? false}
+            onToggleLike={() => handleToggleLike(b.bakeryId)}
             onClick={() => nav(`/bakery/${b.bakeryId}`)}
           />
         ))}

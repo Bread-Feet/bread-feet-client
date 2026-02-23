@@ -1,10 +1,10 @@
 import styled from "styled-components";
 const arrow_left = "/arrow_left_white.svg";
-const heart = "/heart_off.svg";
+const heart_off = "/heart_off.svg";
+const heart_on = "/heart_on.svg";
 const star = "/starIcon.svg";
 const location = "/location.svg";
 const tell = "/tell.svg";
-const link = "/link.svg";
 const clock = "/clock.svg";
 const dropboxIcon = "/dropboxIcon.svg";
 
@@ -13,6 +13,9 @@ import PageLayout from "../../components/layout/PageLayout";
 import { useLayoutEffect, useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useReviews from "./hooks/useReviews";
+import useBookmark from "./hooks/useBookmark";
+import { fetchBakery } from "../../lib/api/bakery";
+import { getValidAccessToken } from "../../lib/token-storage";
 
 function toKoreanDay(jsDay) {
   switch (jsDay) {
@@ -101,58 +104,82 @@ function parseHHMM(s) {
 }
 
 const exampleImg = "/examplePhoto.jpg";
+
+function parseBusinessHours(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function BakeryDetailPage() {
   const nav = useNavigate();
   const { id } = useParams();
 
   const [tab, setTab] = useState("home");
+  const [bakery, setBakery] = useState(null);
+  const [bakeryLoading, setBakeryLoading] = useState(true);
 
-  const bakery = useMemo(() => {
-    return {
-      id,
-      name: "맛있는 빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "101호",
-        lotNumber: "1-45",
-        roadAddress: "서울특별시 강남구 테헤란로 123",
-      },
-      imageUrl: exampleImg,
-      phoneNumber: "010-1234-5678",
-      websiteUrl: "https://www.instagram.com/",
-      businessHours: [
-        { day: "월", time: "09:00 - 18:00" },
-        { day: "화", time: "09:00 - 18:00" },
-        { day: "수", time: "09:00 - 18:00" },
-        { day: "목", time: "09:00 - 10:00" },
-        { day: "금", time: "09:00 - 18:00" },
-        { day: "토", time: "00:00 - 00:00" },
-        { day: "일", time: "" },
-      ],
-      bestBread: "소금빵",
-      features: {
-        beverage: true,
-        dineIn: true,
-        waiting: "onsite", // "onsite" | "online" | "none"
-        parking: true,
-      },
-      menus: [
-        {
-          name: "소금빵",
-          price: 3000,
-          thumbnailUrl: exampleImg,
-        },
-        {
-          name: "바게트",
-          price: 4500,
-          thumbnailUrl: exampleImg,
-        },
-      ],
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    setBakeryLoading(true);
+    fetchBakery(id)
+      .then((data) => {
+        if (cancelled) return;
+        setBakery({
+          id,
+          name: data.name,
+          rating: data.averageRating ?? 0,
+          reviewCount: data.reviewCount ?? 0,
+          address: data.address ?? {},
+          imageUrl: data.imageUrl,
+          phoneNumber: data.phoneNumber,
+          businessHours: parseBusinessHours(data.businessHours),
+          bestBread: data.bestBread,
+          features: {
+            beverage: data.isDrink ?? false,
+            dineIn: data.isEatIn ?? false,
+            waiting: data.isWaiting ? "onsite" : "none",
+            parking: data.isParking ?? false,
+          },
+          menus: data.menus ?? [],
+        });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setBakeryLoading(false);
+      });
+    return () => {
+      cancelled = true;
     };
   }, [id]);
 
-  const { reviews: rawReviews, isLoading: reviewsLoading, hasMore: reviewsHasMore, loadMore: loadMoreReviews } = useReviews(id);
+  const { reviews: rawReviews, isLoading: reviewsLoading, hasMore: reviewsHasMore, loadMore: loadMoreReviews } = useReviews(tab === "review" ? id : null);
+  const { isBookmarked, toggle: toggleBookmark } = useBookmark(id);
+
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleReviewCreate = async () => {
+    const token = await getValidAccessToken();
+    if (!token) {
+      setShowLoginModal(true);
+      return;
+    }
+    nav(`/bakery/${bakery.id}/addreview`);
+  };
+
+  const handleBookmarkToggle = async () => {
+    const token = await getValidAccessToken();
+    if (!token) {
+      setShowLoginModal(true);
+      return;
+    }
+    toggleBookmark();
+  };
 
   const reviews = useMemo(
     () =>
@@ -177,9 +204,13 @@ export default function BakeryDetailPage() {
   }, []);
 
   const status = useMemo(
-    () => getOpenStatus(bakery.businessHours, now),
-    [bakery.businessHours, now],
+    () => getOpenStatus(bakery?.businessHours ?? [], now),
+    [bakery?.businessHours, now],
   );
+
+  if (bakeryLoading || !bakery) {
+    return <PageLayout />;
+  }
 
   return (
     <PageLayout>
@@ -196,8 +227,13 @@ export default function BakeryDetailPage() {
             >
               <ArrowLeftIcon src={arrow_left} alt="" aria-hidden="true" />
             </CircleBtn>
-            <CircleBtn type="button" aria-label="즐겨찾기">
-              <HeartIcon src={heart} alt="" aria-hidden="true" />
+            <CircleBtn
+              type="button"
+              aria-label={isBookmarked ? "즐겨찾기 해제" : "즐겨찾기"}
+              aria-pressed={isBookmarked}
+              onClick={handleBookmarkToggle}
+            >
+              <HeartIcon src={isBookmarked ? heart_on : heart_off} alt="" aria-hidden="true" />
             </CircleBtn>
           </HeroTop>
         </Hero>
@@ -260,11 +296,21 @@ export default function BakeryDetailPage() {
               isLoading={reviewsLoading}
               hasMore={reviewsHasMore}
               onLoadMore={loadMoreReviews}
-              onCreate={() => nav(`/bakery/${bakery.id}/addreview`)}
+              onCreate={handleReviewCreate}
             />
           )}
         </Card>
       </Scroll>
+
+      {showLoginModal && (
+        <LoginModal
+          onConfirm={() => {
+            setShowLoginModal(false);
+            nav(`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+          }}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
     </PageLayout>
   );
 }
@@ -309,14 +355,6 @@ function HomeSection({ bakery, status }) {
           <InfoText>{bakery.phoneNumber}</InfoText>
         </InfoRow>
 
-        <InfoRow>
-          <InfoIconWrap>
-            <LinkIcon src={link} />
-          </InfoIconWrap>
-          <InfoLink href={bakery.websiteUrl} target="_blank" rel="noreferrer">
-            {bakery.websiteUrl}
-          </InfoLink>
-        </InfoRow>
 
         <InfoRowButton
           type="button"
@@ -883,7 +921,6 @@ const PinIcon = styled.img``;
 
 const PhoneIcon = styled.img``;
 
-const LinkIcon = styled.img``;
 
 const ClockIcon = styled.img``;
 
@@ -893,20 +930,6 @@ const InfoText = styled.div`
   color: #000000;
 `;
 
-const InfoLink = styled.a`
-  font-size: 14px;
-  font-weight: 400;
-  color: #000000;
-
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:active {
-    opacity: 0.85;
-  }
-`;
 
 const InfoRowButton = styled.button`
   width: 100%;
@@ -1408,4 +1431,86 @@ const CarouselArrowIcon = styled.img`
   width: 18px;
   height: 18px;
   transform: rotate(${(p) => (p.$flip ? "180deg" : "0deg")});
+`;
+
+function LoginModal({ onConfirm, onClose }) {
+  return (
+    <ModalOverlay onClick={onClose}>
+      <ModalBox onClick={(e) => e.stopPropagation()}>
+        <ModalCloseBtn type="button" onClick={onClose} aria-label="닫기">
+          ×
+        </ModalCloseBtn>
+        <ModalMessage>로그인하시겠습니까?</ModalMessage>
+        <ModalConfirmBtn type="button" onClick={onConfirm}>
+          네
+        </ModalConfirmBtn>
+      </ModalBox>
+    </ModalOverlay>
+  );
+}
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+`;
+
+const ModalBox = styled.div`
+  position: relative;
+  width: 280px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 24px 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+`;
+
+const ModalCloseBtn = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 16px;
+
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: #9e9e9e;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
+`;
+
+const ModalMessage = styled.p`
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+  text-align: center;
+`;
+
+const ModalConfirmBtn = styled.button`
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--main-color4);
+
+  width: 100%;
+  padding: 13px 0;
+
+  border: 0;
+  border-radius: 14px;
+  background: var(--main-color2);
+
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.85;
+  }
 `;
