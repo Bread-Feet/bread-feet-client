@@ -13,6 +13,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import BakeryPage from "./pages/bakery/BakeryPage";
 import BakeryDetailPage from "./pages/bakery/BakeryDetailPage";
 import BakeryReviewPage from "./pages/bakery/BakeryReviewPage";
+import BakeryEditReviewPage from "./pages/bakery/BakeryEditReviewPage";
 
 import CommunityPage from "./pages/community/CommunityPage";
 
@@ -48,6 +49,14 @@ function App() {
           element={
             <PrivateRoute>
               <BakeryReviewPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/bakery/:id/editreview/:reviewId"
+          element={
+            <PrivateRoute>
+              <BakeryEditReviewPage />
             </PrivateRoute>
           }
         />
