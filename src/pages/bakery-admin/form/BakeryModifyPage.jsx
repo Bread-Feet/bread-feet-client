@@ -21,13 +21,13 @@ import MenuSection from "./sections/MenuSection";
 export default function BakeryModifyPage() {
   const { id } = useParams();
   const nav = useNavigate();
-  const { bakery, isLoading, load } = useBakery(id);
+  const { bakery, isLoading, error, load, loaded } = useBakery(id);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  if (isLoading || !bakery) {
+  if (isLoading || !loaded) {
     return (
       <PageLayout>
         <Header>
@@ -36,6 +36,22 @@ export default function BakeryModifyPage() {
           </ActionButton>
           <Title>수정하기</Title>
         </Header>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <Header>
+          <ActionButton onClick={() => nav("/mybakery")}>
+            <Image src={arrow_left} alt="뒤로가기" />
+          </ActionButton>
+          <Title>수정하기</Title>
+        </Header>
+        <p style={{ padding: "20px", textAlign: "center" }}>
+          데이터를 불러오지 못했습니다.
+        </p>
       </PageLayout>
     );
   }
@@ -100,7 +116,7 @@ function BakeryModifyForm({ bakery }) {
         <OperationSection {...operatingHours} {...tags} />
         <MenuSection {...menuManager} />
         <SubmitButton disabled={isSubmitting}>
-          {isSubmitting ? "등록 중..." : "빵집 정보 수정하기"}
+          {isSubmitting ? "수정 중..." : "빵집 정보 수정하기"}
         </SubmitButton>
       </Form>
     </PageLayout>

@@ -5,6 +5,5 @@ export async function submitBakeryForm(body) {
 }
 
 export async function updateBakeryForm(body) {
-  console.log(body);
   return apiClient.put("/api/v1/bakeries", body);
 }
