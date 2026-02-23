@@ -16,7 +16,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import useReviews from "./hooks/useReviews";
 import useBookmark from "./hooks/useBookmark";
 import { fetchBakery } from "../../lib/api/bakery";
-import { deleteReview } from "../../lib/api/review";
+import {
+  deleteReview,
+  createReviewLike,
+  deleteReviewLike,
+} from "../../lib/api/review";
 import { getValidAccessToken } from "../../lib/token-storage";
 
 function toKoreanDay(jsDay) {
@@ -168,6 +172,7 @@ export default function BakeryDetailPage() {
   const { isBookmarked, toggle: toggleBookmark } = useBookmark(id);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [localLikes, setLocalLikes] = useState(new Map());
   const [deletingReviewId, setDeletingReviewId] = useState(null);
   const [isReviewDeleting, setIsReviewDeleting] = useState(false);
   const [reviewDeleteErrorVisible, setReviewDeleteErrorVisible] =
@@ -189,11 +194,44 @@ export default function BakeryDetailPage() {
     try {
       await deleteReview({ reviewId: deletingReviewId });
       setDeletingReviewId(null);
+      setLocalLikes(new Map());
       refreshReviews();
     } catch {
       setReviewDeleteErrorVisible(true);
     } finally {
       setIsReviewDeleting(false);
+    }
+  };
+
+  const handleLikeToggle = async (r) => {
+    const token = await getValidAccessToken();
+    if (!token) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    const wasLiked = r.isLiked;
+    const newIsLiked = !wasLiked;
+    const newCount = r.likeCount + (newIsLiked ? 1 : -1);
+
+    // 낙관적 업데이트
+    setLocalLikes((prev) =>
+      new Map(prev).set(r.id, { isLiked: newIsLiked, likeCount: newCount }),
+    );
+
+    try {
+      if (wasLiked) {
+        await deleteReviewLike({ reviewId: r.id });
+      } else {
+        await createReviewLike({ reviewId: r.id });
+      }
+    } catch {
+      // 실패 시 롤백
+      setLocalLikes((prev) => {
+        const next = new Map(prev);
+        next.delete(r.id);
+        return next;
+      });
     }
   };
 
@@ -221,22 +259,25 @@ export default function BakeryDetailPage() {
 
   const reviews = useMemo(
     () =>
-      rawReviews.map((r) => ({
-        id: r.reviewId,
-        authorName: r.nickname,
-        createdAt: r.createdAt,
-        rating: r.rating,
-        content: r.content,
-        photos: r.reviewPictureUrls?.length
-          ? r.reviewPictureUrls
-          : r.thumbnailUrl
-            ? [r.thumbnailUrl]
-            : [],
-        likeCount: r.likeCount,
-        isLiked: r.isLiked,
-        isMyReview: r.isMyReview,
-      })),
-    [rawReviews],
+      rawReviews.map((r) => {
+        const local = localLikes.get(r.reviewId);
+        return {
+          id: r.reviewId,
+          authorName: r.nickname,
+          createdAt: r.createdAt,
+          rating: r.rating,
+          content: r.content,
+          photos: r.reviewPictureUrls?.length
+            ? r.reviewPictureUrls
+            : r.thumbnailUrl
+              ? [r.thumbnailUrl]
+              : [],
+          likeCount: local?.likeCount ?? r.likeCount,
+          isLiked: local?.isLiked ?? r.isLiked,
+          isMyReview: r.isMyReview,
+        };
+      }),
+    [rawReviews, localLikes],
   );
 
   const [now, setNow] = useState(() => new Date());
@@ -343,6 +384,7 @@ export default function BakeryDetailPage() {
               hasMore={reviewsHasMore}
               onLoadMore={loadMoreReviews}
               onCreate={handleReviewCreate}
+              onLike={handleLikeToggle}
               onEdit={handleEditReview}
               onDelete={openReviewDeleteModal}
             />
@@ -489,7 +531,7 @@ function MenuSection({ menus, bestBread }) {
                   {m.thumbnailUrl ? (
                     <MenuThumbImg src={m.thumbnailUrl} alt="" />
                   ) : (
-                    <MenuThumbFallback aria-hidden="true">🥐</MenuThumbFallback>
+                    <MenuThumbFallback aria-hidden="true" />
                   )}
                 </MenuThumb>
 
@@ -517,6 +559,7 @@ function ReviewSection({
   hasMore,
   onLoadMore,
   onCreate,
+  onLike,
   onEdit,
   onDelete,
 }) {
@@ -565,11 +608,13 @@ function ReviewSection({
                 <LikeBtn
                   type="button"
                   aria-label={r.isLiked ? "좋아요 취소" : "좋아요"}
+                  onClick={() => onLike?.(r)}
                 >
                   <LikeIcon
                     src={r.isLiked ? heart_on : heart_off}
                     alt=""
                     aria-hidden="true"
+                    $liked={r.isLiked}
                   />
                   <LikeCount>{r.likeCount}</LikeCount>
                 </LikeBtn>
@@ -1324,7 +1369,7 @@ const LikeIcon = styled.img`
   width: 20px;
   height: 20px;
 
-  filter: brightness(0%);
+  filter: ${(p) => (p.$liked ? "none" : "brightness(0%)")};
 `;
 
 const LikeCount = styled.span`
