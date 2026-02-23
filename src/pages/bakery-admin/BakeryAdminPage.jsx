@@ -21,7 +21,7 @@ export default function BakeryAdminPage() {
     useMyBakeries(debouncedQuery);
   const sentinelRef = useRef(null);
 
-  const { remove, isDeleting } = useBakery();
+  const { remove, isDeleting, error: deleteError } = useBakery();
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMore) loadMore();
@@ -94,6 +94,7 @@ export default function BakeryAdminPage() {
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         disabled={isDeleting}
+        errorMessage={deleteError ? "삭제에 실패했습니다. 다시 시도해주세요." : null}
       />
     </PageLayout>
   );

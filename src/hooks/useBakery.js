@@ -32,7 +32,7 @@ export default function useBakery(bakeryId) {
   const remove = useCallback(
     async (id) => {
       const targetId = id ?? bakeryId;
-      if (!targetId) return;
+      if (!targetId) return null;
 
       setIsDeleting(true);
       setError(null);
