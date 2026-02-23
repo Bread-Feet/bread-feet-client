@@ -104,7 +104,7 @@ const TitleDropdown = styled.div`
   border: 1px solid #e5e5e5;
   border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  adow: 0 8px 20px rgba(0, 0, 0, 0.08);
 
   padding: 4px;
 `;
