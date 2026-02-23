@@ -21,7 +21,8 @@ export default function BakeryAdminPage() {
     useMyBakeries(debouncedQuery);
   const sentinelRef = useRef(null);
 
-  const { remove, isDeleting, error: deleteError } = useBakery();
+  const { remove, isDeleting } = useBakery();
+  const [deleteErrorVisible, setDeleteErrorVisible] = useState(false);
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMore) loadMore();
@@ -45,18 +46,24 @@ export default function BakeryAdminPage() {
   };
 
   const openDeleteModal = (bakeryId) => {
+    setDeleteErrorVisible(false);
     setDeletingBakeryId(bakeryId);
     setIsDeleteModalOpen(true);
   };
 
   const closeDeleteModal = () => {
+    setDeleteErrorVisible(false);
     setIsDeleteModalOpen(false);
     setDeletingBakeryId(null);
   };
 
   const confirmDelete = async () => {
+    setDeleteErrorVisible(false);
     const result = await remove(deletingBakeryId);
-    if (result === null) return;
+    if (result === null) {
+      setDeleteErrorVisible(true);
+      return;
+    }
     setIsDeleteModalOpen(false);
     setDeletingBakeryId(null);
     refresh();
@@ -94,7 +101,7 @@ export default function BakeryAdminPage() {
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         disabled={isDeleting}
-        errorMessage={deleteError ? "삭제에 실패했습니다. 다시 시도해주세요." : null}
+        errorMessage={deleteErrorVisible ? "삭제에 실패했습니다. 다시 시도해주세요." : null}
       />
     </PageLayout>
   );
