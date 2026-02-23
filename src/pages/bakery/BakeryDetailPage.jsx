@@ -7,6 +7,7 @@ const location = "/location.svg";
 const tell = "/tell.svg";
 const clock = "/clock.svg";
 const dropboxIcon = "/dropboxIcon.svg";
+const mascot = "/mascot.svg";
 
 import PageLayout from "../../components/layout/PageLayout";
 
@@ -15,6 +16,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import useReviews from "./hooks/useReviews";
 import useBookmark from "./hooks/useBookmark";
 import { fetchBakery } from "../../lib/api/bakery";
+import { deleteReview } from "../../lib/api/review";
 import { getValidAccessToken } from "../../lib/token-storage";
 
 function toKoreanDay(jsDay) {
@@ -103,8 +105,6 @@ function parseHHMM(s) {
   return hh * 60 + mm;
 }
 
-const exampleImg = "/examplePhoto.jpg";
-
 function parseBusinessHours(raw) {
   if (!raw) return [];
   try {
@@ -163,10 +163,39 @@ export default function BakeryDetailPage() {
     isLoading: reviewsLoading,
     hasMore: reviewsHasMore,
     loadMore: loadMoreReviews,
+    refresh: refreshReviews,
   } = useReviews(tab === "review" ? id : null);
   const { isBookmarked, toggle: toggleBookmark } = useBookmark(id);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [deletingReviewId, setDeletingReviewId] = useState(null);
+  const [isReviewDeleting, setIsReviewDeleting] = useState(false);
+  const [reviewDeleteErrorVisible, setReviewDeleteErrorVisible] =
+    useState(false);
+
+  const openReviewDeleteModal = (reviewId) => {
+    setReviewDeleteErrorVisible(false);
+    setDeletingReviewId(reviewId);
+  };
+
+  const closeReviewDeleteModal = () => {
+    setDeletingReviewId(null);
+    setReviewDeleteErrorVisible(false);
+  };
+
+  const confirmReviewDelete = async () => {
+    setReviewDeleteErrorVisible(false);
+    setIsReviewDeleting(true);
+    try {
+      await deleteReview({ reviewId: deletingReviewId });
+      setDeletingReviewId(null);
+      refreshReviews();
+    } catch {
+      setReviewDeleteErrorVisible(true);
+    } finally {
+      setIsReviewDeleting(false);
+    }
+  };
 
   const handleEditReview = (review) => {
     nav(`/bakery/${bakery.id}/editreview/${review.id}`, { state: { review } });
@@ -315,6 +344,7 @@ export default function BakeryDetailPage() {
               onLoadMore={loadMoreReviews}
               onCreate={handleReviewCreate}
               onEdit={handleEditReview}
+              onDelete={openReviewDeleteModal}
             />
           )}
         </Card>
@@ -331,6 +361,18 @@ export default function BakeryDetailPage() {
           onClose={() => setShowLoginModal(false)}
         />
       )}
+
+      <ReviewDeleteModal
+        open={!!deletingReviewId}
+        onClose={closeReviewDeleteModal}
+        onConfirm={confirmReviewDelete}
+        disabled={isReviewDeleting}
+        errorMessage={
+          reviewDeleteErrorVisible
+            ? "삭제에 실패했습니다. 다시 시도해주세요."
+            : null
+        }
+      />
     </PageLayout>
   );
 }
@@ -476,6 +518,7 @@ function ReviewSection({
   onLoadMore,
   onCreate,
   onEdit,
+  onDelete,
 }) {
   const sentinelRef = useRef(null);
 
@@ -504,7 +547,7 @@ function ReviewSection({
           <ReviewItem key={r.id} role="listitem">
             <ReviewHeader>
               <ReviewerAvatar>
-                <ReviewerAvatarImg src={exampleImg} alt="" />
+                <ReviewerAvatarImg src={mascot} alt="" />
               </ReviewerAvatar>
 
               <HeaderMeta>
@@ -536,7 +579,12 @@ function ReviewSection({
                       수정
                     </ReviewActionBtn>
                     <ReviewActionDivider>|</ReviewActionDivider>
-                    <ReviewActionBtn type="button">삭제</ReviewActionBtn>
+                    <ReviewActionBtn
+                      type="button"
+                      onClick={() => onDelete?.(r.id)}
+                    >
+                      삭제
+                    </ReviewActionBtn>
                   </MyReviewBtns>
                 )}
               </ReviewActionCol>
@@ -1616,4 +1664,143 @@ const ModalConfirmBtn = styled.button`
   &:active {
     opacity: 0.85;
   }
+`;
+
+// ReviewDeleteModal
+
+function ReviewDeleteModal({
+  open,
+  onClose,
+  onConfirm,
+  disabled,
+  errorMessage,
+}) {
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && !disabled) onClose?.();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, disabled, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <RDOverlay
+      onMouseDown={(e) =>
+        e.target === e.currentTarget && !disabled && onClose?.()
+      }
+    >
+      <RDModal
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="review-delete-title"
+      >
+        <RDIconCircle aria-hidden="true">!</RDIconCircle>
+        <RDTitle id="review-delete-title">리뷰를 삭제할까요?</RDTitle>
+        <RDDescription>삭제된 리뷰는 복구할 수 없습니다.</RDDescription>
+        {errorMessage && <RDErrorMessage>{errorMessage}</RDErrorMessage>}
+        <RDButtonRow>
+          <RDCancelButton type="button" onClick={onClose} disabled={disabled}>
+            취소
+          </RDCancelButton>
+          <RDDeleteButton
+            type="button"
+            onClick={() => onConfirm?.()}
+            disabled={disabled}
+          >
+            {disabled ? "삭제 중..." : "삭제하기"}
+          </RDDeleteButton>
+        </RDButtonRow>
+      </RDModal>
+    </RDOverlay>
+  );
+}
+
+const RDOverlay = styled.div`
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+`;
+
+const RDModal = styled.div`
+  width: min(300px, calc(100vw - 40px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 16px 16px 16px;
+`;
+
+const RDIconCircle = styled.div`
+  font-size: 40px;
+  font-weight: 600;
+  color: #ff0000;
+  width: 56px;
+  height: 56px;
+  background: #ffe8e8;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+`;
+
+const RDTitle = styled.h2`
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+`;
+
+const RDDescription = styled.p`
+  font-size: 12px;
+  color: #a5a5a5;
+  margin: 8px 0 28px;
+`;
+
+const RDErrorMessage = styled.p`
+  font-size: 12px;
+  color: #ff0000;
+  margin: 0 0 12px;
+`;
+
+const RDButtonRow = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+`;
+
+const RDBaseButton = styled.button`
+  font-size: 14px;
+  font-weight: 600;
+  height: 56px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+`;
+
+const RDCancelButton = styled(RDBaseButton)`
+  color: #a5a5a5;
+  background: #f8f9fa;
+`;
+
+const RDDeleteButton = styled(RDBaseButton)`
+  color: var(--main-color4);
+  background: var(--red-color);
 `;
