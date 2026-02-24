@@ -33,3 +33,19 @@ export async function fetchRandomBakeries(size = 4) {
 export async function deleteBakery(bakeryId) {
   return apiClient.delete(`/api/v1/bakeries/${bakeryId}`);
 }
+
+export async function fetchAllMapBakeries() {
+  const all = [];
+  let cursor = null;
+  const size = 100;
+
+  do {
+    const data = await fetchBakeries({ cursor, size });
+    const content = data?.content ?? [];
+    all.push(...content);
+    if (content.length < size) break;
+    cursor = content[content.length - 1]?.cursorId ?? null;
+  } while (cursor != null);
+
+  return all;
+}

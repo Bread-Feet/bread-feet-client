@@ -16,6 +16,7 @@ import BakeryReviewPage from "./pages/bakery/BakeryReviewPage";
 import BakeryEditReviewPage from "./pages/bakery/BakeryEditReviewPage";
 
 import CommunityPage from "./pages/community/CommunityPage";
+import MapPage from "./pages/map/MapPage";
 
 function App() {
   return (
@@ -73,6 +74,7 @@ function App() {
           <Route path="/bakery" element={<BakeryPage />} />
           <Route path="/bakery/:id" element={<BakeryDetailPage />} />
           <Route path="/community" element={<CommunityPage />} />
+          <Route path="/map" element={<MapPage />} />
         </Route>
       </Routes>
     </>

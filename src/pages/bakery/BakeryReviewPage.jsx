@@ -148,11 +148,7 @@ export default function BakeryReviewPage() {
       </ReviewWrapper>
 
       <BottomBar>
-        <SubmitBtn
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
+        <SubmitBtn type="button" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? "등록 중..." : "완료"}
         </SubmitBtn>
       </BottomBar>

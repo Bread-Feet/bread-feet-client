@@ -109,14 +109,38 @@ function parseHHMM(s) {
   return hh * 60 + mm;
 }
 
+const FULL_DAY_TO_SHORT = {
+  월요일: "월",
+  화요일: "화",
+  수요일: "수",
+  목요일: "목",
+  금요일: "금",
+  토요일: "토",
+  일요일: "일",
+};
+
 function parseBusinessHours(raw) {
   if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
+
+  const trimmed = String(raw).trim();
+
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      // fall through
+    }
   }
+
+  const result = [];
+  const regex = /([월화수목금토일]요일)\s+(\d{1,2}:\d{2}-\d{1,2}:\d{2})/g;
+  let match;
+  while ((match = regex.exec(trimmed)) !== null) {
+    const day = FULL_DAY_TO_SHORT[match[1]] ?? match[1];
+    result.push({ day, time: match[2] });
+  }
+  return result;
 }
 
 export default function BakeryDetailPage() {
