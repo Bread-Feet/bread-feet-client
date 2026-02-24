@@ -62,7 +62,7 @@ export default function DiaryCalenderPage() {
 
 export const Screen = styled.main`
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   background: #f8edd0;
   overflow: hidden;
 `;
