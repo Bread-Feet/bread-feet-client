@@ -21,9 +21,18 @@ export default function BakeryPreviewCard({ bakery, onClose }) {
   return (
     <Backdrop onClick={onClose}>
       <Card
+        role="button"
+        tabIndex={0}
+        aria-label={`${bakery.name} 상세 보기`}
         onClick={(e) => {
           e.stopPropagation();
           handleCardClick();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleCardClick();
+          }
         }}
       >
         {bakery.imageUrl && (

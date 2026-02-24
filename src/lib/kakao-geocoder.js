@@ -1,4 +1,3 @@
-// 주소 → 좌표 캐시 (모듈 레벨: 페이지 이탈 후 복귀해도 재호출 없음)
 const cache = new Map();
 
 /**
@@ -19,7 +18,7 @@ export function geocodeAddress(address) {
         status === window.kakao.maps.services.Status.OK && result.length > 0
           ? { x: parseFloat(result[0].x), y: parseFloat(result[0].y) }
           : null;
-      cache.set(address, coords);
+      if (coords) cache.set(address, coords);
       resolve(coords);
     });
   });

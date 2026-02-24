@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
@@ -36,7 +36,7 @@ export default function MapPage() {
   const markerMapRef = useRef(new Map());
   const [selectedBakery, setSelectedBakery] = useState(null);
   const [mapReady, setMapReady] = useState(false);
-  const { bakeries, isLoading } = useMapBakeries();
+  const { bakeries, isLoading, error } = useMapBakeries();
 
   useEffect(() => {
     let cancelled = false;
@@ -98,7 +98,9 @@ export default function MapPage() {
 
   useEffect(() => {
     return () => {
-      markerMapRef.current.forEach((m) => m.setMap(null));
+      markerMapRef.current.forEach((m) => {
+        m.setMap(null);
+      });
       markerMapRef.current.clear();
     };
   }, []);
@@ -111,6 +113,12 @@ export default function MapPage() {
         {isLoading && (
           <LoadingOverlay>
             <LoadingText>빵집을 불러오는 중...</LoadingText>
+          </LoadingOverlay>
+        )}
+
+        {error && (
+          <LoadingOverlay>
+            <LoadingText>빵집 정보를 불러오지 못했습니다.</LoadingText>
           </LoadingOverlay>
         )}
 

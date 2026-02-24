@@ -57,15 +57,19 @@ export default function useMapBakeries() {
       for (const [addr, group] of addrGroups) {
         if (cancelled) break;
 
-        const coords = await geocodeAddress(addr);
-        if (coords) {
-          group.forEach((bakery) => {
-            geocoded.push({
-              ...bakery,
-              xCoordinate: coords.x,
-              yCoordinate: coords.y,
+        try {
+          const coords = await geocodeAddress(addr);
+          if (coords) {
+            group.forEach((bakery) => {
+              geocoded.push({
+                ...bakery,
+                xCoordinate: coords.x,
+                yCoordinate: coords.y,
+              });
             });
-          });
+          }
+        } catch (e) {
+          console.warn(`[useMapBakeries] geocode failed for "${addr}"`, e);
         }
 
         await new Promise((r) => setTimeout(r, GEOCODE_DELAY_MS));
