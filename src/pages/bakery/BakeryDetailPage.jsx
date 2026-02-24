@@ -173,6 +173,7 @@ export default function BakeryDetailPage() {
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [localLikes, setLocalLikes] = useState(new Map());
+  const inFlightLikes = useRef(new Set());
   const [deletingReviewId, setDeletingReviewId] = useState(null);
   const [isReviewDeleting, setIsReviewDeleting] = useState(false);
   const [reviewDeleteErrorVisible, setReviewDeleteErrorVisible] =
@@ -204,6 +205,7 @@ export default function BakeryDetailPage() {
   };
 
   const handleLikeToggle = async (r) => {
+    if (inFlightLikes.current.has(r.id)) return;
     const token = await getValidAccessToken();
     if (!token) {
       setShowLoginModal(true);
@@ -214,11 +216,11 @@ export default function BakeryDetailPage() {
     const newIsLiked = !wasLiked;
     const newCount = r.likeCount + (newIsLiked ? 1 : -1);
 
-    // 낙관적 업데이트
     setLocalLikes((prev) =>
       new Map(prev).set(r.id, { isLiked: newIsLiked, likeCount: newCount }),
     );
 
+    inFlightLikes.current.add(r.id);
     try {
       if (wasLiked) {
         await deleteReviewLike({ reviewId: r.id });
@@ -226,12 +228,13 @@ export default function BakeryDetailPage() {
         await createReviewLike({ reviewId: r.id });
       }
     } catch {
-      // 실패 시 롤백
       setLocalLikes((prev) => {
         const next = new Map(prev);
         next.delete(r.id);
         return next;
       });
+    } finally {
+      inFlightLikes.current.delete(r.id);
     }
   };
 
