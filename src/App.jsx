@@ -29,9 +29,9 @@ function App() {
         <Route path="/mybakery/register" element={<BakeryCreatePage />} />
         <Route path="/mybakery/modify" element={<BakeryModifyPage />} />
         <Route path="/bakery/:id/addreview" element={<BakeryReviewPage />} />
+        <Route path="/diary/new" element={<DiaryEditorPage />} />
         <Route element={<AppLayout />}>
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
-          <Route path="/diary/new" element={<DiaryEditorPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/mybakery" element={<BakeryAdminPage />} />
           <Route path="/bakery" element={<BakeryPage />} />
