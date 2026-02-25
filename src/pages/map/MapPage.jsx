@@ -8,7 +8,7 @@ import useMapBakeries from "./hooks/useMapBakeries";
 
 const KYUNGPOOK_FALLBACK = { lat: 35.887720188, lng: 128.607715777 };
 const DEFAULT_ZOOM_LEVEL = 5;
-const BOUNDS_DEBOUNCE_MS = 400;
+const BOUNDS_DEBOUNCE_MS = 600;
 
 const MAP_FRAME_STYLE = `
   padding: 0;
