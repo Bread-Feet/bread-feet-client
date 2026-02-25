@@ -1,50 +1,37 @@
+﻿import { useRef, useEffect, useCallback } from "react";
 import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
+import useDiaries from "./hooks/useDiaries";
+import { useNavigate } from "react-router-dom";
+
 const location = "/location_brown.svg";
 const mascot = "/mascot.svg";
-const roll_bread = "/roll_bread.svg";
-
-import { useNavigate } from "react-router-dom";
-import { useMemo, useState, useCallback } from "react";
 
 export default function CommunityPage() {
   const nav = useNavigate();
-  const [tab, setTab] = useState("ALL"); // "ALL" | "MINE"
+  const { diaries, isLoading, hasMore, loadMore, error, retry } = useDiaries();
+  const mainRef = useRef(null);
+  const sentinelRef = useRef(null);
 
   const goBakery = useCallback((bakeryId) => nav(`/bakery/${bakeryId}`), [nav]);
   const goPost = useCallback((postId) => {
     console.log("TODO: go post detail:", postId);
   }, []);
 
-  const posts = useMemo(
-    () => [
-      {
-        id: 1,
-        bakeryId: 1,
-        bakeryName: "가가빵집",
-        userName: "논서",
-        title: "크루아상이 맛있는 빵집",
-        content:
-          "빵 엄청ㅁ엄ㅊ엄 맛있다...!!!!!!!!!!~~~~~~~~~~~~~ㅎㅎㅎ엄마랑 아빠랑 왔따 ㅎㅎㅎㅎㅎㅎ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!~......",
+  useEffect(() => {
+    const root = mainRef.current;
+    const sentinel = sentinelRef.current;
+    if (!root || !sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) loadMore();
       },
-      {
-        id: 2,
-        bakeryId: 2,
-        bakeryName: "나나빵집",
-        userName: "곤서",
-        title: "폭신식빵이 맛있는 빵집",
-        content:
-          "엄마아빠랑같이 먹으러 왓따 진짜 폭신폭신하고 말랑말랑 내가 먹어본빵중 최고의 빵인것같다 강추드려오!!!!!!!!!!!근데 안에 크림이 적당히 달면서먹......",
-      },
-    ],
-    [],
-  );
-
-  const filtered = useMemo(() => {
-    if (tab === "MINE") return posts.slice(1, 2); // TODO : 내꺼만 찾도록
-    return posts;
-  }, [posts, tab]);
+      { root, threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   return (
     <PageLayout>
@@ -53,30 +40,16 @@ export default function CommunityPage() {
           <HeaderTitle>커뮤니티</HeaderTitle>
         </Header>
 
-        <Main>
+        <Main ref={mainRef}>
           <TabRow role="tablist" aria-label="커뮤니티 탭">
-            <TabBtn
-              type="button"
-              role="tab"
-              aria-selected={tab === "ALL"}
-              $active={tab === "ALL"}
-              onClick={() => setTab("ALL")}
-            >
+            <TabBtn type="button" role="tab" aria-selected $active>
               전체
             </TabBtn>
-            <TabBtn
-              type="button"
-              role="tab"
-              aria-selected={tab === "MINE"}
-              $active={tab === "MINE"}
-              onClick={() => setTab("MINE")}
-            >
-              나의 빵집
-            </TabBtn>
+            {/* 정렬 탭 추가 예정 */}
           </TabRow>
 
           <List>
-            {filtered.map((p) => (
+            {diaries.map((p) => (
               <PostCard
                 key={p.id}
                 onClick={() => goPost(p.id)}
@@ -84,7 +57,7 @@ export default function CommunityPage() {
                 tabIndex={0}
               >
                 <StickerWrap aria-hidden>
-                  <StickerImg src={roll_bread} alt="" />
+                  <StickerImg src={p.thumbnailUrl} alt="" />
                 </StickerWrap>
 
                 <CardTop
@@ -102,7 +75,7 @@ export default function CommunityPage() {
                 <CardBody>
                   <ProfileWrapper>
                     <Avatar aria-hidden src={mascot} />
-                    <UserName>{p.userName}</UserName>
+                    <UserName>{p.nickname}</UserName>
                   </ProfileWrapper>
 
                   <BodyText>
@@ -112,6 +85,23 @@ export default function CommunityPage() {
                 </CardBody>
               </PostCard>
             ))}
+
+            <Sentinel ref={sentinelRef} />
+            {isLoading && <LoadingText>불러오는 중...</LoadingText>}
+            {!isLoading && error && (
+              <RetryWrap>
+                <LoadingText>목록을 불러오지 못했습니다.</LoadingText>
+                <RetryBtn type="button" onClick={retry}>
+                  다시 시도
+                </RetryBtn>
+              </RetryWrap>
+            )}
+            {!isLoading && !hasMore && diaries.length > 0 && (
+              <EndText>모든 게시물을 불러왔어요</EndText>
+            )}
+            {!isLoading && !hasMore && diaries.length === 0 && (
+              <EndText>아직 게시물이 없어요</EndText>
+            )}
           </List>
         </Main>
       </Screen>
@@ -325,4 +315,37 @@ const Content = styled.p`
   white-space: pre-line;
 
   margin: 0 4px;
+`;
+
+const Sentinel = styled.div`
+  height: 1px;
+`;
+
+const LoadingText = styled.p`
+  text-align: center;
+  font-size: 12px;
+  color: #ab9d8b;
+  padding: 8px 0;
+`;
+
+const RetryWrap = styled.div`
+  display: grid;
+  justify-items: center;
+`;
+
+const RetryBtn = styled.button`
+  font-size: 12px;
+  color: #ffffff;
+  border: 0;
+  border-radius: 999px;
+  background: #ab9d8b;
+  padding: 6px 12px;
+  cursor: pointer;
+`;
+
+const EndText = styled.p`
+  text-align: center;
+  font-size: 12px;
+  color: #cfc6b9;
+  padding: 8px 0;
 `;
