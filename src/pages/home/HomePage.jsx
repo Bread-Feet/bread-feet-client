@@ -10,6 +10,7 @@ import { fetchRandomBakeries } from "../../lib/api/bakery";
 import { getValidAccessToken } from "../../lib/token-storage";
 import { createBookmark, deleteBookmark } from "../../lib/api/bookmark";
 
+const pawSvg = "/paw.svg";
 const mascot = "/mascot.svg";
 const userIcon = "/UserCircle.svg";
 const heart_on = "/heart_on.svg";
@@ -18,7 +19,8 @@ const heart_off = "/heart_off.svg";
 export default function HomePage() {
   const nav = useNavigate();
   const { query, debouncedQuery, setQuery } = useSearch();
-  const { bakeries, isLoading, hasMore, loadMore } = useBakeries(debouncedQuery);
+  const { bakeries, isLoading, hasMore, loadMore } =
+    useBakeries(debouncedQuery);
   const [bookmarks, setBookmarks] = useState({});
   const sentinelRef = useRef(null);
 
@@ -53,7 +55,9 @@ export default function HomePage() {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) handleLoadMore(); },
+      ([entry]) => {
+        if (entry.isIntersecting) handleLoadMore();
+      },
       { threshold: 0.1 },
     );
     observer.observe(sentinel);
@@ -95,6 +99,7 @@ export default function HomePage() {
           <HeaderMascot src={mascot} alt="" />
 
           <SearchBar>
+            <PawImg src={pawSvg} alt="" />
             <SearchInput
               placeholder="빵집 이름을 검색해보세요"
               value={query}
@@ -110,9 +115,14 @@ export default function HomePage() {
                 <SectionTitle>나의 빵집 추천</SectionTitle>
                 <Grid>
                   {randomLoading
-                    ? Array.from({ length: 2 }).map((_, i) => <SkeletonItem key={i} />)
+                    ? Array.from({ length: 2 }).map((_, i) => (
+                        <SkeletonItem key={i} />
+                      ))
                     : myRecs.map((b) => (
-                        <Item key={b.bakeryId} onClick={() => nav(`/bakery/${b.bakeryId}`)}>
+                        <Item
+                          key={b.bakeryId}
+                          onClick={() => nav(`/bakery/${b.bakeryId}`)}
+                        >
                           <Card>
                             {b.imageUrl ? (
                               <CardImg src={b.imageUrl} alt={b.name} />
@@ -121,11 +131,22 @@ export default function HomePage() {
                             )}
                             <HeartBtn
                               type="button"
-                              aria-label={bookmarks[b.bakeryId] ? "즐겨찾기 해제" : "즐겨찾기"}
+                              aria-label={
+                                bookmarks[b.bakeryId]
+                                  ? "즐겨찾기 해제"
+                                  : "즐겨찾기"
+                              }
                               aria-pressed={bookmarks[b.bakeryId]}
-                              onClick={(e) => { e.stopPropagation(); handleToggleLike(b.bakeryId); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleLike(b.bakeryId);
+                              }}
                             >
-                              <HeartIcon src={bookmarks[b.bakeryId] ? heart_on : heart_off} />
+                              <HeartIcon
+                                src={
+                                  bookmarks[b.bakeryId] ? heart_on : heart_off
+                                }
+                              />
                             </HeartBtn>
                           </Card>
                           <NameText>{b.name}</NameText>
@@ -139,9 +160,14 @@ export default function HomePage() {
                 <SectionTitle>오늘의 빵지순례 추천</SectionTitle>
                 <Grid>
                   {randomLoading
-                    ? Array.from({ length: 2 }).map((_, i) => <SkeletonItem key={i} />)
+                    ? Array.from({ length: 2 }).map((_, i) => (
+                        <SkeletonItem key={i} />
+                      ))
                     : todayRecs.map((b) => (
-                        <Item key={b.bakeryId} onClick={() => nav(`/bakery/${b.bakeryId}`)}>
+                        <Item
+                          key={b.bakeryId}
+                          onClick={() => nav(`/bakery/${b.bakeryId}`)}
+                        >
                           <Card>
                             {b.imageUrl ? (
                               <CardImg src={b.imageUrl} alt={b.name} />
@@ -150,11 +176,22 @@ export default function HomePage() {
                             )}
                             <HeartBtn
                               type="button"
-                              aria-label={bookmarks[b.bakeryId] ? "즐겨찾기 해제" : "즐겨찾기"}
+                              aria-label={
+                                bookmarks[b.bakeryId]
+                                  ? "즐겨찾기 해제"
+                                  : "즐겨찾기"
+                              }
                               aria-pressed={bookmarks[b.bakeryId]}
-                              onClick={(e) => { e.stopPropagation(); handleToggleLike(b.bakeryId); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleLike(b.bakeryId);
+                              }}
                             >
-                              <HeartIcon src={bookmarks[b.bakeryId] ? heart_on : heart_off} />
+                              <HeartIcon
+                                src={
+                                  bookmarks[b.bakeryId] ? heart_on : heart_off
+                                }
+                              />
                             </HeartBtn>
                           </Card>
                           <NameText>{b.name}</NameText>
@@ -256,10 +293,14 @@ const UserIcon = styled.img`
 
 const SearchWrap = styled.div`
   position: relative;
+  top: -20px;
+
   flex-shrink: 0;
+
   background: white;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
+
   padding: 15px 19px 0 19px;
 `;
 
@@ -267,24 +308,39 @@ const HeaderMascot = styled.img`
   position: absolute;
   left: 50%;
   top: 0;
+
   width: 140px;
+
+  z-index: 1;
   transform: translate(-50%, -55%);
   pointer-events: none;
 `;
 
 const SearchBar = styled.div`
+  position: relative;
+
   width: 100%;
   height: 72px;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
   background: #ffffff;
   border-radius: 999px;
   border: solid 5px var(--main-color2);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-  display: flex;
-  align-items: center;
+
   padding: 0 18px;
 `;
 
+const PawImg = styled.img`
+  flex-shrink: 0;
+`;
+
 const SearchInput = styled.input`
+  flex: 1;
+  min-width: 0;
+
   font-size: 16px;
   width: 100%;
   height: 62px;
@@ -297,7 +353,7 @@ const Main = styled.main`
   flex: 1;
   width: 100%;
   background: var(--main-color4);
-  padding: 24px 24px 0 24px;
+  padding: 0 24px;
   padding-bottom: calc(var(--tabbar-height) + 20px);
 `;
 
@@ -401,12 +457,7 @@ const shimmer = keyframes`
 `;
 
 const SkeletonBase = styled.div`
-  background: linear-gradient(
-    90deg,
-    #ececec 25%,
-    #f8f8f8 50%,
-    #ececec 75%
-  );
+  background: linear-gradient(90deg, #ececec 25%, #f8f8f8 50%, #ececec 75%);
   background-size: 200% 100%;
   animation: ${shimmer} 1.4s infinite linear;
   border-radius: 12px;
