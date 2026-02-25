@@ -13,6 +13,7 @@ import mapOn from "/navbar/map_on.svg";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getValidAccessToken } from "../lib/token-storage";
+import LoginModal from "./LoginModal";
 
 const tabs = [
   { key: "map", label: "위치", to: "/map", off: mapOff, on: mapOn },
@@ -65,7 +66,11 @@ export default function TabBar() {
         {tabs.map((t) => {
           const isActive = t.key === activeKey;
           return (
-            <TabButton key={t.key} type="button" onClick={() => handleTabClick(t)}>
+            <TabButton
+              key={t.key}
+              type="button"
+              onClick={() => handleTabClick(t)}
+            >
               <TabIcon src={isActive ? t.on : t.off} alt="" />
               <TabLabel>{t.label}</TabLabel>
             </TabButton>
@@ -83,22 +88,6 @@ export default function TabBar() {
         />
       )}
     </>
-  );
-}
-
-function LoginModal({ onConfirm, onClose }) {
-  return (
-    <ModalOverlay onClick={onClose}>
-      <ModalBox onClick={(e) => e.stopPropagation()}>
-        <ModalCloseBtn type="button" onClick={onClose} aria-label="닫기">
-          ×
-        </ModalCloseBtn>
-        <ModalMessage>로그인하시겠습니까?</ModalMessage>
-        <ModalConfirmBtn type="button" onClick={onConfirm}>
-          네
-        </ModalConfirmBtn>
-      </ModalBox>
-    </ModalOverlay>
   );
 }
 
@@ -140,70 +129,4 @@ const TabLabel = styled.span`
   font-size: 12px;
   font-weight: 400;
   color: var(--gray-color);
-`;
-
-const ModalOverlay = styled.div`
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: grid;
-  place-items: center;
-  z-index: 1000;
-`;
-
-const ModalBox = styled.div`
-  position: relative;
-  width: 280px;
-  background: #fff;
-  border-radius: 20px;
-  padding: 36px 24px 24px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-`;
-
-const ModalCloseBtn = styled.button`
-  position: absolute;
-  top: 12px;
-  right: 16px;
-
-  border: 0;
-  background: transparent;
-  font-size: 22px;
-  line-height: 1;
-  color: #9e9e9e;
-  cursor: pointer;
-
-  &:active {
-    opacity: 0.7;
-  }
-`;
-
-const ModalMessage = styled.p`
-  font-size: 16px;
-  font-weight: 600;
-  color: #000;
-  margin: 0;
-  text-align: center;
-`;
-
-const ModalConfirmBtn = styled.button`
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--main-color4);
-
-  width: 100%;
-  padding: 13px 0;
-
-  border: 0;
-  border-radius: 14px;
-  background: var(--main-color2);
-
-  cursor: pointer;
-
-  &:active {
-    opacity: 0.85;
-  }
 `;

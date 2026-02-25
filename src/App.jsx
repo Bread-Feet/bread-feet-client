@@ -9,6 +9,7 @@ import HomePage from "./pages/home/HomePage";
 import BakeryCreatePage from "./pages/bakery-admin/form/BakeryCreatePage";
 import BakeryModifyPage from "./pages/bakery-admin/form/BakeryModifyPage";
 import PrivateRoute from "./components/PrivateRoute";
+import GuestRoute from "./components/GuestRoute";
 
 import BakeryPage from "./pages/bakery/BakeryPage";
 import BakeryDetailPage from "./pages/bakery/BakeryDetailPage";
@@ -61,7 +62,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route element={<AppLayout />}>
+        <Route element={<GuestRoute><AppLayout /></GuestRoute>}>
           <Route path="/" element={<HomePage />} />
           <Route
             path="/mybakery"
