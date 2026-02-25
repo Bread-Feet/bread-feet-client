@@ -5,13 +5,18 @@ const MODAL_TITLE_ID = "login-modal-title";
 
 export default function LoginModal({ onConfirm, onClose }) {
   const confirmBtnRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose?.();
+      if (e.key === "Escape") onCloseRef.current?.();
     };
     window.addEventListener("keydown", handleKeyDown);
     confirmBtnRef.current?.focus();
@@ -20,7 +25,7 @@ export default function LoginModal({ onConfirm, onClose }) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <ModalOverlay onClick={onClose}>
@@ -82,6 +87,12 @@ const ModalCloseBtn = styled.button`
   &:active {
     opacity: 0.7;
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--main-color2);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 `;
 
 const ModalMessage = styled.p`
@@ -108,5 +119,10 @@ const ModalConfirmBtn = styled.button`
 
   &:active {
     opacity: 0.85;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--main-color1);
+    outline-offset: 2px;
   }
 `;
