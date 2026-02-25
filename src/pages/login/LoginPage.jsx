@@ -27,6 +27,17 @@ function LoginContent() {
     }
   }, [searchParams]);
 
+  const handleSkipLogin = () => {
+    sessionStorage.setItem("skipLogin", "true");
+    const returnUrl = sessionStorage.getItem("returnUrl");
+    if (returnUrl) {
+      sessionStorage.removeItem("returnUrl");
+      navigate(returnUrl);
+    } else {
+      navigate("/");
+    }
+  };
+
   const handleSocialLogin = async (provider) => {
     const apiUrl = getApiUrl();
 
@@ -112,6 +123,9 @@ function LoginContent() {
         >
           <img src={kakaoLoginIcon} alt="카카오로 로그인" />
         </Button>
+        <SkipLoginButton type="button" onClick={handleSkipLogin}>
+          로그인 없이 사용하기
+        </SkipLoginButton>
         <BottomSpacer />
       </Content>
     </PageLayout>
@@ -186,6 +200,22 @@ const Button = styled.button`
 
   img {
     display: block;
+  }
+`;
+
+const SkipLoginButton = styled.button`
+  margin-top: 16px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--main-color2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  &:active {
+    opacity: 0.7;
   }
 `;
 
