@@ -35,6 +35,11 @@ export async function deleteBakery(bakeryId) {
   return apiClient.delete(`/api/v1/bakeries/${bakeryId}`);
 }
 
+export async function fetchNearbyBakeries({ x, y }) {
+  const params = new URLSearchParams({ x: String(x), y: String(y) });
+  return apiClient.get(`/api/v1/bakeries/nearby?${params}`);
+}
+
 export async function fetchAllMapBakeries() {
   const all = [];
   let cursor = null;
