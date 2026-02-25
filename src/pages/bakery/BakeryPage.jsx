@@ -124,7 +124,12 @@ export default function BakeryPage() {
 const Header = styled.header`
   width: 100%;
 
-  background: var(--main-color2);
+  background: #f8edd0;
+  background: linear-gradient(
+    rgba(248, 237, 208, 1) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+
   padding: 57px var(--page-padding) 10px var(--page-padding);
 `;
 
