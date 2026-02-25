@@ -1,17 +1,43 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
+import { useEffect, useRef } from "react";
+
+const MODAL_TITLE_ID = "login-modal-title";
 
 export default function LoginModal({ onConfirm, onClose }) {
+  const confirmBtnRef = useRef(null);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    confirmBtnRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
     <ModalOverlay onClick={onClose}>
-      <ModalBox onClick={(e) => e.stopPropagation()}>
+      <ModalBox
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={MODAL_TITLE_ID}
+        onClick={(e) => e.stopPropagation()}
+      >
         <ModalCloseBtn type="button" onClick={onClose} aria-label="닫기">
           ×
         </ModalCloseBtn>
-        <ModalMessage>
+        <ModalMessage id={MODAL_TITLE_ID}>
           로그인 후 사용할 수 있습니다
           <br /> 로그인 하시겠습니까?
         </ModalMessage>
-        <ModalConfirmBtn type="button" onClick={onConfirm}>
+        <ModalConfirmBtn ref={confirmBtnRef} type="button" onClick={onConfirm}>
           네
         </ModalConfirmBtn>
       </ModalBox>

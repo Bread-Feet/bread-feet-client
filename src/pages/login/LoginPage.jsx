@@ -32,9 +32,9 @@ function LoginContent() {
     const returnUrl = sessionStorage.getItem("returnUrl");
     if (returnUrl) {
       sessionStorage.removeItem("returnUrl");
-      navigate(returnUrl);
+      navigate(returnUrl, { replace: true });
     } else {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   };
 
@@ -134,7 +134,6 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    // 한번에 로딩하기
     <Suspense fallback={<div>로딩중...</div>}>
       <LoginContent />
     </Suspense>
@@ -216,6 +215,12 @@ const SkipLoginButton = styled.button`
 
   &:active {
     opacity: 0.7;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--main-color2);
+    outline-offset: 2px;
+    border-radius: 6px;
   }
 `;
 
