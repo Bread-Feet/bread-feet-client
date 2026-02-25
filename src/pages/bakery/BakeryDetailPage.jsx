@@ -327,7 +327,7 @@ export default function BakeryDetailPage() {
     <PageLayout>
       <Scroll>
         <Hero>
-          <HeroImg src={bakery.imageUrl} alt={bakery.name} />
+          <HeroImg src={bakery.imageUrl || "/bread-feet-logo-login.png"} alt={bakery.name} />
           <HeroDim />
 
           <HeroTop>

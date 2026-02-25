@@ -33,11 +33,10 @@ export default function BakeryCard({
       }}
     >
       <ThumbWrap>
-        {imageUrl ? (
-          <Thumb src={imageUrl} alt={`${name} 사진`} />
-        ) : (
-          <ThumbFallback aria-hidden />
-        )}
+        <Thumb
+          src={imageUrl || "/bread-feet-logo-login.png"}
+          alt={`${name} 사진`}
+        />
 
         <LikeButton
           type="button"
@@ -106,9 +105,6 @@ const Thumb = styled.img`
   object-fit: cover;
 `;
 
-const ThumbFallback = styled(ThumbBase)`
-  background: #f1f3f5;
-`;
 
 const LikeButton = styled.button`
   position: absolute;
