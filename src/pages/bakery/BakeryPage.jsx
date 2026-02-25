@@ -19,6 +19,7 @@ export default function BakeryPage() {
   const { bakeries, isLoading, hasMore, loadMore } = useBakeries(
     debouncedQuery,
     sortKey,
+    true,
   );
   const sentinelRef = useRef(null);
   const [bookmarks, setBookmarks] = useState({});
