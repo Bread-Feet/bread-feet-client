@@ -327,7 +327,7 @@ export default function BakeryDetailPage() {
     <PageLayout>
       <Scroll>
         <Hero>
-          <HeroImg src={bakery.imageUrl} alt={bakery.name} />
+          <HeroImg src={bakery.imageUrl || "/bread-feet-logo-login.png"} alt={bakery.name} />
           <HeroDim />
 
           <HeroTop>
@@ -451,7 +451,7 @@ export default function BakeryDetailPage() {
 function HomeSection({ bakery, status }) {
   const [hoursOpen, setHoursOpen] = useState(false);
   const hoursPanelId = `hours-panel-${bakery.id}`;
-  const canShowHours = status.state !== "unknown";
+  const canShowHours = (bakery.businessHours?.length ?? 0) > 0;
 
   const hoursOpenUI = canShowHours && hoursOpen;
 
@@ -460,7 +460,9 @@ function HomeSection({ bakery, status }) {
       ? "영업중"
       : status.state === "closed"
         ? "영업종료"
-        : "영업정보없음";
+        : canShowHours
+          ? "오늘 휴무"
+          : "영업정보없음";
 
   const active = {
     beverage: bakery.features.beverage,

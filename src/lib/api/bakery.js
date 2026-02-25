@@ -1,10 +1,11 @@
 import { apiClient } from "../api-client";
 
-export async function fetchBakeries({ keyword, cursor, size = 10, sort } = {}) {
+export async function fetchBakeries({ keyword, cursor, size = 10, sort, isBookmark } = {}) {
   const params = new URLSearchParams({ size });
   if (keyword) params.set("keyword", keyword);
   if (cursor != null) params.set("cursor", String(cursor));
   if (sort) params.set("sort", sort);
+  if (isBookmark) params.set("isBookmark", true);
   return apiClient.get(`/api/v1/bakeries?${params}`);
 }
 

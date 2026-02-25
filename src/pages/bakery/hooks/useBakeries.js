@@ -3,7 +3,7 @@ import { fetchBakeries } from "../../../lib/api/bakery";
 
 const PAGE_SIZE = 10;
 
-export default function useBakeries(keyword, sort) {
+export default function useBakeries(keyword, sort, isBookmark = false) {
   const [bakeries, setBakeries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -18,6 +18,7 @@ export default function useBakeries(keyword, sort) {
           cursor,
           size: PAGE_SIZE,
           sort,
+          isBookmark,
         });
         const content = data?.content ?? [];
         setBakeries((prev) =>
@@ -37,7 +38,7 @@ export default function useBakeries(keyword, sort) {
         setIsLoading(false);
       }
     },
-    [sort],
+    [sort, isBookmark],
   );
 
   useEffect(() => {
