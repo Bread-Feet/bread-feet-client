@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react";
+﻿import { useRef, useEffect, useCallback } from "react";
 import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
@@ -10,8 +10,9 @@ const mascot = "/mascot.svg";
 
 export default function CommunityPage() {
   const nav = useNavigate();
-  const { diaries, isLoading, hasMore, loadMore } = useDiaries();
-  const sentinelRef = useRef(0);
+  const { diaries, isLoading, hasMore, loadMore, error, retry } = useDiaries();
+  const mainRef = useRef(null);
+  const sentinelRef = useRef(null);
 
   const goBakery = useCallback((bakeryId) => nav(`/bakery/${bakeryId}`), [nav]);
   const goPost = useCallback((postId) => {
@@ -19,13 +20,14 @@ export default function CommunityPage() {
   }, []);
 
   useEffect(() => {
+    const root = mainRef.current;
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (!root || !sentinel) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) loadMore();
       },
-      { threshold: 0.1 },
+      { root, threshold: 0.1 },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -38,7 +40,7 @@ export default function CommunityPage() {
           <HeaderTitle>커뮤니티</HeaderTitle>
         </Header>
 
-        <Main>
+        <Main ref={mainRef}>
           <TabRow role="tablist" aria-label="커뮤니티 탭">
             <TabBtn type="button" role="tab" aria-selected $active>
               전체
@@ -86,8 +88,19 @@ export default function CommunityPage() {
 
             <Sentinel ref={sentinelRef} />
             {isLoading && <LoadingText>불러오는 중...</LoadingText>}
+            {!isLoading && error && (
+              <RetryWrap>
+                <LoadingText>목록을 불러오지 못했습니다.</LoadingText>
+                <RetryBtn type="button" onClick={retry}>
+                  다시 시도
+                </RetryBtn>
+              </RetryWrap>
+            )}
             {!isLoading && !hasMore && diaries.length > 0 && (
               <EndText>모든 게시물을 불러왔어요</EndText>
+            )}
+            {!isLoading && !hasMore && diaries.length === 0 && (
+              <EndText>아직 게시물이 없어요</EndText>
             )}
           </List>
         </Main>
@@ -313,6 +326,21 @@ const LoadingText = styled.p`
   font-size: 12px;
   color: #ab9d8b;
   padding: 8px 0;
+`;
+
+const RetryWrap = styled.div`
+  display: grid;
+  justify-items: center;
+`;
+
+const RetryBtn = styled.button`
+  font-size: 12px;
+  color: #ffffff;
+  border: 0;
+  border-radius: 999px;
+  background: #ab9d8b;
+  padding: 6px 12px;
+  cursor: pointer;
 `;
 
 const EndText = styled.p`
