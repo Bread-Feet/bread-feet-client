@@ -1,6 +1,12 @@
 import { apiClient } from "../api-client";
 
-export async function fetchBakeries({ keyword, cursor, size = 10, sort, isBookmark } = {}) {
+export async function fetchBakeries({
+  keyword,
+  cursor,
+  size = 10,
+  sort,
+  isBookmark,
+} = {}) {
   const params = new URLSearchParams({ size });
   if (keyword) params.set("keyword", keyword);
   if (cursor != null) params.set("cursor", String(cursor));
@@ -36,6 +42,10 @@ export async function deleteBakery(bakeryId) {
 }
 
 export async function fetchNearbyBakeries({ x, y }) {
+  if (!Number.isFinite(x) || !Number.isFinite(y)) {
+    throw new TypeError("fetchNearbyBakeries requires finite x/y coordinates");
+  }
+
   const params = new URLSearchParams({ x: String(x), y: String(y) });
   return apiClient.get(`/api/v1/bakeries/nearby?${params}`);
 }

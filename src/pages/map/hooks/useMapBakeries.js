@@ -24,6 +24,7 @@ export default function useMapBakeries(mapCenter) {
       .catch((err) => {
         if (!cancelled) {
           console.error("[useMapBakeries]", err);
+          setBakeries([]);
           setError(err);
           setIsLoading(false);
         }
