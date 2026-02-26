@@ -39,6 +39,7 @@ export default function MapPage() {
   const regionTabsRef = useRef(null);
   const kakaoMapRef = useRef(null);
   const markerMapRef = useRef(new Map());
+  const regionalRequestRef = useRef(0);
   const skipBoundsRef = useRef(true);
   const suppressNextBoundsRef = useRef(false);
 
@@ -52,6 +53,14 @@ export default function MapPage() {
 
   const { bakeries, error } = useMapBakeries(mapCenter);
   const displayBakeries = regionalBakeries ?? bakeries;
+  const nearbyError = regionalBakeries ? null : error;
+  const clearRegionalMode = () => {
+    regionalRequestRef.current += 1;
+    setSelectedRegion(null);
+    setRegionalBakeries(null);
+    setRegionalError(null);
+    setRegionalLoading(false);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -88,8 +97,7 @@ export default function MapPage() {
         debounceTimer = setTimeout(() => {
           if (cancelled) return;
           const c = map.getCenter();
-          setRegionalBakeries(null);
-          setRegionalError(null);
+          clearRegionalMode();
           setMapCenter({ lat: c.getLat(), lng: c.getLng() });
         }, BOUNDS_DEBOUNCE_MS);
       });
@@ -141,6 +149,7 @@ export default function MapPage() {
 
   useEffect(() => {
     return () => {
+      regionalRequestRef.current += 1;
       markerMapRef.current.forEach((m) => m.setMap(null));
       markerMapRef.current.clear();
     };
@@ -149,6 +158,8 @@ export default function MapPage() {
   const handleRegionClick = async (region) => {
     if (!mapReady || !kakaoMapRef.current) return;
 
+    const requestId = regionalRequestRef.current + 1;
+    regionalRequestRef.current = requestId;
     setSelectedRegion(region);
     setRegionalLoading(true);
     setRegionalError(null);
@@ -156,6 +167,7 @@ export default function MapPage() {
 
     try {
       const data = await fetchRegionalRecommendations(region, REGIONAL_SIZE);
+      if (requestId !== regionalRequestRef.current) return;
       const list = Array.isArray(data) ? data : [];
       setRegionalBakeries(list);
 
@@ -171,11 +183,14 @@ export default function MapPage() {
         );
       }
     } catch (err) {
+      if (requestId !== regionalRequestRef.current) return;
       console.error("[MapPage] regional recommendations failed:", err);
       setRegionalBakeries([]);
       setRegionalError(err);
     } finally {
-      setRegionalLoading(false);
+      if (requestId === regionalRequestRef.current) {
+        setRegionalLoading(false);
+      }
     }
   };
 
@@ -219,7 +234,7 @@ export default function MapPage() {
           </ScrollArrow>
         </RegionTabsWrap>
 
-        {(error || regionalError) && (
+        {(nearbyError || regionalError) && (
           <LoadingOverlay>
             <LoadingText>빵집 정보를 불러오지 못했어요.</LoadingText>
           </LoadingOverlay>
