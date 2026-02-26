@@ -4,25 +4,51 @@ import { useState, useRef, useEffect } from "react";
 
 const isBlobUrl = (url) => typeof url === "string" && url.startsWith("blob:");
 
-export default function useMenuManager() {
-  const [menus, setMenus] = useState([
-    {
-      id: 1,
-      name: "소금빵",
-      price: 2800,
-      isMain: true,
-      photoPreview: logoImg,
+function initMenusFromData(serverMenus, bestBread) {
+  if (!Array.isArray(serverMenus) || serverMenus.length === 0) return [];
+  let mainAssigned = false;
+
+  return serverMenus.map((m, idx) => {
+    const isMatch = m.name === bestBread;
+    const isMain = !mainAssigned && isMatch;
+    if (isMain) mainAssigned = true;
+
+    return {
+      id: idx + 1,
+      name: m.name ?? "",
+      price: m.price ?? 0,
+      isMain,
+      photoPreview: m.thumbnailUrl || logoImg,
       photo: null,
-    },
-    {
-      id: 2,
-      name: "크림빵",
-      price: 4500,
-      isMain: false,
-      photoPreview: logoImg,
-      photo: null,
-    },
-  ]);
+    };
+  });
+}
+
+const DEFAULT_MENUS = [
+  {
+    id: 1,
+    name: "소금빵",
+    price: 2800,
+    isMain: true,
+    photoPreview: logoImg,
+    photo: null,
+  },
+  {
+    id: 2,
+    name: "크림빵",
+    price: 4500,
+    isMain: false,
+    photoPreview: logoImg,
+    photo: null,
+  },
+];
+
+export default function useMenuManager(initialData = null) {
+  const [menus, setMenus] = useState(
+    initialData
+      ? initMenusFromData(initialData.menus, initialData.bestBread)
+      : DEFAULT_MENUS,
+  );
 
   // 메뉴 추가용 임시 상태
   const [newMenu, setNewMenu] = useState({

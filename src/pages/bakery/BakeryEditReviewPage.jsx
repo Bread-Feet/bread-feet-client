@@ -1,62 +1,82 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 const left_arrow = "/arrow_left_black.svg";
 const PlusIcon = "/plus.svg";
 const star = "/starIcon.svg";
 
 import PageLayout from "../../components/layout/PageLayout";
 
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 
 import { uploadReviewPhoto } from "../../lib/api/imgUpload";
-import { createReview } from "../../lib/api/review";
+import { updateReview } from "../../lib/api/review";
 
 const MAX_LEN = 299;
 const MAX_PHOTOS = 5;
 
-export default function BakeryReviewPage() {
+export default function BakeryEditReviewPage() {
   const nav = useNavigate();
-  const { id: bakeryId } = useParams();
+  const { id: bakeryId, reviewId } = useParams();
+  const { state } = useLocation();
+  const review = state?.review;
+  const resolvedReviewId = review?.id ?? Number(reviewId);
 
-  const [text, setText] = useState("");
-  const [rating, setRating] = useState(0);
-  const [photos, setPhotos] = useState([]); // [{ file, previewUrl }]
+  const [text, setText] = useState(review?.content ?? "");
+  const [rating, setRating] = useState(review?.rating ?? 0);
+  const [existingPhotos, setExistingPhotos] = useState(review?.photos ?? []); // 湲곗〈 S3 URL
+  const [newPhotos, setNewPhotos] = useState([]); // { file, previewUrl }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileRef = useRef(null);
-  const photosRef = useRef(photos);
-  photosRef.current = photos;
+  const newPhotosRef = useRef(newPhotos);
+  newPhotosRef.current = newPhotos;
+
+  const totalCount = existingPhotos.length + newPhotos.length;
 
   useEffect(() => {
     return () => {
-      photosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      newPhotosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
     };
   }, []);
 
+  useEffect(() => {
+    if (!review?.id && !reviewId) {
+      nav(bakeryId ? `/bakery/${bakeryId}` : "/bakery", { replace: true });
+    }
+  }, [review?.id, reviewId, bakeryId, nav]);
+
   const openFilePicker = () => {
-    if (photos.length >= MAX_PHOTOS) return;
+    if (totalCount >= MAX_PHOTOS) return;
     fileRef.current?.click();
   };
 
   const handleFiles = (e) => {
     const files = Array.from(e.target.files || []);
-    const remaining = MAX_PHOTOS - photos.length;
+    const remaining = MAX_PHOTOS - totalCount;
     const toAdd = files.slice(0, remaining);
-    const newPhotos = toAdd.map((file) => ({
+    const newItems = toAdd.map((file) => ({
       file,
       previewUrl: URL.createObjectURL(file),
     }));
-    setPhotos((prev) => [...prev, ...newPhotos]);
+    setNewPhotos((prev) => [...prev, ...newItems]);
     e.target.value = "";
   };
 
-  const removePhoto = (idx) => {
-    setPhotos((prev) => {
+  const removeExisting = (idx) => {
+    setExistingPhotos((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const removeNew = (idx) => {
+    setNewPhotos((prev) => {
       URL.revokeObjectURL(prev[idx].previewUrl);
       return prev.filter((_, i) => i !== idx);
     });
   };
 
   const handleSubmit = async () => {
+    if (!resolvedReviewId) {
+      nav(bakeryId ? `/bakery/${bakeryId}` : "/bakery", { replace: true });
+      return;
+    }
     if (!text.trim()) {
       alert("리뷰 내용을 입력해주세요.");
       return;
@@ -68,18 +88,19 @@ export default function BakeryReviewPage() {
 
     setIsSubmitting(true);
     try {
-      const reviewPictureUrls = await Promise.all(
-        photos.map((p) => uploadReviewPhoto({ file: p.file })),
+      const uploadedUrls = await Promise.all(
+        newPhotos.map((p) => uploadReviewPhoto({ file: p.file })),
       );
-      await createReview({
-        bakeryId: Number(bakeryId),
+      const reviewPictureUrls = [...existingPhotos, ...uploadedUrls];
+      await updateReview({
+        reviewId: resolvedReviewId,
         content: text,
         rating,
         reviewPictureUrls,
       });
       nav(-1);
     } catch (err) {
-      alert(err.message || "리뷰 등록에 실패했습니다.");
+      alert(err.message || "리뷰 수정에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +112,7 @@ export default function BakeryReviewPage() {
         <BackBtn type="button" onClick={() => nav(-1)} aria-label="뒤로가기">
           <Arrow src={left_arrow} />
         </BackBtn>
-        <Title>리뷰 등록하기</Title>
+        <Title>리뷰 수정하기</Title>
         <RightSpace />
       </TopBar>
 
@@ -114,7 +135,7 @@ export default function BakeryReviewPage() {
           <PhotoRow>
             <PhotoInputBox
               onClick={openFilePicker}
-              disabled={photos.length >= MAX_PHOTOS}
+              disabled={totalCount >= MAX_PHOTOS}
             >
               <PlusImg src={PlusIcon} />
             </PhotoInputBox>
@@ -126,22 +147,31 @@ export default function BakeryReviewPage() {
               onChange={handleFiles}
             />
             <PhotoWrapper>
-              {photos.map((p, i) => (
+              {existingPhotos.map((url, i) => (
+                <PhotoBox
+                  key={`existing-${i}-${url}`}
+                  type="button"
+                  onClick={() => removeExisting(i)}
+                  aria-label="사진 삭제"
+                >
+                  <PreviewImg src={url} alt="" />
+                  <DeleteBadge aria-hidden="true">×</DeleteBadge>
+                </PhotoBox>
+              ))}
+              {newPhotos.map((p, i) => (
                 <PhotoBox
                   key={p.previewUrl}
                   type="button"
-                  onClick={() => removePhoto(i)}
+                  onClick={() => removeNew(i)}
                   aria-label="사진 삭제"
                 >
                   <PreviewImg src={p.previewUrl} alt="" />
                   <DeleteBadge aria-hidden="true">×</DeleteBadge>
                 </PhotoBox>
               ))}
-              {Array.from({ length: MAX_PHOTOS - photos.length }).map(
-                (_, i) => (
-                  <EmptyPhotoBox key={`empty-${i}`} />
-                ),
-              )}
+              {Array.from({ length: MAX_PHOTOS - totalCount }).map((_, i) => (
+                <EmptyPhotoBox key={`empty-${i}`} />
+              ))}
             </PhotoWrapper>
           </PhotoRow>
         </Body>
@@ -149,7 +179,7 @@ export default function BakeryReviewPage() {
 
       <BottomBar>
         <SubmitBtn type="button" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? "등록 중..." : "완료"}
+          {isSubmitting ? "수정 중..." : "완료"}
         </SubmitBtn>
       </BottomBar>
     </PageLayout>

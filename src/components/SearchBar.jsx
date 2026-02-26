@@ -1,29 +1,48 @@
 import styled from "styled-components";
-import xIcon from "/xIcon.svg";
+const xIcon = "/xIcon.svg";
+const pawSvg = "/paw.svg";
 
-export default function SearchBar() {
+export default function SearchBar({ value, onChange, onClear }) {
   return (
     <Search>
-      <SearchInput placeholder="" />
-      <ClearButton type="button" aria-label="검색어 지우기">
-        <Image src={xIcon} alt="검색어 지우기" />
-      </ClearButton>
+      <PawImg src={pawSvg} alt="" />
+      <SearchInput
+        placeholder=""
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {value?.length > 0 && (
+        <ClearButton type="button" aria-label="검색어 지우기" onClick={onClear}>
+          <Image src={xIcon} alt="검색어 지우기" />
+        </ClearButton>
+      )}
     </Search>
   );
 }
 
 const Search = styled.div`
   position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
   background: #fff;
   border-radius: 999px;
-  padding: 8px 55px 8px 11px;
   box-sizing: border-box;
-
   border: solid 5px var(--main-color2);
   box-shadow: 0 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+  padding: 8px 55px 8px 11px;
+`;
+
+const PawImg = styled.img`
+  flex-shrink: 0;
 `;
 
 const SearchInput = styled.input`
+  flex: 1;
+  min-width: 0;
+
   width: 100%;
   border: none;
   outline: none;

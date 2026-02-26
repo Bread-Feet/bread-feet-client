@@ -17,10 +17,11 @@ export default function BakeryInfoSection({
   bakeryName,
   handleBakeryNameChange,
   address,
+  detailedAddress,
   handleSearchAddress,
   handleDetailedAddressChange,
+  phoneNumber,
   handlePhoneNumberChange,
-  handleWebpageChange,
   mainPhotoPreview,
   handleMainPhotoChange,
 }) {
@@ -54,6 +55,7 @@ export default function BakeryInfoSection({
           </AddressRow>
           <Input
             placeholder="상세 주소를 입력하세요"
+            value={detailedAddress}
             onChange={(e) => {
               handleDetailedAddressChange(e);
             }}
@@ -66,14 +68,8 @@ export default function BakeryInfoSection({
           <Label>전화번호</Label>
           <Input
             placeholder="XXX-XXXX-XXXX"
+            value={phoneNumber}
             onChange={(e) => handlePhoneNumberChange(e)}
-          />
-        </Field>
-        <Field>
-          <Label>웹페이지</Label>
-          <Input
-            placeholder="https://www...."
-            onChange={(e) => handleWebpageChange(e)}
           />
         </Field>
         <Field>

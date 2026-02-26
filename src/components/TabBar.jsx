@@ -10,7 +10,10 @@ import homeOn from "/navbar/home_on.svg";
 import mapOff from "/navbar/map_off.svg";
 import mapOn from "/navbar/map_on.svg";
 
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getValidAccessToken } from "../lib/token-storage";
+import LoginModal from "./LoginModal";
 
 const tabs = [
   { key: "map", label: "위치", to: "/map", off: mapOff, on: mapOn },
@@ -21,6 +24,7 @@ const tabs = [
     extraPaths: ["/mybakery"],
     off: heartOff,
     on: heartOn,
+    requireAuth: true,
   },
   { key: "home", label: "홈", to: "/", off: homeOff, on: homeOn },
   {
@@ -42,31 +46,54 @@ const tabs = [
 export default function TabBar() {
   const nav = useNavigate();
   const { pathname } = useLocation();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const matchedTab = tabs.find((t) => {
     if (t.to === "/") return pathname === "/";
     if (pathname.startsWith(t.to)) return true;
     return t.extraPaths?.some((p) => pathname.startsWith(p)) ?? false;
   });
-  let activeKey;
-  if (matchedTab !== undefined && matchedTab !== null) {
-    activeKey = matchedTab.key;
-  } else {
-    activeKey = "home";
-  }
+  const activeKey = matchedTab?.key ?? "home";
+
+  const handleTabClick = async (t) => {
+    if (t.requireAuth) {
+      const token = await getValidAccessToken();
+      if (!token) {
+        setShowLoginModal(true);
+        return;
+      }
+    }
+    nav(t.to);
+  };
 
   return (
-    <TabBarWrapper>
-      {tabs.map((t) => {
-        const isActive = t.key === activeKey;
-        return (
-          <TabButton key={t.key} type="button" onClick={() => nav(t.to)}>
-            <TabIcon src={isActive ? t.on : t.off} alt="" />
-            <TabLabel>{t.label}</TabLabel>
-          </TabButton>
-        );
-      })}
-    </TabBarWrapper>
+    <>
+      <TabBarWrapper>
+        {tabs.map((t) => {
+          const isActive = t.key === activeKey;
+          return (
+            <TabButton
+              key={t.key}
+              type="button"
+              onClick={() => handleTabClick(t)}
+            >
+              <TabIcon src={isActive ? t.on : t.off} alt="" />
+              <TabLabel>{t.label}</TabLabel>
+            </TabButton>
+          );
+        })}
+      </TabBarWrapper>
+
+      {showLoginModal && (
+        <LoginModal
+          onConfirm={() => {
+            setShowLoginModal(false);
+            nav(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+          }}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -77,7 +104,7 @@ const TabBarWrapper = styled.nav`
   margin: 0 auto;
 
   background: var(--main-color4);
-  box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 -4px 4px rgba(210, 205, 205, 0.25);
 
   display: grid;
   grid-template-columns: repeat(5, 1fr);

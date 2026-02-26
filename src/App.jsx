@@ -10,10 +10,16 @@ import AppLayout from "./pages/layouts/AppLayout";
 import HomePage from "./pages/home/HomePage";
 import BakeryCreatePage from "./pages/bakery-admin/form/BakeryCreatePage";
 import BakeryModifyPage from "./pages/bakery-admin/form/BakeryModifyPage";
+import PrivateRoute from "./components/PrivateRoute";
+import GuestRoute from "./components/GuestRoute";
 
 import BakeryPage from "./pages/bakery/BakeryPage";
 import BakeryDetailPage from "./pages/bakery/BakeryDetailPage";
 import BakeryReviewPage from "./pages/bakery/BakeryReviewPage";
+import BakeryEditReviewPage from "./pages/bakery/BakeryEditReviewPage";
+
+import CommunityPage from "./pages/community/CommunityPage";
+import MapPage from "./pages/map/MapPage";
 
 function App() {
   return (
@@ -32,10 +38,52 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
           <Route path="/diary/new" element={<DiaryEditorPage />} />
+        <Route
+          path="/mybakery/register"
+          element={
+            <PrivateRoute>
+              <BakeryCreatePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/mybakery/:id/modify"
+          element={
+            <PrivateRoute>
+              <BakeryModifyPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/bakery/:id/addreview"
+          element={
+            <PrivateRoute>
+              <BakeryReviewPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/bakery/:id/editreview/:reviewId"
+          element={
+            <PrivateRoute>
+              <BakeryEditReviewPage />
+            </PrivateRoute>
+          }
+        />
+        <Route element={<GuestRoute><AppLayout /></GuestRoute>}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/mybakery" element={<BakeryAdminPage />} />
+          <Route
+            path="/mybakery"
+            element={
+              <PrivateRoute>
+                <BakeryAdminPage />
+              </PrivateRoute>
+            }
+          />
           <Route path="/bakery" element={<BakeryPage />} />
           <Route path="/bakery/:id" element={<BakeryDetailPage />} />
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/map" element={<MapPage />} />
         </Route>
       </Routes>
     </>

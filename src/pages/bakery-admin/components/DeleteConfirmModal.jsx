@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import styled from "styled-components";
 
-export default function DeleteConfirmModal({ open, onClose, onConfirm }) {
+export default function DeleteConfirmModal({ open, onClose, onConfirm, disabled, errorMessage }) {
   useEffect(() => {
     if (!open) return;
 
@@ -9,7 +9,7 @@ export default function DeleteConfirmModal({ open, onClose, onConfirm }) {
     document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose?.();
+      if (event.key === "Escape" && !disabled) onClose?.();
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -18,14 +18,14 @@ export default function DeleteConfirmModal({ open, onClose, onConfirm }) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, disabled]);
 
   if (!open) return null;
 
   return (
     <Overlay
       onMouseDown={(event) =>
-        event.target === event.currentTarget && onClose?.()
+        event.target === event.currentTarget && !disabled && onClose?.()
       }
     >
       <Modal
@@ -40,12 +40,13 @@ export default function DeleteConfirmModal({ open, onClose, onConfirm }) {
           <br />
           삭제된 내용은 복구할 수 없습니다.
         </Description>
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         <ButtonRow>
-          <CancelButton type="button" onClick={onClose}>
+          <CancelButton type="button" onClick={onClose} disabled={disabled}>
             취소
           </CancelButton>
-          <DeleteButton type="button" onClick={() => onConfirm?.()}>
-            삭제하기
+          <DeleteButton type="button" onClick={() => onConfirm?.()} disabled={disabled}>
+            {disabled ? "삭제 중..." : "삭제하기"}
           </DeleteButton>
         </ButtonRow>
       </Modal>
@@ -107,6 +108,13 @@ const Description = styled.p`
   color: #a5a5a5;
 
   margin: 8px 0 28px;
+`;
+
+const ErrorMessage = styled.p`
+  font-size: 12px;
+  color: #ff0000;
+
+  margin: 0 0 12px;
 `;
 
 const ButtonRow = styled.div`

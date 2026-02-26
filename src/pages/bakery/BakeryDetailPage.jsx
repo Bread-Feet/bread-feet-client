@@ -1,17 +1,28 @@
 import styled from "styled-components";
 const arrow_left = "/arrow_left_white.svg";
-const heart = "/heart_off.svg";
+const heart_off = "/heart_off.svg";
+const heart_on = "/heart_on.svg";
 const star = "/starIcon.svg";
 const location = "/location.svg";
 const tell = "/tell.svg";
-const link = "/link.svg";
 const clock = "/clock.svg";
 const dropboxIcon = "/dropboxIcon.svg";
+const mascot = "/mascot.svg";
 
 import PageLayout from "../../components/layout/PageLayout";
+import LoginModal from "../../components/LoginModal";
 
 import { useLayoutEffect, useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useReviews from "./hooks/useReviews";
+import useBookmark from "./hooks/useBookmark";
+import { fetchBakery } from "../../lib/api/bakery";
+import {
+  deleteReview,
+  createReviewLike,
+  deleteReviewLike,
+} from "../../lib/api/review";
+import { getValidAccessToken } from "../../lib/token-storage";
 
 function toKoreanDay(jsDay) {
   switch (jsDay) {
@@ -99,81 +110,203 @@ function parseHHMM(s) {
   return hh * 60 + mm;
 }
 
-const exampleImg = "/examplePhoto.jpg";
+const FULL_DAY_TO_SHORT = {
+  월요일: "월",
+  화요일: "화",
+  수요일: "수",
+  목요일: "목",
+  금요일: "금",
+  토요일: "토",
+  일요일: "일",
+};
+
+function parseBusinessHours(raw) {
+  if (!raw) return [];
+
+  const trimmed = String(raw).trim();
+
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      // fall through
+    }
+  }
+
+  const result = [];
+  const regex = /([월화수목금토일]요일)\s+(\d{1,2}:\d{2}-\d{1,2}:\d{2})/g;
+  let match;
+  while ((match = regex.exec(trimmed)) !== null) {
+    const day = FULL_DAY_TO_SHORT[match[1]] ?? match[1];
+    result.push({ day, time: match[2] });
+  }
+  return result;
+}
+
 export default function BakeryDetailPage() {
   const nav = useNavigate();
   const { id } = useParams();
 
   const [tab, setTab] = useState("home");
+  const [bakery, setBakery] = useState(null);
+  const [bakeryLoading, setBakeryLoading] = useState(true);
 
-  const bakery = useMemo(() => {
-    return {
-      id,
-      name: "맛있는 빵집",
-      rating: 5.0,
-      reviewCount: 1689,
-      address: {
-        detail: "101호",
-        lotNumber: "1-45",
-        roadAddress: "서울특별시 강남구 테헤란로 123",
-      },
-      imageUrl: exampleImg,
-      phoneNumber: "010-1234-5678",
-      websiteUrl: "https://www.instagram.com/",
-      businessHours: [
-        { day: "월", time: "09:00 - 18:00" },
-        { day: "화", time: "09:00 - 18:00" },
-        { day: "수", time: "09:00 - 18:00" },
-        { day: "목", time: "09:00 - 10:00" },
-        { day: "금", time: "09:00 - 18:00" },
-        { day: "토", time: "00:00 - 00:00" },
-        { day: "일", time: "" },
-      ],
-      bestBread: "소금빵",
-      features: {
-        beverage: true,
-        dineIn: true,
-        waiting: "onsite", // "onsite" | "online" | "none"
-        parking: true,
-      },
-      menus: [
-        {
-          name: "소금빵",
-          price: 3000,
-          thumbnailUrl: exampleImg,
-        },
-        {
-          name: "바게트",
-          price: 4500,
-          thumbnailUrl: exampleImg,
-        },
-      ],
-
-      // review
-      reviews: [
-        {
-          id: 1,
-          authorName: "논서",
-          createdAt: "2026-01-30",
-          rating: 5,
-          content:
-            "맛있어요 남남 굿!\n굿굿남\n남남굿! | | | | | | | | | | !!!!!!!!!!!",
-          photos: [exampleImg, exampleImg],
-          avatarUrl: exampleImg,
-        },
-        {
-          id: 2,
-          authorName: "논서",
-          createdAt: "2026-01-30",
-          rating: 4,
-          content:
-            "가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하가나다라마바사아자차카파타하",
-          photos: [exampleImg, exampleImg, exampleImg, exampleImg, exampleImg],
-          avatarUrl: exampleImg,
-        },
-      ],
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    setBakeryLoading(true);
+    fetchBakery(id)
+      .then((data) => {
+        if (cancelled) return;
+        setBakery({
+          id,
+          name: data.name,
+          rating: data.averageRating ?? 0,
+          reviewCount: data.reviewCount ?? 0,
+          address: data.address ?? {},
+          imageUrl: data.imageUrl,
+          phoneNumber: data.phoneNumber,
+          businessHours: parseBusinessHours(data.businessHours),
+          bestBread: data.bestBread,
+          features: {
+            beverage: data.isDrink ?? false,
+            dineIn: data.isEatIn ?? false,
+            waiting: data.isWaiting ? "onsite" : "none",
+            parking: data.isParking ?? false,
+          },
+          menus: data.menus ?? [],
+        });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setBakeryLoading(false);
+      });
+    return () => {
+      cancelled = true;
     };
   }, [id]);
+
+  const {
+    reviews: rawReviews,
+    isLoading: reviewsLoading,
+    hasMore: reviewsHasMore,
+    loadMore: loadMoreReviews,
+    refresh: refreshReviews,
+  } = useReviews(tab === "review" ? id : null);
+  const { isBookmarked, toggle: toggleBookmark } = useBookmark(id);
+
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [localLikes, setLocalLikes] = useState(new Map());
+  const inFlightLikes = useRef(new Set());
+  const [deletingReviewId, setDeletingReviewId] = useState(null);
+  const [isReviewDeleting, setIsReviewDeleting] = useState(false);
+  const [reviewDeleteErrorVisible, setReviewDeleteErrorVisible] =
+    useState(false);
+
+  const openReviewDeleteModal = (reviewId) => {
+    setReviewDeleteErrorVisible(false);
+    setDeletingReviewId(reviewId);
+  };
+
+  const closeReviewDeleteModal = () => {
+    setDeletingReviewId(null);
+    setReviewDeleteErrorVisible(false);
+  };
+
+  const confirmReviewDelete = async () => {
+    setReviewDeleteErrorVisible(false);
+    setIsReviewDeleting(true);
+    try {
+      await deleteReview({ reviewId: deletingReviewId });
+      setDeletingReviewId(null);
+      setLocalLikes(new Map());
+      refreshReviews();
+    } catch {
+      setReviewDeleteErrorVisible(true);
+    } finally {
+      setIsReviewDeleting(false);
+    }
+  };
+
+  const handleLikeToggle = async (r) => {
+    if (inFlightLikes.current.has(r.id)) return;
+    const token = await getValidAccessToken();
+    if (!token) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    const wasLiked = r.isLiked;
+    const newIsLiked = !wasLiked;
+    const newCount = r.likeCount + (newIsLiked ? 1 : -1);
+
+    setLocalLikes((prev) =>
+      new Map(prev).set(r.id, { isLiked: newIsLiked, likeCount: newCount }),
+    );
+
+    inFlightLikes.current.add(r.id);
+    try {
+      if (wasLiked) {
+        await deleteReviewLike({ reviewId: r.id });
+      } else {
+        await createReviewLike({ reviewId: r.id });
+      }
+    } catch {
+      setLocalLikes((prev) => {
+        const next = new Map(prev);
+        next.delete(r.id);
+        return next;
+      });
+    } finally {
+      inFlightLikes.current.delete(r.id);
+    }
+  };
+
+  const handleEditReview = (review) => {
+    nav(`/bakery/${bakery.id}/editreview/${review.id}`, { state: { review } });
+  };
+
+  const handleReviewCreate = async () => {
+    const token = await getValidAccessToken();
+    if (!token) {
+      setShowLoginModal(true);
+      return;
+    }
+    nav(`/bakery/${bakery.id}/addreview`);
+  };
+
+  const handleBookmarkToggle = async () => {
+    const token = await getValidAccessToken();
+    if (!token) {
+      setShowLoginModal(true);
+      return;
+    }
+    toggleBookmark();
+  };
+
+  const reviews = useMemo(
+    () =>
+      rawReviews.map((r) => {
+        const local = localLikes.get(r.reviewId);
+        return {
+          id: r.reviewId,
+          authorName: r.nickname,
+          createdAt: r.createdAt,
+          rating: r.rating,
+          content: r.content,
+          photos: r.reviewPictureUrls?.length
+            ? r.reviewPictureUrls
+            : r.thumbnailUrl
+              ? [r.thumbnailUrl]
+              : [],
+          likeCount: local?.likeCount ?? r.likeCount,
+          isLiked: local?.isLiked ?? r.isLiked,
+          isMyReview: r.isMyReview,
+        };
+      }),
+    [rawReviews, localLikes],
+  );
 
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -182,15 +315,19 @@ export default function BakeryDetailPage() {
   }, []);
 
   const status = useMemo(
-    () => getOpenStatus(bakery.businessHours, now),
-    [bakery.businessHours, now],
+    () => getOpenStatus(bakery?.businessHours ?? [], now),
+    [bakery?.businessHours, now],
   );
+
+  if (bakeryLoading || !bakery) {
+    return <PageLayout />;
+  }
 
   return (
     <PageLayout>
       <Scroll>
         <Hero>
-          <HeroImg src={bakery.imageUrl} alt={bakery.name} />
+          <HeroImg src={bakery.imageUrl || "/bread-feet-logo-login.png"} alt={bakery.name} />
           <HeroDim />
 
           <HeroTop>
@@ -201,8 +338,17 @@ export default function BakeryDetailPage() {
             >
               <ArrowLeftIcon src={arrow_left} alt="" aria-hidden="true" />
             </CircleBtn>
-            <CircleBtn type="button" aria-label="즐겨찾기">
-              <HeartIcon src={heart} alt="" aria-hidden="true" />
+            <CircleBtn
+              type="button"
+              aria-label={isBookmarked ? "즐겨찾기 해제" : "즐겨찾기"}
+              aria-pressed={isBookmarked}
+              onClick={handleBookmarkToggle}
+            >
+              <HeartIcon
+                src={isBookmarked ? heart_on : heart_off}
+                alt=""
+                aria-hidden="true"
+              />
             </CircleBtn>
           </HeroTop>
         </Hero>
@@ -261,12 +407,42 @@ export default function BakeryDetailPage() {
             <MenuSection menus={bakery.menus} bestBread={bakery.bestBread} />
           ) : (
             <ReviewSection
-              reviews={bakery.reviews}
-              onCreate={() => nav(`/bakery/${bakery.id}/addreview`)}
+              reviews={reviews}
+              isLoading={reviewsLoading}
+              hasMore={reviewsHasMore}
+              onLoadMore={loadMoreReviews}
+              onCreate={handleReviewCreate}
+              onLike={handleLikeToggle}
+              onEdit={handleEditReview}
+              onDelete={openReviewDeleteModal}
             />
           )}
         </Card>
       </Scroll>
+
+      {showLoginModal && (
+        <LoginModal
+          onConfirm={() => {
+            setShowLoginModal(false);
+            nav(
+              `/login?returnUrl=${encodeURIComponent(window.location.pathname)}`,
+            );
+          }}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
+
+      <ReviewDeleteModal
+        open={!!deletingReviewId}
+        onClose={closeReviewDeleteModal}
+        onConfirm={confirmReviewDelete}
+        disabled={isReviewDeleting}
+        errorMessage={
+          reviewDeleteErrorVisible
+            ? "삭제에 실패했습니다. 다시 시도해주세요."
+            : null
+        }
+      />
     </PageLayout>
   );
 }
@@ -275,7 +451,7 @@ export default function BakeryDetailPage() {
 function HomeSection({ bakery, status }) {
   const [hoursOpen, setHoursOpen] = useState(false);
   const hoursPanelId = `hours-panel-${bakery.id}`;
-  const canShowHours = status.state !== "unknown";
+  const canShowHours = (bakery.businessHours?.length ?? 0) > 0;
 
   const hoursOpenUI = canShowHours && hoursOpen;
 
@@ -284,7 +460,9 @@ function HomeSection({ bakery, status }) {
       ? "영업중"
       : status.state === "closed"
         ? "영업종료"
-        : "영업정보없음";
+        : canShowHours
+          ? "오늘 휴무"
+          : "영업정보없음";
 
   const active = {
     beverage: bakery.features.beverage,
@@ -309,15 +487,6 @@ function HomeSection({ bakery, status }) {
             <PhoneIcon src={tell} />
           </InfoIconWrap>
           <InfoText>{bakery.phoneNumber}</InfoText>
-        </InfoRow>
-
-        <InfoRow>
-          <InfoIconWrap>
-            <LinkIcon src={link} />
-          </InfoIconWrap>
-          <InfoLink href={bakery.websiteUrl} target="_blank" rel="noreferrer">
-            {bakery.websiteUrl}
-          </InfoLink>
         </InfoRow>
 
         <InfoRowButton
@@ -392,7 +561,7 @@ function MenuSection({ menus, bestBread }) {
                   {m.thumbnailUrl ? (
                     <MenuThumbImg src={m.thumbnailUrl} alt="" />
                   ) : (
-                    <MenuThumbFallback aria-hidden="true">🥐</MenuThumbFallback>
+                    <MenuThumbFallback aria-hidden="true" />
                   )}
                 </MenuThumb>
 
@@ -414,7 +583,32 @@ function MenuSection({ menus, bestBread }) {
 }
 
 // review section
-function ReviewSection({ reviews, onCreate }) {
+function ReviewSection({
+  reviews,
+  isLoading,
+  hasMore,
+  onLoadMore,
+  onCreate,
+  onLike,
+  onEdit,
+  onDelete,
+}) {
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) onLoadMore();
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading, onLoadMore]);
+
   return (
     <ReviewWrap aria-label="리뷰">
       <ReviewCtaBtn type="button" onClick={onCreate} aria-label="리뷰 등록하기">
@@ -426,7 +620,7 @@ function ReviewSection({ reviews, onCreate }) {
           <ReviewItem key={r.id} role="listitem">
             <ReviewHeader>
               <ReviewerAvatar>
-                <ReviewerAvatarImg src={r.avatarUrl || exampleImg} alt="" />
+                <ReviewerAvatarImg src={mascot} alt="" />
               </ReviewerAvatar>
 
               <HeaderMeta>
@@ -439,6 +633,36 @@ function ReviewSection({ reviews, onCreate }) {
                   <StarRating rating={r.rating} />
                 </StarRow>
               </HeaderMeta>
+
+              <ReviewActionCol>
+                <LikeBtn
+                  type="button"
+                  aria-label={r.isLiked ? "좋아요 취소" : "좋아요"}
+                  onClick={() => onLike?.(r)}
+                >
+                  <LikeIcon
+                    src={r.isLiked ? heart_on : heart_off}
+                    alt=""
+                    aria-hidden="true"
+                    $liked={r.isLiked}
+                  />
+                  <LikeCount>{r.likeCount}</LikeCount>
+                </LikeBtn>
+                {r.isMyReview && (
+                  <MyReviewBtns>
+                    <ReviewActionBtn type="button" onClick={() => onEdit?.(r)}>
+                      수정
+                    </ReviewActionBtn>
+                    <ReviewActionDivider>|</ReviewActionDivider>
+                    <ReviewActionBtn
+                      type="button"
+                      onClick={() => onDelete?.(r.id)}
+                    >
+                      삭제
+                    </ReviewActionBtn>
+                  </MyReviewBtns>
+                )}
+              </ReviewActionCol>
             </ReviewHeader>
 
             <ReviewBody>
@@ -449,6 +673,8 @@ function ReviewSection({ reviews, onCreate }) {
           </ReviewItem>
         ))}
       </ReviewList>
+
+      <div ref={sentinelRef} style={{ height: 1 }} />
     </ReviewWrap>
   );
 }
@@ -470,12 +696,11 @@ function StarRating({ rating }) {
   );
 }
 
-// TODO : date 형식보고 수정
 function formatDotDate(dateStr) {
-  const parts = typeof dateStr === "string" ? dateStr.split("-") : [];
-  if (parts.length !== 3) return dateStr;
-  const [y, m, day] = parts;
-  return `${y}. ${m}. ${day}`;
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr);
+  return `${d.getFullYear()}. ${String(d.getMonth() + 1).padStart(2, "0")}. ${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function ExpandableReviewText({ text, clampLines = 3 }) {
@@ -868,29 +1093,12 @@ const PinIcon = styled.img``;
 
 const PhoneIcon = styled.img``;
 
-const LinkIcon = styled.img``;
-
 const ClockIcon = styled.img``;
 
 const InfoText = styled.div`
   font-size: 14px;
   font-weight: 400;
   color: #000000;
-`;
-
-const InfoLink = styled.a`
-  font-size: 14px;
-  font-weight: 400;
-  color: #000000;
-
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:active {
-    opacity: 0.85;
-  }
 `;
 
 const InfoRowButton = styled.button`
@@ -1157,10 +1365,66 @@ const ReviewerAvatarImg = styled.img`
 `;
 
 const HeaderMeta = styled.div`
+  flex: 1;
   min-width: 0;
+
   display: flex;
   flex-direction: column;
   gap: 8px;
+`;
+
+const ReviewActionCol = styled.div`
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+`;
+
+const LikeBtn = styled.button`
+  border: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  padding: 2px;
+
+  cursor: pointer;
+`;
+
+const LikeIcon = styled.img`
+  width: 20px;
+  height: 20px;
+
+  filter: ${(p) => (p.$liked ? "none" : "brightness(0%)")};
+`;
+
+const LikeCount = styled.span`
+  font-size: 10px;
+  color: #9e9e9e;
+`;
+
+const MyReviewBtns = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const ReviewActionBtn = styled.button`
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+  color: #9e9e9e;
+  cursor: pointer;
+  padding: 0;
+`;
+
+const ReviewActionDivider = styled.span`
+  font-size: 11px;
+  color: #d5d5d5;
 `;
 
 const MetaTopRow = styled.div`
@@ -1331,7 +1595,7 @@ const ReviewPhotoItem = styled.div`
   border-radius: 16px;
   overflow: hidden;
 
-  background: #f7dfe2;
+  background: #d4d4d4;
   border: 1px solid rgba(0, 0, 0, 0.06);
 `;
 
@@ -1393,4 +1657,143 @@ const CarouselArrowIcon = styled.img`
   width: 18px;
   height: 18px;
   transform: rotate(${(p) => (p.$flip ? "180deg" : "0deg")});
+`;
+
+// ReviewDeleteModal
+
+function ReviewDeleteModal({
+  open,
+  onClose,
+  onConfirm,
+  disabled,
+  errorMessage,
+}) {
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && !disabled) onClose?.();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, disabled, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <RDOverlay
+      onMouseDown={(e) =>
+        e.target === e.currentTarget && !disabled && onClose?.()
+      }
+    >
+      <RDModal
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="review-delete-title"
+      >
+        <RDIconCircle aria-hidden="true">!</RDIconCircle>
+        <RDTitle id="review-delete-title">리뷰를 삭제할까요?</RDTitle>
+        <RDDescription>삭제된 리뷰는 복구할 수 없습니다.</RDDescription>
+        {errorMessage && <RDErrorMessage>{errorMessage}</RDErrorMessage>}
+        <RDButtonRow>
+          <RDCancelButton type="button" onClick={onClose} disabled={disabled}>
+            취소
+          </RDCancelButton>
+          <RDDeleteButton
+            type="button"
+            onClick={() => onConfirm?.()}
+            disabled={disabled}
+          >
+            {disabled ? "삭제 중..." : "삭제하기"}
+          </RDDeleteButton>
+        </RDButtonRow>
+      </RDModal>
+    </RDOverlay>
+  );
+}
+
+const RDOverlay = styled.div`
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+`;
+
+const RDModal = styled.div`
+  width: min(300px, calc(100vw - 40px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 16px 16px 16px;
+`;
+
+const RDIconCircle = styled.div`
+  font-size: 40px;
+  font-weight: 600;
+  color: #ff0000;
+  width: 56px;
+  height: 56px;
+  background: #ffe8e8;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+`;
+
+const RDTitle = styled.h2`
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+`;
+
+const RDDescription = styled.p`
+  font-size: 12px;
+  color: #a5a5a5;
+  margin: 8px 0 28px;
+`;
+
+const RDErrorMessage = styled.p`
+  font-size: 12px;
+  color: #ff0000;
+  margin: 0 0 12px;
+`;
+
+const RDButtonRow = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+`;
+
+const RDBaseButton = styled.button`
+  font-size: 14px;
+  font-weight: 600;
+  height: 56px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+`;
+
+const RDCancelButton = styled(RDBaseButton)`
+  color: #a5a5a5;
+  background: #f8f9fa;
+`;
+
+const RDDeleteButton = styled(RDBaseButton)`
+  color: var(--main-color4);
+  background: var(--red-color);
 `;
