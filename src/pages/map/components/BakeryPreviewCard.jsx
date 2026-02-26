@@ -60,7 +60,7 @@ const Backdrop = styled.div`
 
 const Card = styled.div`
   position: absolute;
-  bottom: 60px;
+  bottom: 100px;
   left: 16px;
   right: 16px;
 
