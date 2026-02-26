@@ -1,0 +1,44 @@
+import styled from "styled-components";
+
+export const Wrap = styled.div`
+  margin: 12px 16px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+
+  border-radius: 10px;
+  border: 1px solid #ab9d8b;
+
+  background: transparent;
+  backdrop-filter: blur(6px);
+`;
+
+export const Left = styled.div`
+  width: 150px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #000000;
+  white-space: nowrap;
+`;
+
+export const Divider = styled.div`
+  width: 1px;
+  height: 60px;
+  background-color: #ab9d8b;
+`;
+
+export const Right = styled.div`
+  flex: 1;
+  padding-left: 14px;
+  font-size: 13px;
+  color: #000000;
+  cursor: pointer;
+`;
+
+export const MapPinImg = styled.img`
+  width: 16px;
+  height: 15px;
+  margin-right: 6px;
+  vertical-align: middle;
+`;

@@ -16,6 +16,9 @@ import BakeryDetailPage from "./pages/bakery/BakeryDetailPage";
 import BakeryReviewPage from "./pages/bakery/BakeryReviewPage";
 import BakeryEditReviewPage from "./pages/bakery/BakeryEditReviewPage";
 
+import DiaryCalenderPage from "./pages/diary/DiaryCalendarPage";
+import DiaryEditorPage from "./pages/diary/DiaryEditorPage";
+
 import CommunityPage from "./pages/community/CommunityPage";
 import MapPage from "./pages/map/MapPage";
 
@@ -62,7 +65,17 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route element={<GuestRoute><AppLayout /></GuestRoute>}>
+        <Route element={<AppLayout />}>
+          <Route path="/mydiary" element={<DiaryCalenderPage />} />
+          <Route path="/diary/new" element={<DiaryEditorPage />} />
+        </Route>
+        <Route
+          element={
+            <GuestRoute>
+              <AppLayout />
+            </GuestRoute>
+          }
+        >
           <Route path="/" element={<HomePage />} />
           <Route
             path="/mybakery"
