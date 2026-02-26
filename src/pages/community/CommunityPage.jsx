@@ -15,9 +15,10 @@ export default function CommunityPage() {
   const sentinelRef = useRef(null);
 
   const goBakery = useCallback((bakeryId) => nav(`/bakery/${bakeryId}`), [nav]);
-  const goPost = useCallback((postId) => {
-    console.log("TODO: go post detail:", postId);
-  }, []);
+  const goPost = useCallback(
+    (postId) => nav(`/community/diary/${postId}`),
+    [nav],
+  );
 
   useEffect(() => {
     const root = mainRef.current;

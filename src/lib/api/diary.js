@@ -9,3 +9,7 @@ export async function fetchDiaries({ cursor, size = 10 } = {}) {
 export async function createDiary(body) {
   return apiClient.post("/api/v1/diaries", body);
 }
+
+export async function fetchDiaryDetail(diaryId) {
+  return apiClient.get(`/api/v1/diaries/${diaryId}`);
+}

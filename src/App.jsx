@@ -19,6 +19,7 @@ import BakeryEditReviewPage from "./pages/bakery/BakeryEditReviewPage";
 import DiaryCalenderPage from "./pages/diary/DiaryCalendarPage";
 import DiaryEditorPage from "./pages/diary/DiaryEditorPage";
 import DiaryBakeryPage from "./pages/diary/BakeryPage";
+import DiaryDetailPage from "./pages/diary/DiaryDetailPage";
 
 import CommunityPage from "./pages/community/CommunityPage";
 import MapPage from "./pages/map/MapPage";
@@ -90,6 +91,7 @@ function App() {
           <Route path="/bakery" element={<BakeryPage />} />
           <Route path="/bakery/:id" element={<BakeryDetailPage />} />
           <Route path="/community" element={<CommunityPage />} />
+          <Route path="/community/diary/:diaryId" element={<DiaryDetailPage />} />
           <Route path="/map" element={<MapPage />} />
         </Route>
       </Routes>
