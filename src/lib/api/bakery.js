@@ -29,6 +29,12 @@ export async function fetchMyBakeries({
   return apiClient.get(`/api/v1/bakeries?${params}`);
 }
 
+export async function fetchRegionalRecommendations(region, size = 3) {
+  return apiClient.get(
+    `/api/v1/bakeries/recommendations/nearby?region=${encodeURIComponent(region)}&size=${size}`,
+  );
+}
+
 export async function fetchBakery(bakeryId) {
   return apiClient.get(`/api/v1/bakeries/${bakeryId}`);
 }
