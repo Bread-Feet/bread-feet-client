@@ -69,6 +69,7 @@ function App() {
         />
         <Route element={<AppLayout />}>
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
+          <Route path="/diary/:diaryId" element={<DiaryDetailPage />} />
           <Route path="/diary/new" element={<DiaryEditorPage />} />
           <Route path="/diary/bakery" element={<DiaryBakeryPage />} />
         </Route>
