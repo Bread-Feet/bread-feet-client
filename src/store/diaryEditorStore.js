@@ -15,6 +15,7 @@ const initialState = {
   tool: "pen",
   color: "#E33B3B",
   brushSize: 8,
+  textFont: "pretendard",
 
   activeTab: null, // 'font' | 'text' | 'image' | 'sticker' | 'tag' | 'draw' | null
   isPublic: false,
@@ -43,6 +44,7 @@ export const useDiaryEditorStore = create((set, get) => ({
   setTool: (tool) => set({ tool }),
   setColor: (color) => set({ color }),
   setBrushSize: (brushSize) => set({ brushSize }),
+  setTextFont: (textFont) => set({ textFont }),
 
   // 같은 탭 재클릭 시 닫기 (image 탭은 토글 없이 항상 파일 picker)
   setActiveTab: (tab) =>

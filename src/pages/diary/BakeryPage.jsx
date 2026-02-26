@@ -101,9 +101,7 @@ export default function DiaryBakeryPage() {
           <BakerySelectCard
             key={b.bakeryId}
             name={b.name}
-            address={[b.address?.roadAddress, b.address?.detail]
-              .filter(Boolean)
-              .join(" ")}
+            address={b.address?.roadAddress ?? ""}
             onClick={() => handleSelectBakery(b)}
           />
         ))}

@@ -1,3 +1,4 @@
+import PageLayout from "../../components/layout/PageLayout";
 import CalendarCard from "../../components/diary/CalendarCard";
 import Header from "../../components/diary/TopHeader";
 import styled from "styled-components";
@@ -39,24 +40,26 @@ export default function DiaryCalenderPage() {
   }, [year, month, selectedDate]);
 
   return (
-    <Screen>
-      <Content>
-        <Header year={year} onYearChange={setYear} />
-        <CardWrap>
-          <CalendarCard
-            year={year}
-            month={month}
-            onPrevMonth={goPrevMonth}
-            onNextMonth={goNextMonth}
-            onSelectDate={setSelectedDate}
-            selectedDay={selectedDate}
-          />
-        </CardWrap>
-        <Fab onClick={() => navigate(`/diary/new?date=${yyyyMmDd}`)}>
-          <img src={AddIcon} alt="새 기록 추가" />
-        </Fab>
-      </Content>
-    </Screen>
+    <PageLayout>
+      <Screen>
+        <Content>
+          <Header year={year} onYearChange={setYear} />
+          <CardWrap>
+            <CalendarCard
+              year={year}
+              month={month}
+              onPrevMonth={goPrevMonth}
+              onNextMonth={goNextMonth}
+              onSelectDate={setSelectedDate}
+              selectedDay={selectedDate}
+            />
+          </CardWrap>
+          <Fab onClick={() => navigate(`/diary/new?date=${yyyyMmDd}`)}>
+            <img src={AddIcon} alt="새 기록 추가" />
+          </Fab>
+        </Content>
+      </Screen>
+    </PageLayout>
   );
 }
 

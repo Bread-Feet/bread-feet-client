@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+﻿import React, { useRef, useState } from "react";
 import * as S from "./EditorTabBar.styled";
 import { useDiaryEditorStore } from "../../store/diaryEditorStore";
 
@@ -17,7 +17,10 @@ const DRAW_COLORS = [
   "#FFFFFF",
 ];
 
-// ─── 탭바 아이콘 SVG ──────────────────────────────────────────────
+const FONT_OPTIONS = [
+  { key: "pretendard", label: "Pretendard" },
+  { key: "fredoka", label: "Fredoka" },
+];
 
 function FontIcon() {
   return <S.AaText>Aa</S.AaText>;
@@ -76,8 +79,6 @@ function PencilIcon() {
     </svg>
   );
 }
-
-// ─── 그림판 컨트롤 아이콘 SVG ─────────────────────────────────────
 
 function UndoIcon() {
   return (
@@ -149,8 +150,6 @@ function CheckIcon() {
   );
 }
 
-// ─── 메인 컴포넌트 ────────────────────────────────────────────────
-
 export default function EditorTabBar() {
   const imageInputRef = useRef(null);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -162,6 +161,7 @@ export default function EditorTabBar() {
   const brushSize = useDiaryEditorStore((s) => s.brushSize);
   const strokes = useDiaryEditorStore((s) => s.strokes);
   const undoneStrokes = useDiaryEditorStore((s) => s.undoneStrokes);
+  const textFont = useDiaryEditorStore((s) => s.textFont);
 
   const setActiveTab = useDiaryEditorStore((s) => s.setActiveTab);
   const setIsPublic = useDiaryEditorStore((s) => s.setIsPublic);
@@ -169,6 +169,7 @@ export default function EditorTabBar() {
   const setColor = useDiaryEditorStore((s) => s.setColor);
   const setBrushSize = useDiaryEditorStore((s) => s.setBrushSize);
   const setBaseImage = useDiaryEditorStore((s) => s.setBaseImage);
+  const setTextFont = useDiaryEditorStore((s) => s.setTextFont);
   const undoStroke = useDiaryEditorStore((s) => s.undoStroke);
   const redoStroke = useDiaryEditorStore((s) => s.redoStroke);
   const clearStrokes = useDiaryEditorStore((s) => s.clearStrokes);
@@ -190,12 +191,51 @@ export default function EditorTabBar() {
     setIsPaletteOpen(false);
   };
 
-  const handleDone = () => {
-    setActiveTab("draw"); // 같은 탭 재클릭 → 닫기(null)
+  const handleDrawDone = () => {
+    setIsPaletteOpen(false);
+    setActiveTab("draw");
     setTool("pen");
   };
 
-  // ── 그림판 모드 ──
+  const handleFontDone = () => {
+    setActiveTab("font");
+  };
+
+  if (activeTab === "font") {
+    return (
+      <S.BarWrapper>
+        <S.BarInner>
+          <S.FontWrap>
+            <S.MainPill $mode="draw">
+              <S.FontControlsRow>
+                {FONT_OPTIONS.map((option) => (
+                  <S.FontOptionBtn
+                    key={option.key}
+                    type="button"
+                    $fontKey={option.key}
+                    $active={textFont === option.key}
+                    onClick={() => setTextFont(option.key)}
+                    aria-label={`${option.label} 폰트 선택`}
+                  >
+                    {option.label}
+                  </S.FontOptionBtn>
+                ))}
+                <S.TabBtnLike
+                  type="button"
+                  $done
+                  onClick={handleFontDone}
+                  aria-label="폰트 선택 완료"
+                >
+                  <CheckIcon />
+                </S.TabBtnLike>
+              </S.FontControlsRow>
+            </S.MainPill>
+          </S.FontWrap>
+        </S.BarInner>
+      </S.BarWrapper>
+    );
+  }
+
   if (activeTab === "draw") {
     return (
       <S.BarWrapper>
@@ -216,9 +256,7 @@ export default function EditorTabBar() {
               </S.PalettePopover>
             )}
 
-            {/* 드로잉 컨트롤 */}
             <S.MainPill $mode="draw">
-              {/* 현재 색상 미리보기 */}
               <S.CurrentColorBtn
                 type="button"
                 $color={color}
@@ -227,27 +265,25 @@ export default function EditorTabBar() {
                   setTool("pen");
                   setIsPaletteOpen((v) => !v);
                 }}
-                aria-label="펜 선택"
+                aria-label="색상 선택"
               />
 
-              {/* 지우개 */}
               <S.TabBtnLike
                 type="button"
                 $active={tool === "eraser"}
                 onClick={() => setTool(tool === "eraser" ? "pen" : "eraser")}
                 aria-label="지우개"
               >
-                <img src={Eraser} />
+                <img src={Eraser} alt="" />
               </S.TabBtnLike>
 
-              {/* 굵기 */}
               <S.SizePill>
                 <S.SizeBtn
                   type="button"
                   onClick={() => setBrushSize(Math.max(1, brushSize - 1))}
                   aria-label="굵기 감소"
                 >
-                  −
+                  -
                 </S.SizeBtn>
                 <S.SizeNum>{brushSize}</S.SizeNum>
                 <S.SizeBtn
@@ -259,7 +295,6 @@ export default function EditorTabBar() {
                 </S.SizeBtn>
               </S.SizePill>
 
-              {/* 실행취소 */}
               <S.TabBtnLike
                 type="button"
                 disabled={strokes.length === 0}
@@ -269,7 +304,6 @@ export default function EditorTabBar() {
                 <UndoIcon />
               </S.TabBtnLike>
 
-              {/* 다시실행 */}
               <S.TabBtnLike
                 type="button"
                 disabled={undoneStrokes.length === 0}
@@ -279,7 +313,6 @@ export default function EditorTabBar() {
                 <RedoIcon />
               </S.TabBtnLike>
 
-              {/* 전체 지우기 */}
               <S.TabBtnLike
                 type="button"
                 onClick={clearStrokes}
@@ -288,11 +321,10 @@ export default function EditorTabBar() {
                 <TrashIcon />
               </S.TabBtnLike>
 
-              {/* 완료 */}
               <S.TabBtnLike
                 type="button"
                 $done
-                onClick={handleDone}
+                onClick={handleDrawDone}
                 aria-label="완료"
               >
                 <CheckIcon />
@@ -304,7 +336,6 @@ export default function EditorTabBar() {
     );
   }
 
-  // ── 기본 탭바 ──
   return (
     <S.BarWrapper>
       <S.BarInner>
@@ -345,7 +376,7 @@ export default function EditorTabBar() {
             type="button"
             $active={activeTab === "draw"}
             onClick={() => setActiveTab("draw")}
-            aria-label="그림판 열기"
+            aria-label="그림 그리기"
           >
             <PencilIcon />
           </S.TabBtn>
