@@ -192,6 +192,7 @@ export default function EditorTabBar() {
   };
 
   const handleDrawDone = () => {
+    setIsPaletteOpen(false);
     setActiveTab("draw");
     setTool("pen");
   };

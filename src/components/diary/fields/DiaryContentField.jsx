@@ -20,7 +20,7 @@ export default function DiaryContentField() {
           e.target.style.height = "auto";
           e.target.style.height = e.target.scrollHeight + "px";
         }}
-        placeholder="오늘의 빵 이야기를 적어보세요.."
+        placeholder="오늘의 빵 이야기를 적어보세요!"
       />
     </Wrap>
   );

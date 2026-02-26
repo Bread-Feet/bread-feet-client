@@ -98,7 +98,9 @@ export default function DiaryDetailPage() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-    drawingStrokes.forEach((stroke) => drawStrokeOnCtx(ctx, stroke));
+    drawingStrokes.forEach((stroke) => {
+      drawStrokeOnCtx(ctx, stroke);
+    });
   }, [drawingStrokes]);
 
   const imageUrl = diary?.pictureUrls?.[0] || diary?.thumbnailUrl || "";

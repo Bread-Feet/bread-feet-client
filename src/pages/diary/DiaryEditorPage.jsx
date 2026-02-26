@@ -23,7 +23,8 @@ function isValidYYYYMMDD(dateStr) {
 }
 
 function toVisitDateISOString(dateStr) {
-  return new Date(`${dateStr}T00:00:00`).toISOString();
+  const [yyyy, mm, dd] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(yyyy, mm - 1, dd)).toISOString();
 }
 
 function normalizeAddress(address) {
