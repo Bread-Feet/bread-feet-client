@@ -18,6 +18,7 @@ import BakeryEditReviewPage from "./pages/bakery/BakeryEditReviewPage";
 
 import DiaryCalenderPage from "./pages/diary/DiaryCalendarPage";
 import DiaryEditorPage from "./pages/diary/DiaryEditorPage";
+import DiaryBakeryPage from "./pages/diary/BakeryPage";
 
 import CommunityPage from "./pages/community/CommunityPage";
 import MapPage from "./pages/map/MapPage";
@@ -68,6 +69,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
           <Route path="/diary/new" element={<DiaryEditorPage />} />
+          <Route path="/diary/bakery" element={<DiaryBakeryPage />} />
         </Route>
         <Route
           element={
