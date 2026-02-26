@@ -46,6 +46,7 @@ export default function DiaryEditorPage() {
   const content = useDiaryEditorStore((s) => s.content);
   const isPublic = useDiaryEditorStore((s) => s.isPublic);
   const baseImage = useDiaryEditorStore((s) => s.baseImage);
+  const strokes = useDiaryEditorStore((s) => s.strokes);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -105,6 +106,7 @@ export default function DiaryEditorPage() {
         title: title.trim(),
         visitDate: toVisitDateISOString(diaryDate),
         content: content.trim(),
+        drawingData: JSON.stringify(strokes ?? []),
         hashtags: [],
         pictureUrls,
       });
@@ -127,6 +129,7 @@ export default function DiaryEditorPage() {
     title,
     content,
     baseImage,
+    strokes,
     isPublic,
     resetEditor,
     navigate,
