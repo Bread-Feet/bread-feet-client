@@ -127,7 +127,9 @@ export default function MapPage() {
   useEffect(() => {
     if (!mapReady || !kakaoMapRef.current) return;
 
-    markerMapRef.current.forEach((m) => m.setMap(null));
+    markerMapRef.current.forEach((m) => {
+      m.setMap(null);
+    });
     markerMapRef.current.clear();
     setSelectedBakery(null);
 
