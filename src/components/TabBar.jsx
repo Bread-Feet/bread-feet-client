@@ -34,7 +34,13 @@ const tabs = [
     off: communicationOff,
     on: communicationOn,
   },
-  { key: "diary", label: "다이어리", to: "/diary", off: diaryOff, on: diaryOn },
+  {
+    key: "diary",
+    label: "다이어리",
+    to: "/mydiary",
+    off: diaryOff,
+    on: diaryOn,
+  },
 ];
 
 export default function TabBar() {

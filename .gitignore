@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .claude/*.local.json
+.vite/
 .vercel
 .env
