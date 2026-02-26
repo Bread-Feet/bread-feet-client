@@ -124,6 +124,33 @@ export const DrawWrap = styled.div`
   width: 100%;
 `;
 
+export const FontWrap = styled.div`
+  width: 100%;
+`;
+
+export const FontControlsRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const FontOptionBtn = styled.button`
+  flex: 1;
+  height: 36px;
+  border-radius: 18px;
+  border: 1.5px solid ${BROWN};
+  background: ${({ $active }) =>
+    $active ? "rgba(124,70,40,0.14)" : "transparent"};
+  color: ${BROWN};
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: ${({ $fontKey }) =>
+    $fontKey === "fredoka"
+      ? '"Fredoka", "Pretendard", sans-serif'
+      : '"Pretendard", sans-serif'};
+`;
+
 export const PalettePopover = styled.div`
   position: absolute;
   left: 0;

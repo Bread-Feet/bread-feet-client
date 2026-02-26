@@ -1,15 +1,17 @@
-import React from "react";
+﻿import React from "react";
 import styled from "styled-components";
 import { useDiaryEditorStore } from "../../../store/diaryEditorStore";
 
 export default function DiaryTitleField() {
   const title = useDiaryEditorStore((s) => s.title);
   const setTitle = useDiaryEditorStore((s) => s.setTitle);
+  const textFont = useDiaryEditorStore((s) => s.textFont);
 
   return (
     <Wrap>
       <Label htmlFor="diary-title">제목:</Label>
       <Input
+        $font={textFont}
         id="diary-title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -53,6 +55,10 @@ const Input = styled.input`
   font-size: 16px;
   font-weight: 400;
   color: #ab9d8b;
+  font-family: ${(p) =>
+    p.$font === "fredoka"
+      ? '"Fredoka", "Pretendard", sans-serif'
+      : '"Pretendard", sans-serif'};
 
   outline: none;
 `;

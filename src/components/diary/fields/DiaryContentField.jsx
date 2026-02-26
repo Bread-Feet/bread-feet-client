@@ -1,15 +1,17 @@
-import React from "react";
+﻿import React from "react";
 import styled from "styled-components";
 import { useDiaryEditorStore } from "../../../store/diaryEditorStore";
 
 export default function DiaryContentField() {
   const content = useDiaryEditorStore((s) => s.content);
   const setContent = useDiaryEditorStore((s) => s.setContent);
+  const textFont = useDiaryEditorStore((s) => s.textFont);
 
   return (
     <Wrap>
       <Lines />
       <Textarea
+        $font={textFont}
         rows={6}
         value={content}
         onChange={(e) => {
@@ -18,7 +20,7 @@ export default function DiaryContentField() {
           e.target.style.height = "auto";
           e.target.style.height = e.target.scrollHeight + "px";
         }}
-        placeholder="오늘의 빵 이야기를 적어보세요..."
+        placeholder="오늘의 빵 이야기를 적어보세요.."
       />
     </Wrap>
   );
@@ -39,6 +41,10 @@ const Textarea = styled.textarea`
 
   font-size: 16px;
   line-height: 36px;
+  font-family: ${(p) =>
+    p.$font === "fredoka"
+      ? '"Fredoka", "Pretendard", sans-serif'
+      : '"Pretendard", sans-serif'};
 
   padding: 6px 8px;
   box-sizing: border-box;

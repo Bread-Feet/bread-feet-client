@@ -194,6 +194,7 @@ const PostCard = styled.button`
   -webkit-appearance: none;
 
   padding: 0 16px;
+  overflow: hidden;
 
   cursor: pointer;
 `;
@@ -215,6 +216,8 @@ const StickerWrap = styled.div`
 `;
 
 const StickerImg = styled.img`
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   transform: rotate(20deg);
 
