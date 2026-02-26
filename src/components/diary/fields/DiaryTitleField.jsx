@@ -13,7 +13,7 @@ export default function DiaryTitleField() {
         id="diary-title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="wpahr"
+        placeholder="제목을 입력해주세요!"
         maxLength={40}
       />
     </Wrap>
