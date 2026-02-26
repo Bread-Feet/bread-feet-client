@@ -6,6 +6,7 @@ import PageLayout from "../../components/layout/PageLayout";
 import { useDiaryEditorStore } from "../../store/diaryEditorStore";
 import DiaryHeader from "../../components/diary/EditorHeader";
 import DiaryEditorForm from "../../components/diary/EditorForm";
+import EditorTabBar from "../../components/diary/EditorTabBar";
 
 function isValidYYYYMMDD(dateStr) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
@@ -62,6 +63,7 @@ export default function DiaryEditorPage() {
         <DiaryHeader />
         <DiaryEditorForm />
       </Content>
+      <EditorTabBar />
     </PageLayout>
   );
 }
@@ -73,6 +75,8 @@ const Content = styled.div`
   -webkit-overflow-scrolling: touch;
 
   padding: 16px;
+  /* 탭바 높이(~80px) + safe area 여유분 */
+  padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 
   display: flex;

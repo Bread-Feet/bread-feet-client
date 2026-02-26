@@ -3,7 +3,7 @@ import { create } from "zustand";
 const initialState = {
   date: null,
   bakery: null,
-  stikerId: null,
+  stickerId: null,
 
   title: "",
   content: "",
@@ -13,8 +13,14 @@ const initialState = {
   undoneStrokes: [],
 
   tool: "pen",
-  color: "#FF9EC4",
+  color: "#E33B3B",
   brushSize: 8,
+
+  activeTab: null, // 'font' | 'text' | 'image' | 'sticker' | 'tag' | 'draw' | null
+  isPublic: false,
+
+  isStickerModalOpen: false,
+  stickers: [],
 };
 
 export const useDiaryEditorStore = create((set, get) => ({
@@ -37,6 +43,14 @@ export const useDiaryEditorStore = create((set, get) => ({
   setTool: (tool) => set({ tool }),
   setColor: (color) => set({ color }),
   setBrushSize: (brushSize) => set({ brushSize }),
+
+  // 같은 탭 재클릭 시 닫기 (image 탭은 토글 없이 항상 파일 picker)
+  setActiveTab: (tab) =>
+    set((state) => ({
+      activeTab: state.activeTab === tab ? null : tab,
+    })),
+
+  setIsPublic: (val) => set({ isPublic: val }),
 
   addStroke: (stroke) =>
     set((state) => ({
@@ -67,6 +81,23 @@ export const useDiaryEditorStore = create((set, get) => ({
   },
 
   clearStrokes: () => set({ strokes: [], undoneStrokes: [] }),
+
+  openStickerModal: () => set({ isStickerModalOpen: true }),
+  closeStickerModal: () => set({ isStickerModalOpen: false }),
+
+  removeSticker: (id) =>
+    set((state) => ({
+      stickers: state.stickers.filter((s) => s.id !== id),
+    })),
+
+  updateSticker: (id, patch) =>
+    set((state) => ({
+      stickers: state.stickers.map((s) =>
+        s.id === id ? { ...s, ...patch } : s,
+      ),
+    })),
+
+  selectSticker: (id) => set({ stickerId: id, isStickerModalOpen: false }),
 
   resetEditor: () => set({ ...initialState }),
 }));
