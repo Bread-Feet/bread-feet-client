@@ -53,7 +53,8 @@ export default function MapPage() {
 
   const { bakeries, error } = useMapBakeries(mapCenter);
   const displayBakeries = regionalBakeries ?? bakeries;
-  const nearbyError = regionalBakeries ? null : error;
+  const isRegionalMode = selectedRegion !== null;
+  const nearbyError = isRegionalMode ? null : error;
   const clearRegionalMode = () => {
     regionalRequestRef.current += 1;
     setSelectedRegion(null);
