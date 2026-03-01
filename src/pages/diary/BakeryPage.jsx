@@ -1,4 +1,4 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -14,7 +14,7 @@ import BackMark from "../../assets/BackMark.svg";
 export default function DiaryBakeryPage() {
   const nav = useNavigate();
   const { search } = useLocation();
-  const [sortKey, setSortKey] = useState(""); // "" for RECENT, "NAME" for KOREAN
+  const [sortKey, setSortKey] = useState("");
   const { query, debouncedQuery, setQuery, clearQuery } = useSearch();
   const { bakeries, isLoading, hasMore, loadMore } = useBakeries(
     debouncedQuery,
@@ -25,12 +25,13 @@ export default function DiaryBakeryPage() {
   const setBakery = useDiaryEditorStore((s) => s.setBakery);
   const storeDate = useDiaryEditorStore((s) => s.date);
 
-  const dateParam = useMemo(() => {
+  const { resolvedDate, returnTo } = useMemo(() => {
     const params = new URLSearchParams(search);
-    return params.get("date");
-  }, [search]);
-
-  const resolvedDate = dateParam || storeDate;
+    return {
+      resolvedDate: params.get("date") || storeDate,
+      returnTo: params.get("returnTo"),
+    };
+  }, [search, storeDate]);
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMore) loadMore();
@@ -56,6 +57,11 @@ export default function DiaryBakeryPage() {
       name: bakery.name,
       address: bakery.address,
     });
+
+    if (returnTo) {
+      nav(returnTo);
+      return;
+    }
 
     if (resolvedDate) {
       nav(`/diary/new?date=${encodeURIComponent(resolvedDate)}`);

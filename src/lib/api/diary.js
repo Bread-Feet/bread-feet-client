@@ -24,3 +24,31 @@ export async function fetchDiaryDetail(diaryId) {
   const encodedId = encodeURIComponent(normalizedId);
   return apiClient.get(`/api/v1/diaries/${encodedId}`);
 }
+
+export async function updateDiary(diaryId, body) {
+  if (diaryId == null) {
+    throw new TypeError("updateDiary requires a diaryId");
+  }
+
+  const normalizedId = String(diaryId).trim();
+  if (!normalizedId) {
+    throw new TypeError("updateDiary requires a non-empty diaryId");
+  }
+
+  const encodedId = encodeURIComponent(normalizedId);
+  return apiClient.put(`/api/v1/diaries/${encodedId}`, body);
+}
+
+export async function deleteDiary(diaryId) {
+  if (diaryId == null) {
+    throw new TypeError("deleteDiary requires a diaryId");
+  }
+
+  const normalizedId = String(diaryId).trim();
+  if (!normalizedId) {
+    throw new TypeError("deleteDiary requires a non-empty diaryId");
+  }
+
+  const encodedId = encodeURIComponent(normalizedId);
+  return apiClient.delete(`/api/v1/diaries/${encodedId}`);
+}

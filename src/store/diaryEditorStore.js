@@ -1,4 +1,4 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 
 const initialState = {
   date: null,
@@ -41,12 +41,17 @@ export const useDiaryEditorStore = create((set, get) => ({
       undoneStrokes: [],
     }),
 
+  setStrokes: (strokes) =>
+    set({
+      strokes: Array.isArray(strokes) ? strokes : [],
+      undoneStrokes: [],
+    }),
+
   setTool: (tool) => set({ tool }),
   setColor: (color) => set({ color }),
   setBrushSize: (brushSize) => set({ brushSize }),
   setTextFont: (textFont) => set({ textFont }),
 
-  // 같은 탭 재클릭 시 닫기 (image 탭은 토글 없이 항상 파일 picker)
   setActiveTab: (tab) =>
     set((state) => ({
       activeTab: state.activeTab === tab ? null : tab,

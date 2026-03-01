@@ -1,5 +1,5 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+﻿import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as S from "./DiaryDateBox.styled";
 
 import MapPin from "../../../assets/MapPin.png";
@@ -7,6 +7,7 @@ import { useDiaryEditorStore } from "../../../store/diaryEditorStore";
 
 export default function DiaryDateBox() {
   const navigate = useNavigate();
+  const { pathname, search } = useLocation();
 
   const date = useDiaryEditorStore((s) => s.date);
   const bakery = useDiaryEditorStore((s) => s.bakery);
@@ -25,7 +26,10 @@ export default function DiaryDateBox() {
   const goPickBakery = () => {
     if (!date) return;
 
-    navigate(`/diary/bakery?date=${encodeURIComponent(date)}`);
+    const returnTo = `${pathname}${search}`;
+    navigate(
+      `/diary/bakery?date=${encodeURIComponent(date)}&returnTo=${encodeURIComponent(returnTo)}`,
+    );
   };
 
   return (

@@ -1,9 +1,9 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import PageLayout from "../../components/layout/PageLayout";
-import { fetchDiaryDetail } from "../../lib/api/diary";
+import { deleteDiary, fetchDiaryDetail } from "../../lib/api/diary";
 
 const BackMark = "/arrow_left_black.svg";
 const MapPin = "/location_brown.svg";
@@ -48,12 +48,16 @@ function drawStrokeOnCtx(ctx, stroke) {
 
 export default function DiaryDetailPage() {
   const nav = useNavigate();
+  const { pathname } = useLocation();
   const { diaryId } = useParams();
   const canvasRef = useRef(null);
 
   const [diary, setDiary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const canModify = pathname.startsWith("/diary/");
 
   useEffect(() => {
     let cancelled = false;
@@ -105,15 +109,56 @@ export default function DiaryDetailPage() {
 
   const imageUrl = diary?.pictureUrls?.[0] || diary?.thumbnailUrl || "";
 
+  const handleDelete = async () => {
+    if (!diary || isDeleting) return;
+
+    const ok = window.confirm("이 다이어리를 삭제할까요?");
+    if (!ok) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteDiary(diary.id);
+      nav("/mydiary", { replace: true });
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "삭제에 실패했어요. 다시 시도해주세요.";
+      alert(msg);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <PageLayout frameStyle={`align-items: stretch; background: #FFFCF5; overflow: hidden;`}>
+    <PageLayout
+      frameStyle={`align-items: stretch; background: #FFFCF5; overflow: hidden;`}
+    >
       <Screen>
         <Header>
           <BackButton type="button" onClick={() => nav(-1)} aria-label="back">
             <BackIcon src={BackMark} alt="뒤로가기" />
           </BackButton>
           <Title>다이어리</Title>
-          <Spacer />
+          <HeaderRight>
+            {canModify && (
+              <>
+                <ActionButton
+                  type="button"
+                  onClick={() => nav(`/diary/modify/${diaryId}`)}
+                >
+                  수정
+                </ActionButton>
+                <ActionButton
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  삭제
+                </ActionButton>
+              </>
+            )}
+          </HeaderRight>
         </Header>
 
         <Main>
@@ -142,7 +187,11 @@ export default function DiaryDetailPage() {
                 ) : (
                   <EmptyLabel>이미지가 없어요</EmptyLabel>
                 )}
-                <DrawingCanvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} />
+                <DrawingCanvas
+                  ref={canvasRef}
+                  width={CANVAS_W}
+                  height={CANVAS_H}
+                />
               </MediaFrame>
 
               <ContentBox>{diary.content || ""}</ContentBox>
@@ -164,9 +213,9 @@ const Screen = styled.div`
 const Header = styled.header`
   height: calc(56px + env(safe-area-inset-top, 0px) + 8px);
   padding: calc(env(safe-area-inset-top, 0px) + 8px) 14px 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: 84px 1fr 84px;
   align-items: center;
-  justify-content: space-between;
 `;
 
 const BackButton = styled.button`
@@ -176,6 +225,7 @@ const BackButton = styled.button`
   background: transparent;
   cursor: pointer;
   padding: 0;
+  justify-self: start;
 `;
 
 const BackIcon = styled.img`
@@ -187,11 +237,27 @@ const Title = styled.h1`
   margin: 0;
   font-size: 18px;
   font-weight: 700;
+  text-align: center;
 `;
 
-const Spacer = styled.div`
-  width: 36px;
-  height: 36px;
+const HeaderRight = styled.div`
+  width: 84px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  justify-self: end;
+`;
+
+const ActionButton = styled.button`
+  border: 1px solid #ab9d8b;
+  background: #ffffff;
+  color: #7c4628;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 4px 8px;
+  cursor: pointer;
 `;
 
 const Main = styled.main`
@@ -215,14 +281,15 @@ const Message = styled.p`
 const DateBox = styled.div`
   width: 100%;
   height: 48px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
   align-items: center;
+  align-content: center;
   border-radius: 10px;
   border: 1px solid #ab9d8b;
 `;
 
 const DateText = styled.div`
-  width: 150px;
   padding: 0 14px;
   font-size: 14px;
   color: #000000;
@@ -236,10 +303,12 @@ const Divider = styled.div`
 `;
 
 const BakeryText = styled.div`
-  flex: 1;
   padding-left: 14px;
   font-size: 13px;
   color: #000000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const Pin = styled.img`
