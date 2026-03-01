@@ -117,7 +117,7 @@ export default function DiaryDetailPage() {
 
     setIsDeleting(true);
     try {
-      await deleteDiary(diary.id);
+      await deleteDiary(diaryId);
       nav("/mydiary", { replace: true });
     } catch (err) {
       const msg =

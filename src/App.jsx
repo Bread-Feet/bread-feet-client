@@ -68,8 +68,22 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/diary/new" element={<DiaryEditorPage />} />
-        <Route path="/diary/modify/:diaryId" element={<DiaryModifyPage />} />
+        <Route
+          path="/diary/new"
+          element={
+            <PrivateRoute>
+              <DiaryEditorPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/diary/modify/:diaryId"
+          element={
+            <PrivateRoute>
+              <DiaryModifyPage />
+            </PrivateRoute>
+          }
+        />
         <Route element={<AppLayout />}>
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
           <Route path="/diary/:diaryId" element={<DiaryDetailPage />} />
