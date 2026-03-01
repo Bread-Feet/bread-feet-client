@@ -1,11 +1,10 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 import "../../assets/font.css";
 
 const COLORS = {
   brown: "#7C4628",
   gray: "#A5A5A5",
   black: "#000000",
-  white: "#FFFFFF",
 };
 
 const S = 35;
@@ -16,10 +15,8 @@ export const Card = styled.div`
   width: min(360px, 100%);
   aspect-ratio: 460 / 430;
   height: auto;
-
   border-radius: 20px;
   box-sizing: border-box;
-
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -39,7 +36,6 @@ export const MonthTitle = styled.div`
   font-weight: 700;
   color: ${COLORS.brown};
   letter-spacing: -0.2px;
-
   display: flex;
   align-items: flex-end;
 `;
@@ -60,7 +56,6 @@ export const IconButton = styled.button`
   color: ${COLORS.brown};
   font-size: 22px;
   cursor: pointer;
-
   display: grid;
   place-items: center;
 
@@ -103,29 +98,24 @@ export const EmptyCell = styled.div`
 export const DayCellButton = styled.button`
   width: ${S}px;
   height: ${S}px;
-  border: 0px;
-  padding: 2px;
+  border: 0;
+  padding: 0;
   background: transparent;
   cursor: pointer;
-
   position: relative;
   display: grid;
   place-items: center;
   border-radius: 50%;
   overflow: hidden;
-
-  outline: ${({ $selected }) =>
-    $selected ? `3px dashed ${COLORS.brown}` : "none"};
+  outline: ${({ $selected }) => ($selected ? `3px dashed ${COLORS.brown}` : "none")};
   outline-offset: 2;
 `;
 
-export const Sticker = styled.img`
-  width: 120%;
-  height: 120%;
+export const DiaryThumb = styled.img`
+  width: 100%;
+  height: 100%;
   display: block;
-  object-fit: contain;
-
-  transform: translateY(-0.5px);
+  object-fit: cover;
 `;
 
 export const DayNumber = styled.div`

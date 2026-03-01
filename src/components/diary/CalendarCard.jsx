@@ -1,12 +1,5 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import * as S from "./CalendarCard.styled";
-import {
-  Baguette,
-  CinnamonRoll,
-  Croissant,
-  CupCake,
-  Donut,
-} from "../../assets/sticker";
 import MonthMark from "../../assets/MonthMark.png";
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -18,63 +11,45 @@ export default function CalendarCard({
   onNextMonth,
   selectedDay,
   onSelectDate,
+  diaryByDay,
+  onDayClick,
 }) {
-  const stickerDays = useMemo(() => {
-    return new Map([
-      [10, Baguette],
-      [15, Croissant],
-      [20, Donut],
-    ]);
-  }, []);
-
   const viewDate = useMemo(() => new Date(year, month - 1, 1), [year, month]);
 
   const daysInMonth = useMemo(() => {
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
-
-    return new Date(year, month + 1, 0).getDate();
+    const y = viewDate.getFullYear();
+    const m = viewDate.getMonth();
+    return new Date(y, m + 1, 0).getDate();
   }, [viewDate]);
 
-  const leadingBlancks = useMemo(() => {
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
-
-    return new Date(year, month, 1).getDay();
+  const leadingBlanks = useMemo(() => {
+    const y = viewDate.getFullYear();
+    const m = viewDate.getMonth();
+    return new Date(y, m, 1).getDay();
   }, [viewDate]);
 
-  const days = useMemo(() => {
-    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  }, [daysInMonth]);
+  const days = useMemo(
+    () => Array.from({ length: daysInMonth }, (_, i) => i + 1),
+    [daysInMonth],
+  );
 
-  const goPrevMonth = () => {
-    onPrevMonth?.();
-  };
-
-  const goNextMonth = () => {
-    onNextMonth?.();
+  const handleDayClick = (day, diary) => {
+    onSelectDate?.(day);
+    onDayClick?.(day, diary);
   };
 
   return (
     <S.Card>
       <S.TopRow>
-        <S.IconButton
-          type="button"
-          aria-label="prev month"
-          onClick={goPrevMonth}
-        >
-          ‹
+        <S.IconButton type="button" aria-label="prev month" onClick={onPrevMonth}>
+          {"<"}
         </S.IconButton>
         <S.MonthTitle>
           {month}
           <S.MonthMarkImg src={MonthMark} alt="월" />
         </S.MonthTitle>
-        <S.IconButton
-          type="button"
-          aria-label="next month"
-          onClick={goNextMonth}
-        >
-          ›
+        <S.IconButton type="button" aria-label="next month" onClick={onNextMonth}>
+          {">"}
         </S.IconButton>
       </S.TopRow>
 
@@ -85,24 +60,24 @@ export default function CalendarCard({
       </S.WeekRow>
 
       <S.Grid>
-        {Array.from({ length: leadingBlancks }).map((_, idx) => (
-          <S.EmptyCell key={`black-${idx}`} />
+        {Array.from({ length: leadingBlanks }).map((_, idx) => (
+          <S.EmptyCell key={`blank-${idx}`} />
         ))}
 
         {days.map((day) => {
+          const diary = diaryByDay?.get(day) ?? null;
           const isSelected = day === selectedDay;
-          const hasSticker = stickerDays.has(day);
-          const sticker = stickerDays.get(day);
 
           return (
             <S.DayCellButton
               key={day}
               type="button"
-              onClick={() => onSelectDate?.(day)}
+              onClick={() => handleDayClick(day, diary)}
               $selected={isSelected}
+              aria-label={`${day}일`}
             >
-              {hasSticker ? (
-                <S.Sticker src={sticker} alt="" />
+              {diary?.thumbnailUrl ? (
+                <S.DiaryThumb src={diary.thumbnailUrl} alt="" />
               ) : (
                 <S.DayNumber>{day}</S.DayNumber>
               )}

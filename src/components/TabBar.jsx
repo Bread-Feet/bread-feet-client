@@ -1,4 +1,4 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
 import communicationOff from "/navbar/communication_off.svg";
 import communicationOn from "/navbar/communication_on.svg";
 import diaryOff from "/navbar/diary_off.svg";
@@ -38,6 +38,7 @@ const tabs = [
     key: "diary",
     label: "다이어리",
     to: "/mydiary",
+    extraPaths: ["/diary"],
     off: diaryOff,
     on: diaryOn,
   },
@@ -72,11 +73,7 @@ export default function TabBar() {
         {tabs.map((t) => {
           const isActive = t.key === activeKey;
           return (
-            <TabButton
-              key={t.key}
-              type="button"
-              onClick={() => handleTabClick(t)}
-            >
+            <TabButton key={t.key} type="button" onClick={() => handleTabClick(t)}>
               <TabIcon src={isActive ? t.on : t.off} alt="" />
               <TabLabel>{t.label}</TabLabel>
             </TabButton>

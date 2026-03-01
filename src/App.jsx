@@ -1,4 +1,4 @@
-import "./App.css";
+﻿import "./App.css";
 import { GlobalStyle } from "../GlobalStyle";
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
@@ -20,6 +20,7 @@ import DiaryCalenderPage from "./pages/diary/DiaryCalendarPage";
 import DiaryEditorPage from "./pages/diary/DiaryEditorPage";
 import DiaryBakeryPage from "./pages/diary/BakeryPage";
 import DiaryDetailPage from "./pages/diary/DiaryDetailPage";
+import DiaryModifyPage from "./pages/diary/DiaryModifyPage";
 
 import CommunityPage from "./pages/community/CommunityPage";
 import MapPage from "./pages/map/MapPage";
@@ -67,9 +68,25 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/diary/new"
+          element={
+            <PrivateRoute>
+              <DiaryEditorPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/diary/modify/:diaryId"
+          element={
+            <PrivateRoute>
+              <DiaryModifyPage />
+            </PrivateRoute>
+          }
+        />
         <Route element={<AppLayout />}>
           <Route path="/mydiary" element={<DiaryCalenderPage />} />
-          <Route path="/diary/new" element={<DiaryEditorPage />} />
+          <Route path="/diary/:diaryId" element={<DiaryDetailPage />} />
           <Route path="/diary/bakery" element={<DiaryBakeryPage />} />
         </Route>
         <Route

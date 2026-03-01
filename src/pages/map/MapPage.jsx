@@ -269,7 +269,7 @@ const MapWrapper = styled.div`
 
 const RegionTabsWrap = styled.div`
   position: absolute;
-  top: 12px;
+  top: 40px;
   left: 12px;
   right: 12px;
   z-index: 7;
